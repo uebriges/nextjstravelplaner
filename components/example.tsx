@@ -1,5 +1,7 @@
 import { Button } from '@material-ui/core';
+import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { GetServerSidePropsContext } from 'next';
 import React, { useCallback, useRef, useState } from 'react';
 import ReactMapGL, { Popup } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
@@ -16,14 +18,15 @@ type CoordinatesType = {
 
 const Example = (props: HomeType) => {
   const [viewport, setViewport] = useState({
-    latitude: 37.7577,
-    longitude: -122.4376,
-    zoom: 8,
+    latitude: 38.899826,
+    longitude: -77.023041,
+    zoom: 13,
   });
-  const [currentLatitude, setCurrentLatitude] = useState(37.78);
-  const [currentLongitude, setCurrentLongitude] = useState(-122.41);
+  const [currentLatitude, setCurrentLatitude] = useState(38.899826);
+  const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
 
-  const mapRef = useRef();
+  const mapRef = useRef(null);
+  const geoCoderContainerRef = useRef(null);
 
   const handleViewportChange = useCallback(
     (newViewport) => setViewport(newViewport),
@@ -41,7 +44,6 @@ const Example = (props: HomeType) => {
       setCurrentLatitude(newViewport.latitude.toFixed(2));
       setCurrentLongitude(newViewport.longitude.toFixed(2));
 
-      console.log('after setting');
       const geocoderDefaultOverrides = { transitionDuration: 1000 };
 
       return handleViewportChange({
@@ -56,13 +58,16 @@ const Example = (props: HomeType) => {
 
   // Adds new coordinates to the local storage or cookies
   function addCoordinatesToRoute() {
-    let localStorageContent = [];
-    let alreadyAvailableCoordinatesInLocalStorage;
+    let cookiesContent = [];
+    let alreadyAvailableCoordinatesInCookies;
+    console.log('add coordinates');
 
     // Search for coordinates in local storage
-    if (localStorage.getItem('route')) {
-      localStorageContent = JSON.parse(localStorage.getItem('route') as string);
-      alreadyAvailableCoordinatesInLocalStorage = localStorageContent.find(
+    if (Cookies.get('route')) {
+      console.log('route exists');
+
+      cookiesContent = Cookies.getJSON('route');
+      alreadyAvailableCoordinatesInCookies = cookiesContent.find(
         (coordinates: CoordinatesType) =>
           coordinates.longitude === currentLongitude &&
           coordinates.latitude === currentLatitude,
@@ -70,19 +75,22 @@ const Example = (props: HomeType) => {
     }
 
     // If not in local storage yet, add the new coordinates
-    if (!alreadyAvailableCoordinatesInLocalStorage) {
-      localStorage.setItem(
-        'route',
-        JSON.stringify([
-          ...localStorageContent,
-          { longitude: currentLongitude, latitude: currentLatitude },
-        ]),
-      );
+    if (!alreadyAvailableCoordinatesInCookies) {
+      console.log('already available');
+      Cookies.set('route', [
+        ...cookiesContent,
+        { longitude: currentLongitude, latitude: currentLatitude },
+      ]);
     }
   }
 
   return (
     <div style={{ height: '100vh' }}>
+      <div
+        ref={geoCoderContainerRef}
+        style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
+      />
+
       <ReactMapGL
         {...viewport}
         ref={mapRef}
@@ -91,14 +99,11 @@ const Example = (props: HomeType) => {
         onViewportChange={handleViewportChange}
         mapboxApiAccessToken={props.mapboxToken}
       >
-        <Geocoder
-          mapRef={mapRef}
-          onViewportChange={handleGeocoderViewportChange}
-          mapboxApiAccessToken={props.mapboxToken}
-          position="top-left"
-          collapsed={true}
-          marker={true}
-          //render -> Renders HTML into result -> use for add and mark as favorite
+        <Route
+          points={[
+            { longitude: 38.911488, latitude: -77.042886 },
+            { longitude: 38.91085, latitude: -77.036041 },
+          ]}
         />
         {currentLatitude && currentLongitude ? (
           <Popup
@@ -122,11 +127,15 @@ const Example = (props: HomeType) => {
             </div>
           </Popup>
         ) : null}
-        <Route
-          points={[
-            [-76.987471, 38.845286],
-            [-76.987469, 38.845219],
-          ]}
+        <Geocoder
+          mapRef={mapRef}
+          onViewportChange={handleGeocoderViewportChange}
+          mapboxApiAccessToken={props.mapboxToken}
+          position="top-left"
+          collapsed={true}
+          marker={true}
+          containerRef={geoCoderContainerRef}
+          //render -> Renders HTML into result -> use for add and mark as favorite
         />
       </ReactMapGL>
     </div>
@@ -135,7 +144,8 @@ const Example = (props: HomeType) => {
 
 export default Example;
 
-export function getServerSideProps() {
+export function getServerSideProps(ctx: GetServerSidePropsContext) {
   console.log('server side');
+
   return { props: { mapboxToken: process.env.MAPBOX_API_TOKEN || null } };
 }

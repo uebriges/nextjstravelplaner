@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import 'next';
+import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { useCallback, useRef, useState } from 'react';
 import Example from '../components/example';
@@ -39,15 +40,6 @@ export default function Home(props: HomeType) {
     [],
   );
 
-  const handleGeocoderViewportChange = useCallback((newViewport) => {
-    const geocoderDefaultOverrides = { transitionDuration: 1000 };
-
-    return handleViewportChange({
-      ...newViewport,
-      ...geocoderDefaultOverrides,
-    });
-  }, []);
-
   return (
     <div>
       <Head>
@@ -65,25 +57,16 @@ export default function Home(props: HomeType) {
 
       <main>
         <Example mapboxToken={props.mapboxToken} />
-        {/* <ReactMapGL
-          {...viewport}
-          mapStyle="mapbox://styles/mapbox/streets-v9"
-          mapboxApiAccessToken={props.mapboxToken}
-          onViewportChange={handleViewportChange}
-        > */}
-        {/* <Geocoder
-            mapRef={mapRef}
-            onViewportChange={handleGeocoderViewportChange}
-            mapboxApiAccessToken={props.mapboxToken}
-            position="top-left"
-          /> */}
-        {/* </ReactMapGL> */}
-        {/* <Map viewport={viewport} setViewport={setViewport} /> */}
       </main>
     </div>
   );
 }
 
-export function getServerSideProps() {
-  return { props: { mapboxToken: process.env.MAPBOX_API_TOKEN || null } };
+export function getServerSideProps(ctx: GetServerSidePropsContext) {
+  return {
+    props: {
+      mapboxToken: process.env.MAPBOX_API_TOKEN || null,
+      cookies: ctx.req.cookies.route || null,
+    },
+  };
 }
