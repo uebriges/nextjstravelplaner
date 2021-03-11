@@ -1,11 +1,18 @@
+import { Button } from '@material-ui/core';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useCallback, useRef, useState } from 'react';
 import ReactMapGL, { Popup } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { HomeType } from '../pages';
+import Route from './Route';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
+
+type CoordinatesType = {
+  longitude: number;
+  latitude: number;
+};
 
 const Example = (props: HomeType) => {
   const [viewport, setViewport] = useState({
@@ -17,6 +24,7 @@ const Example = (props: HomeType) => {
   const [currentLongitude, setCurrentLongitude] = useState(-122.41);
 
   const mapRef = useRef();
+
   const handleViewportChange = useCallback(
     (newViewport) => setViewport(newViewport),
     [],
@@ -46,11 +54,38 @@ const Example = (props: HomeType) => {
 
   const [showPopup, togglePopup] = useState(false);
 
+  // Adds new coordinates to the local storage or cookies
+  function addCoordinatesToRoute() {
+    let localStorageContent = [];
+    let alreadyAvailableCoordinatesInLocalStorage;
+
+    // Search for coordinates in local storage
+    if (localStorage.getItem('route')) {
+      localStorageContent = JSON.parse(localStorage.getItem('route') as string);
+      alreadyAvailableCoordinatesInLocalStorage = localStorageContent.find(
+        (coordinates: CoordinatesType) =>
+          coordinates.longitude === currentLongitude &&
+          coordinates.latitude === currentLatitude,
+      );
+    }
+
+    // If not in local storage yet, add the new coordinates
+    if (!alreadyAvailableCoordinatesInLocalStorage) {
+      localStorage.setItem(
+        'route',
+        JSON.stringify([
+          ...localStorageContent,
+          { longitude: currentLongitude, latitude: currentLatitude },
+        ]),
+      );
+    }
+  }
+
   return (
     <div style={{ height: '100vh' }}>
       <ReactMapGL
-        ref={mapRef}
         {...viewport}
+        ref={mapRef}
         width="100%"
         height="100%"
         onViewportChange={handleViewportChange}
@@ -74,9 +109,25 @@ const Example = (props: HomeType) => {
             onClose={() => togglePopup(false)}
             anchor="top"
           >
-            <div>You are here</div>{' '}
+            <div>
+              You are <strong>here</strong>
+              <br />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={addCoordinatesToRoute}
+              >
+                Add to route
+              </Button>
+            </div>
           </Popup>
         ) : null}
+        <Route
+          points={[
+            [-76.987471, 38.845286],
+            [-76.987469, 38.845219],
+          ]}
+        />
       </ReactMapGL>
     </div>
   );
