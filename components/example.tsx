@@ -16,6 +16,7 @@ type CoordinatesType = {
   latitude: number;
 };
 
+// Exmaple function component
 const Example = (props: HomeType) => {
   const [viewport, setViewport] = useState({
     latitude: 38.899826,
@@ -24,16 +25,14 @@ const Example = (props: HomeType) => {
   });
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
-
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
-
   const handleViewportChange = useCallback(
     (newViewport) => setViewport(newViewport),
     [],
   );
+  const [currentRoute, setCurrentRoute] = useState();
 
-  // if you are happy with Geocoder default settings, you can just use handleViewportChange directly
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
       // setViewport({
@@ -41,8 +40,8 @@ const Example = (props: HomeType) => {
       //   longitude: newViewport.longitude,
       //   zoom: 8,
       // });
-      setCurrentLatitude(newViewport.latitude.toFixed(2));
-      setCurrentLongitude(newViewport.longitude.toFixed(2));
+      setCurrentLatitude(Number(newViewport.latitude.toFixed(2)));
+      setCurrentLongitude(Number(newViewport.longitude.toFixed(2)));
 
       const geocoderDefaultOverrides = { transitionDuration: 1000 };
 
@@ -56,15 +55,15 @@ const Example = (props: HomeType) => {
 
   const [showPopup, togglePopup] = useState(false);
 
-  // Adds new coordinates to the local storage or cookies
+  // Adds new coordinates to the local cookies
   function addCoordinatesToRoute() {
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
-    console.log('add coordinates');
+    // console.log('add coordinates');
 
-    // Search for coordinates in local storage
+    // Search for coordinates in cookies
     if (Cookies.get('route')) {
-      console.log('route exists');
+      // console.log('route exists');
 
       cookiesContent = Cookies.getJSON('route');
       alreadyAvailableCoordinatesInCookies = cookiesContent.find(
@@ -74,15 +73,42 @@ const Example = (props: HomeType) => {
       );
     }
 
-    // If not in local storage yet, add the new coordinates
+    // If not in cookies yet, add the new coordinates
     if (!alreadyAvailableCoordinatesInCookies) {
-      console.log('already available');
+      // console.log('already available');
       Cookies.set('route', [
         ...cookiesContent,
         { longitude: currentLongitude, latitude: currentLatitude },
       ]);
     }
   }
+
+  async function route() {
+    let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
+    if (Cookies.getJSON('route')) {
+      Cookies.getJSON('route').map(
+        (coordinates: CoordinatesType, index: number, array: []) => {
+          console.log('coord long: ', coordinates.longitude);
+          console.log('coord lat: ', coordinates.latitude);
+          console.log('index: ', index);
+          apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
+          apiCallString +=
+            index < array.length - 1
+              ? '%3B'
+              : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
+        },
+      );
+      const routeJSON = await fetch(apiCallString);
+      console.log('apiCallSTring: ', apiCallString);
+
+      const response = await routeJSON.json();
+      console.log('route: ', response.routes[0]?.geometry.coordinates);
+      Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
+    }
+
+    // setCurrentRoute(response.routes[0].geometry.coordinates);
+  }
+  route();
 
   return (
     <div style={{ height: '100vh' }}>
@@ -99,12 +125,7 @@ const Example = (props: HomeType) => {
         onViewportChange={handleViewportChange}
         mapboxApiAccessToken={props.mapboxToken}
       >
-        <Route
-          points={[
-            { longitude: 38.911488, latitude: -77.042886 },
-            { longitude: 38.91085, latitude: -77.036041 },
-          ]}
-        />
+        <Route points={[{ longitude: 70.03, latitude: 30.3 }]} />
         {currentLatitude && currentLongitude ? (
           <Popup
             latitude={Number(currentLatitude)}
