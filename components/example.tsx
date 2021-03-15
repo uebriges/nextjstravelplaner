@@ -1,23 +1,30 @@
+/** @jsxImportSource @emotion/react */
 import { Button } from '@material-ui/core';
 import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { GetServerSidePropsContext } from 'next';
 import React, { useCallback, useRef, useState } from 'react';
 import ReactMapGL, { Popup } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { HomeType } from '../pages';
 import Route from './Route';
+import WaypointsList from './WaypointsList';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
-type CoordinatesType = {
+export type CoordinatesType = {
+  longitude: number;
+  latitude: number;
+};
+
+type DragItem = {
   longitude: number;
   latitude: number;
 };
 
 // Exmaple function component
 const Example = (props: HomeType) => {
+  let currentRoute;
   const [viewport, setViewport] = useState({
     latitude: 38.899826,
     longitude: -77.023041,
@@ -31,15 +38,9 @@ const Example = (props: HomeType) => {
     (newViewport) => setViewport(newViewport),
     [],
   );
-  const [currentRoute, setCurrentRoute] = useState();
 
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
-      // setViewport({
-      //   latitude: newViewport.latitude,
-      //   longitude: newViewport.longitude,
-      //   zoom: 8,
-      // });
       setCurrentLatitude(Number(newViewport.latitude.toFixed(2)));
       setCurrentLongitude(Number(newViewport.longitude.toFixed(2)));
 
@@ -83,14 +84,12 @@ const Example = (props: HomeType) => {
     }
   }
 
-  async function route() {
+  // Generate turn by turn route
+  async function generateTurnByTurnRoute() {
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
     if (Cookies.getJSON('route')) {
       Cookies.getJSON('route').map(
         (coordinates: CoordinatesType, index: number, array: []) => {
-          console.log('coord long: ', coordinates.longitude);
-          console.log('coord lat: ', coordinates.latitude);
-          console.log('index: ', index);
           apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
           apiCallString +=
             index < array.length - 1
@@ -99,16 +98,12 @@ const Example = (props: HomeType) => {
         },
       );
       const routeJSON = await fetch(apiCallString);
-      console.log('apiCallSTring: ', apiCallString);
 
       const response = await routeJSON.json();
-      console.log('route: ', response.routes[0]?.geometry.coordinates);
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
     }
-
-    // setCurrentRoute(response.routes[0].geometry.coordinates);
   }
-  route();
+  generateTurnByTurnRoute();
 
   return (
     <div style={{ height: '100vh' }}>
@@ -116,7 +111,7 @@ const Example = (props: HomeType) => {
         ref={geoCoderContainerRef}
         style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
       />
-
+      <WaypointsList />
       <ReactMapGL
         {...viewport}
         ref={mapRef}
@@ -165,7 +160,7 @@ const Example = (props: HomeType) => {
 
 export default Example;
 
-export function getServerSideProps(ctx: GetServerSidePropsContext) {
+export function getServerSideProps() {
   console.log('server side');
 
   return { props: { mapboxToken: process.env.MAPBOX_API_TOKEN || null } };

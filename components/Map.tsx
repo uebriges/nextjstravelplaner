@@ -43,9 +43,6 @@ export default function Map(props: MapProps) {
 
 export function getServerSideProps(context: GetServerSidePropsContext) {
   console.log(context);
-  // console.log('asldfjalsdkjfs');
-  // console.log('Server side: ', process.env.HERE_API_KEY);
-  // console.log('Server side: ', process.env.HERE_APP_ID);
 
   return { props: {} };
 }

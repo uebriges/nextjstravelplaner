@@ -5,8 +5,6 @@ import Head from 'next/head';
 import { useCallback, useRef, useState } from 'react';
 import Example from '../components/example';
 
-// Create the parameters for the routing request:
-
 // const DynamicComponentWithNoSSR = dynamic(() => import('../components/Map'), {
 //   ssr: false,
 // });
@@ -57,6 +55,7 @@ export default function Home(props: HomeType) {
 
       <main>
         <Example mapboxToken={props.mapboxToken} />
+
       </main>
     </div>
   );
