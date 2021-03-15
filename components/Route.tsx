@@ -19,10 +19,8 @@ type DrawRoutePropsType = {
 
 export default function Route(props: RoutePropsType) {
   function drawRoute({ ctx, width, height, project }: DrawRoutePropsType) {
-    let points = props.points;
-    console.log('props: ', props);
     // console.log('cookies in js-cookies: ', Cookies.getJSON('route'));
-    points = Cookies.getJSON('finalRoute');
+    let points = Cookies.getJSON('finalRoute');
     // console.log('points: ', points);
 
     const color = '#b94545',

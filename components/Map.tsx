@@ -1,48 +1,35 @@
 /** @jsxImportSource @emotion/react */
-import { GetServerSidePropsContext } from 'next';
-import Head from 'next/head';
+import React from 'react';
 import ReactMapGL from 'react-map-gl';
-
-type ViewportType = {
-  width: string;
-  height: string;
-  latitude: number;
-  longitude: number;
-  zoom: number;
-};
+import { ViewportType } from '../pages/TravelPlaner';
 
 type MapProps = {
   viewport: ViewportType;
   setViewport: (viewport: ViewportType) => void;
+  mapboxToken: string;
+  handleViewportChange: (newViewport: ViewportType) => void;
+  mapRef: any;
 };
 
-export default function Map(props: MapProps) {
-  console.log(process.env.MAPBOX_API_TOKEN);
+export default function Map(props: React.PropsWithChildren<MapProps>) {
+  const childrenWithProps = React.Children.map(props.children, (child) => {
+    return React.cloneElement(child, {
+      handleViewportChange: props.handleViewportChange,
+      mapRef: props.mapRef,
+      mapboxToken: props.mapboxToken,
+    });
+  });
+
   return (
-    <div>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <ReactMapGL
-          {...props.viewport}
-          width="100vw"
-          height="100vh"
-          mapStyle="mapbox://styles/mapbox/streets-v9"
-          mapboxApiAccessToken={process.env.MAPBOX_API_TOKEN}
-          onViewportChange={(viewport: ViewportType) =>
-            props.setViewport(viewport)
-          }
-        />
-      </main>
-    </div>
+    <ReactMapGL
+      {...props.viewport}
+      ref={props.mapRef}
+      width="100%"
+      height="100%"
+      onViewportChange={props.handleViewportChange}
+      mapboxApiAccessToken={props.mapboxToken}
+    >
+      {childrenWithProps}
+    </ReactMapGL>
   );
-}
-
-export function getServerSideProps(context: GetServerSidePropsContext) {
-  console.log(context);
-
-  return { props: {} };
 }

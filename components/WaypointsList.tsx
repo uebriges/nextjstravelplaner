@@ -3,9 +3,9 @@ import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import Cookies from 'js-cookie';
 import { useDrag, useDrop } from 'react-dnd';
+import { CoordinatesType } from '../pages/TravelPlaner';
 import { routeListStyle } from '../styles/styles';
 import { ItemType } from './DndContext';
-import { CoordinatesType } from './example';
 
 function getCurrentRoute() {
   return Cookies.getJSON('route');
