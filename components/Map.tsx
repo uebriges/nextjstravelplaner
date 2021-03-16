@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import ReactMapGL from 'react-map-gl';
-import { ViewportType } from '../pages/TravelPlaner';
+import { ViewportType } from '../pages/travelplaner';
 
 type MapProps = {
   viewport: ViewportType;

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import 'next';
 import Head from 'next/head';
-import TravelPlaner from './TravelPlaner';
+import TravelPlaner from './travelplaner';
 
 // const DynamicComponentWithNoSSR = dynamic(() => import('../components/Map'), {
 //   ssr: false,

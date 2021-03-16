@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Popup } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -62,8 +62,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
-      setCurrentLatitude(Number(newViewport.latitude.toFixed(2)));
-      setCurrentLongitude(Number(newViewport.longitude.toFixed(2)));
+      setCurrentLatitude(Number(newViewport.latitude));
+      setCurrentLongitude(Number(newViewport.longitude));
 
       const geocoderDefaultOverrides = { transitionDuration: 1000 };
 
@@ -77,7 +77,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   const [showPopup, togglePopup] = useState(false);
 
-  // Adds new coordinates to the local cookies
+  // Adds new coordinates to the cookies
   function addCoordinatesToRoute() {
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
@@ -123,9 +123,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
+      console.log('response.routes[0]: ', response);
+
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     }
   }
+
+  useEffect(() => {
+    generateTurnByTurnRoute();
+  }, []);
 
   return (
     <>

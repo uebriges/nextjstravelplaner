@@ -1,5 +1,5 @@
 import { CanvasOverlay } from 'react-map-gl';
-import { PointType } from '../pages/TravelPlaner';
+import { PointType } from '../pages/travelplaner';
 
 type RoutePropsType = {
   points: PointType[] | undefined;

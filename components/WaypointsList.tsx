@@ -2,62 +2,95 @@
 import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import Cookies from 'js-cookie';
-import { useDrag, useDrop } from 'react-dnd';
-import { CoordinatesType } from '../pages/TravelPlaner';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  resetServerContext,
+} from 'react-beautiful-dnd';
+import { CoordinatesType } from '../pages/travelplaner';
 import { routeListStyle } from '../styles/styles';
-import { ItemType } from './DndContext';
 
 function getCurrentRoute() {
   return Cookies.getJSON('route');
 }
 
 export default function WaypointsList() {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ItemType.WAYPOINT,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-    item: { type: ItemType.WAYPOINT },
-  }));
+  resetServerContext();
 
-  const [{ isOver, handlerId, canDrop }, drop] = useDrop(() => ({
-    // The type (or types) to accept - strings or symbols
-    accept: ItemType.WAYPOINT,
-    // Props to collect
-    drop: (item, monitor) => {
-      console.log('item: ', item);
-      console.log('monitor: ', monitor);
-      console.log('handlerId: ', handlerId);
-      console.log('canDrop: ', canDrop);
-      console.log('isOver: ', isOver);
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      handlerId: monitor.getHandlerId(),
-      canDrop: monitor.canDrop(),
-    }),
-  }));
+  function onDragEnd(result) {
+    const { destination, source } = result;
+    const pointsTemp = Array.from(getCurrentRoute());
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const pointToBeMoved = pointsTemp.splice(source.index, 1);
+    pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
+    Cookies.set('route', pointsTemp);
+  }
 
   return (
-    <div className="list" css={routeListStyle}>
-      <List dense={false} ref={drop}>
-        {getCurrentRoute()
-          ? getCurrentRoute().map(
-              (waypoint: CoordinatesType, index: number) => {
-                return (
-                  <ListItem key={index} ref={drag}>
-                    <ListItemIcon>
-                      <MenuIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={`${waypoint.longitude}, ${waypoint.latitude}`}
-                    />
-                  </ListItem>
-                );
-              },
-            )
-          : null}
-      </List>
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="1">
+        {(provided) => {
+          return (
+            <div css={routeListStyle}>
+              <List
+                dense={false}
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {getCurrentRoute()
+                  ? getCurrentRoute().map(
+                      (waypoint: CoordinatesType, index: number) => {
+                        return (
+                          <Draggable
+                            key={
+                              'Draggable' +
+                              waypoint.latitude +
+                              waypoint.longitude
+                            }
+                            draggableId={
+                              'Id' + waypoint.latitude + waypoint.longitude
+                            }
+                            index={index}
+                          >
+                            {(provided) => {
+                              return (
+                                <ListItem
+                                  key={waypoint.longitude + waypoint.latitude}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  ref={provided.innerRef}
+                                >
+                                  <ListItemIcon>
+                                    <MenuIcon />
+                                  </ListItemIcon>
+                                  <ListItemText
+                                    primary={`${waypoint.longitude}, ${waypoint.latitude}`}
+                                  />
+                                </ListItem>
+                              );
+                            }}
+                          </Draggable>
+                        );
+                      },
+                    )
+                  : null}
+              </List>
+            </div>
+          );
+        }}
+      </Droppable>
+    </DragDropContext>
   );
 }
