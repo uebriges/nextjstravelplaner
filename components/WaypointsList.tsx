@@ -12,7 +12,7 @@ import { CoordinatesType } from '../pages/travelplaner';
 import { routeListStyle } from '../styles/styles';
 
 function getCurrentRoute() {
-  return Cookies.getJSON('route');
+  return Cookies.getJSON('waypoint');
 }
 
 export default function WaypointsList() {
@@ -35,7 +35,8 @@ export default function WaypointsList() {
 
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
-    Cookies.set('route', pointsTemp);
+
+    Cookies.set('waypoint', pointsTemp);
   }
 
   return (
@@ -76,7 +77,7 @@ export default function WaypointsList() {
                                     <MenuIcon />
                                   </ListItemIcon>
                                   <ListItemText
-                                    primary={`${waypoint.longitude}, ${waypoint.latitude}`}
+                                    primary={waypoint.locationName}
                                   />
                                 </ListItem>
                               );

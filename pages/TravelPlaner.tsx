@@ -17,6 +17,7 @@ import WaypointsList from '../components/WaypointsList';
 export type CoordinatesType = {
   longitude: number;
   latitude: number;
+  locationName: string;
 };
 
 export type ViewportType = {
@@ -37,11 +38,6 @@ export type TravelPlanerPropsType = {
   mapboxToken: string;
 };
 
-export type PointType = {
-  longitude: number;
-  latitude: number;
-};
-
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const [viewport, setViewport] = useState({
     width: '100vw',
@@ -58,8 +54,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   );
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
-  const [currentRoute, setCurrentRoute] = useState<PointType[] | undefined>();
+  const [currentRoute, setCurrentRoute] = useState<
+    CoordinatesType[] | undefined
+  >();
+  const [showPopup, togglePopup] = useState(false);
 
+  // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
       setCurrentLatitude(Number(newViewport.latitude));
@@ -75,19 +75,16 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     [handleViewportChange],
   );
 
-  const [showPopup, togglePopup] = useState(false);
-
   // Adds new coordinates to the cookies
-  function addCoordinatesToRoute() {
+  async function addCoordinatesToRoute() {
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
-    // console.log('add coordinates');
 
     // Search for coordinates in cookies
-    if (Cookies.get('route')) {
+    if (Cookies.get('waypoint')) {
       // console.log('route exists');
 
-      cookiesContent = Cookies.getJSON('route');
+      cookiesContent = Cookies.getJSON('waypoint');
       alreadyAvailableCoordinatesInCookies = cookiesContent.find(
         (coordinates: CoordinatesType) =>
           coordinates.longitude === currentLongitude &&
@@ -98,9 +95,21 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     // If not in cookies yet, add the new coordinates
     if (!alreadyAvailableCoordinatesInCookies) {
       // console.log('already available');
-      Cookies.set('route', [
+      console.log(
+        'new entry: ',
+        await reversGeocodeWaypoint({
+          longitude: currentLongitude,
+          latitude: currentLatitude,
+          locationName: '',
+        }),
+      );
+      Cookies.set('waypoint', [
         ...cookiesContent,
-        { longitude: currentLongitude, latitude: currentLatitude },
+        await reversGeocodeWaypoint({
+          longitude: currentLongitude,
+          latitude: currentLatitude,
+          locationName: '',
+        }),
       ]);
     }
     generateTurnByTurnRoute();
@@ -109,24 +118,39 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
-    const route = Cookies.getJSON('route');
+    const route = Cookies.getJSON('waypoint');
     if (route && route.length > 1) {
-      Cookies.getJSON('route').map(
-        (coordinates: CoordinatesType, index: number, array: []) => {
-          apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
-          apiCallString +=
-            index < array.length - 1
-              ? '%3B'
-              : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
-        },
-      );
+      route.map((coordinates: CoordinatesType, index: number, array: []) => {
+        apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
+        apiCallString +=
+          index < array.length - 1
+            ? '%3B'
+            : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
+      });
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
-      console.log('response.routes[0]: ', response);
-
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     }
+  }
+
+  async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
+    if (waypoint) {
+      let apiCallString;
+      apiCallString = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
+      apiCallString +=
+        waypoint.longitude +
+        ',' +
+        waypoint.latitude +
+        '.json?access_token=' +
+        props.mapboxToken;
+      const response = await fetch(apiCallString);
+      const geoCodeJSON = await response.json();
+      console.log('place_name: ', geoCodeJSON.features[0].place_name);
+      waypoint.locationName = geoCodeJSON.features[0].place_name;
+    }
+
+    return waypoint;
   }
 
   useEffect(() => {
