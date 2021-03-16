@@ -15,7 +15,11 @@ function getCurrentRoute() {
   return Cookies.getJSON('waypoint');
 }
 
-export default function WaypointsList() {
+type WaypointsListType = {
+  generateTurnByTurnRoute: () => void;
+};
+
+export default function WaypointsList(props: WaypointsListType) {
   resetServerContext();
 
   function onDragEnd(result) {
@@ -37,6 +41,7 @@ export default function WaypointsList() {
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
 
     Cookies.set('waypoint', pointsTemp);
+    props.generateTurnByTurnRoute();
   }
 
   return (

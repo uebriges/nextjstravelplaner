@@ -168,7 +168,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
         />
-        <WaypointsList />
+        <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} />
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}
