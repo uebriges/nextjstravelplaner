@@ -1,7 +1,16 @@
 /** @jsxImportSource @emotion/react */
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import {
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+} from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
 import Cookies from 'js-cookie';
+import { useState } from 'react';
 import {
   DragDropContext,
   Draggable,
@@ -11,7 +20,7 @@ import {
 import { CoordinatesType } from '../pages/travelplaner';
 import { routeListStyle } from '../styles/styles';
 
-function getCurrentRoute() {
+function getCurrentWaypoints() {
   return Cookies.getJSON('waypoint');
 }
 
@@ -20,11 +29,12 @@ type WaypointsListType = {
 };
 
 export default function WaypointsList(props: WaypointsListType) {
+  const [waypoints, setWaypoints] = useState(getCurrentWaypoints());
   resetServerContext();
 
   function onDragEnd(result) {
     const { destination, source } = result;
-    const pointsTemp = Array.from(getCurrentRoute());
+    const pointsTemp = Array.from(getCurrentWaypoints());
 
     if (!destination) {
       return;
@@ -44,6 +54,10 @@ export default function WaypointsList(props: WaypointsListType) {
     props.generateTurnByTurnRoute();
   }
 
+  function removeWaypoint(e) {
+    console.log('event: ', e.target.parentElement);
+  }
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="1">
@@ -55,8 +69,8 @@ export default function WaypointsList(props: WaypointsListType) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {getCurrentRoute()
-                  ? getCurrentRoute().map(
+                {getCurrentWaypoints()
+                  ? getCurrentWaypoints().map(
                       (waypoint: CoordinatesType, index: number) => {
                         return (
                           <Draggable
@@ -71,6 +85,7 @@ export default function WaypointsList(props: WaypointsListType) {
                             index={index}
                           >
                             {(provided) => {
+                              console.log('provided: ', provided);
                               return (
                                 <ListItem
                                   key={waypoint.longitude + waypoint.latitude}
@@ -84,6 +99,27 @@ export default function WaypointsList(props: WaypointsListType) {
                                   <ListItemText
                                     primary={waypoint.locationName}
                                   />
+                                  <ListItemSecondaryAction>
+                                    <IconButton
+                                      key={
+                                        'IconButton' +
+                                        waypoint.longitude +
+                                        waypoint.latitude
+                                      }
+                                      edge="end"
+                                      aria-label="delete"
+                                      onClick={(e) => {
+                                        console.log('index: ', index);
+                                        const route = getCurrentWaypoints();
+                                        route.splice(index, 1);
+                                        Cookies.set('waypoint', route);
+                                        setWaypoints(route);
+                                        props.generateTurnByTurnRoute();
+                                      }}
+                                    >
+                                      <CloseIcon />
+                                    </IconButton>
+                                  </ListItemSecondaryAction>
                                 </ListItem>
                               );
                             }}

@@ -28,11 +28,6 @@ export type ViewportType = {
   zoom: number;
 };
 
-type DragItem = {
-  longitude: number;
-  latitude: number;
-};
-
 export type TravelPlanerPropsType = {
   routeInCookies: CoordinatesType[];
   mapboxToken: string;
@@ -131,6 +126,9 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       const response = await routeJSON.json();
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
+    } else {
+      setCurrentRoute(route);
+      Cookies.set('finalRoute', route);
     }
   }
 
