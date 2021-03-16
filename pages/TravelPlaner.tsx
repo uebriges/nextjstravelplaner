@@ -37,7 +37,11 @@ export type TravelPlanerPropsType = {
   mapboxToken: string;
 };
 
-// Exmaple function component
+export type PointType = {
+  longitude: number;
+  latitude: number;
+};
+
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const [viewport, setViewport] = useState({
     width: '100vw',
@@ -46,7 +50,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     longitude: -77.023041,
     zoom: 13,
   });
-  let currentRoute;
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
   const handleViewportChange = useCallback(
@@ -55,6 +58,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   );
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
+  const [currentRoute, setCurrentRoute] = useState<PointType[] | undefined>();
 
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
@@ -119,6 +123,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
+      setCurrentRoute(response.routes[0]?.geometry.coordinates);
     }
   }
 
@@ -141,7 +146,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           handleViewportChange={handleViewportChange}
           mapRef={mapRef}
         >
-          <Route points={[{ longitude: 70.03, latitude: 30.3 }]} />
+          <Route points={currentRoute} />
           {currentLatitude && currentLongitude ? (
             <Popup
               latitude={Number(currentLatitude)}

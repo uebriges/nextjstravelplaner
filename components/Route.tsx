@@ -1,13 +1,8 @@
-import Cookies from 'js-cookie';
 import { CanvasOverlay } from 'react-map-gl';
-
-type PointType = {
-  longitude: number;
-  latitude: number;
-};
+import { PointType } from '../pages/TravelPlaner';
 
 type RoutePropsType = {
-  points: PointType[];
+  points: PointType[] | undefined;
 };
 
 type DrawRoutePropsType = {
@@ -20,7 +15,7 @@ type DrawRoutePropsType = {
 export default function Route(props: RoutePropsType) {
   function drawRoute({ ctx, width, height, project }: DrawRoutePropsType) {
     // console.log('cookies in js-cookies: ', Cookies.getJSON('route'));
-    let points = Cookies.getJSON('finalRoute');
+    let points = props.points;
     // console.log('points: ', points);
 
     const color = '#b94545',
