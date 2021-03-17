@@ -14,6 +14,8 @@ type MapProps = {
   addCoordinatesToRoute: () => void;
   setCurrentLatitude: (latitude: Number) => void;
   setCurrentLongitude: (longitude: Number) => void;
+  markerSetByClick: boolean;
+  setMarkerSetByClick: () => void;
 };
 
 export default function Map(props: React.PropsWithChildren<MapProps>) {
@@ -21,7 +23,6 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     props.viewport.longitude,
     props.viewport.latitude,
   ]);
-  const [markerSetByClick, setMarkerSetByClick] = useState(false);
 
   const childrenWithProps = React.Children.map(props.children, (child) => {
     return React.cloneElement(child, {
@@ -41,7 +42,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     setCurrentMarkerPosition(event.lngLat);
     props.setCurrentLongitude(event.lngLat[0]);
     props.setCurrentLatitude(event.lngLat[1]);
-    setMarkerSetByClick(true);
+    props.setMarkerSetByClick(true);
   }
 
   return (
@@ -54,7 +55,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       mapboxApiAccessToken={props.mapboxToken}
       onClick={handleOnclick}
     >
-      {markerSetByClick ? (
+      {props.markerSetByClick ? (
         <>
           <Marker
             key="currentMarker"

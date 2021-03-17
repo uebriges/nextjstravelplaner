@@ -6,6 +6,7 @@ import Head from 'next/head';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import CustomPopup from '../components/CustomPopup';
 import Map from '../components/Map';
 import Route from '../components/Route';
 import WaypointMarker from '../components/WaypointMarker';
@@ -52,6 +53,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     CoordinatesType[] | undefined
   >();
   const [showPopup, togglePopup] = useState(false);
+  const [markerSetByClick, setMarkerSetByClick] = useState(false);
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
@@ -180,26 +182,31 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           addCoordinatesToRoute={addCoordinatesToRoute}
           setCurrentLatitude={setCurrentLatitude}
           setCurrentLongitude={setCurrentLongitude}
+          markerSetByClick={markerSetByClick}
+          setMarkerSetByClick={setMarkerSetByClick}
         >
           <Route points={currentRoute} />
           <WaypointMarker waypoints={Cookies.getJSON('waypoint')} />
-          {/* {false ? (
-            // currentLatitude && currentLongitude
+          {currentLatitude && currentLongitude ? (
             <CustomPopup
               key="currentWaypointPopup"
               longitude={Number(currentLongitude)}
               latitude={Number(currentLatitude)}
               addCoordinatesToRoute={addCoordinatesToRoute}
             />
-          ) : null} */}
+          ) : null}
           <Geocoder
             mapRef={mapRef}
             onViewportChange={handleGeocoderViewportChange}
             mapboxApiAccessToken={props.mapboxToken}
             position="top-left"
             collapsed={true}
-            marker={true}
+            marker={false}
             containerRef={geoCoderContainerRef}
+            onResult={() => {
+              setMarkerSetByClick(false);
+            }}
+
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
           {/* <Marker
