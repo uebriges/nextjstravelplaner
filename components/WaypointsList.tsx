@@ -15,6 +15,7 @@ import {
   DragDropContext,
   Draggable,
   Droppable,
+  DropResult,
   resetServerContext,
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../pages/travelplaner';
@@ -32,7 +33,7 @@ export default function WaypointsList(props: WaypointsListType) {
   const [waypoints, setWaypoints] = useState(getCurrentWaypoints());
   resetServerContext();
 
-  function onDragEnd(result) {
+  function onDragEnd(result: DropResult) {
     const { destination, source } = result;
     const pointsTemp = Array.from(getCurrentWaypoints());
 
@@ -52,10 +53,6 @@ export default function WaypointsList(props: WaypointsListType) {
 
     Cookies.set('waypoint', pointsTemp);
     props.generateTurnByTurnRoute();
-  }
-
-  function removeWaypoint(e) {
-    console.log('event: ', e.target.parentElement);
   }
 
   return (
@@ -84,14 +81,13 @@ export default function WaypointsList(props: WaypointsListType) {
                             }
                             index={index}
                           >
-                            {(provided) => {
-                              console.log('provided: ', provided);
+                            {(providedDraggable) => {
                               return (
                                 <ListItem
                                   key={waypoint.longitude + waypoint.latitude}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  ref={provided.innerRef}
+                                  {...providedDraggable.draggableProps}
+                                  {...providedDraggable.dragHandleProps}
+                                  ref={providedDraggable.innerRef}
                                 >
                                   <ListItemIcon>
                                     <MenuIcon />
@@ -108,8 +104,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                       }
                                       edge="end"
                                       aria-label="delete"
-                                      onClick={(e) => {
-                                        console.log('index: ', index);
+                                      onClick={() => {
                                         const route = getCurrentWaypoints();
                                         route.splice(index, 1);
                                         Cookies.set('waypoint', route);

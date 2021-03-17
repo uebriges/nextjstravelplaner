@@ -10,6 +10,7 @@ import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Map from '../components/Map';
 import Route from '../components/Route';
+import WaypointMarker from '../components/WaypointMarker';
 import WaypointsList from '../components/WaypointsList';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
@@ -37,9 +38,9 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   const [viewport, setViewport] = useState({
     width: '100vw',
     height: '100vh',
-    latitude: 38.899826,
-    longitude: -77.023041,
-    zoom: 13,
+    latitude: 48.204845,
+    longitude: 16.368368,
+    zoom: 12,
   });
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
@@ -144,7 +145,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         props.mapboxToken;
       const response = await fetch(apiCallString);
       const geoCodeJSON = await response.json();
-      console.log('place_name: ', geoCodeJSON.features[0].place_name);
       waypoint.locationName = geoCodeJSON.features[0].place_name;
     }
 
@@ -166,6 +166,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
         />
+
         <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} />
         <Map
           mapboxToken={props.mapboxToken}
@@ -175,6 +176,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           mapRef={mapRef}
         >
           <Route points={currentRoute} />
+          <WaypointMarker waypoints={Cookies.getJSON('waypoint')} />
           {currentLatitude && currentLongitude ? (
             <Popup
               latitude={Number(currentLatitude)}
@@ -185,8 +187,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
               anchor="top"
             >
               <div>
-                You are <strong>here</strong>
-                <br />
                 <Button
                   variant="contained"
                   color="primary"
@@ -207,6 +207,20 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             containerRef={geoCoderContainerRef}
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
+          {/* <Marker
+            key="asdflkj"
+            latitude={48.204845}
+            longitude={16.368368}
+            offsetLeft={-20}
+            offsetTop={-10}
+          >
+            <Image
+              src="/locationIcon.svg"
+              alt="marker"
+              width={30}
+              height={30}
+            />
+          </Marker> */}
         </Map>
       </div>
     </>
