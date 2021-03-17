@@ -1,11 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { Button } from '@material-ui/core';
 import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Popup } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Map from '../components/Map';
@@ -73,12 +71,13 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Adds new coordinates to the cookies
   async function addCoordinatesToRoute() {
+    console.log('addCoordinatesToRoute');
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
 
     // Search for coordinates in cookies
     if (Cookies.get('waypoint')) {
-      // console.log('route exists');
+      console.log('route exists');
 
       cookiesContent = Cookies.getJSON('waypoint');
       alreadyAvailableCoordinatesInCookies = cookiesContent.find(
@@ -90,7 +89,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
     // If not in cookies yet, add the new coordinates
     if (!alreadyAvailableCoordinatesInCookies) {
-      // console.log('already available');
+      console.log('current Long: ', currentLongitude);
+      console.log('current Lat: ', currentLatitude);
+
+      console.log('not yet  available');
       console.log(
         'new entry: ',
         await reversGeocodeWaypoint({
@@ -125,6 +127,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       });
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
+      console.log('response: ', response);
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
@@ -174,29 +177,21 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           setViewport={setViewport}
           handleViewportChange={handleViewportChange}
           mapRef={mapRef}
+          addCoordinatesToRoute={addCoordinatesToRoute}
+          setCurrentLatitude={setCurrentLatitude}
+          setCurrentLongitude={setCurrentLongitude}
         >
           <Route points={currentRoute} />
           <WaypointMarker waypoints={Cookies.getJSON('waypoint')} />
-          {currentLatitude && currentLongitude ? (
-            <Popup
-              latitude={Number(currentLatitude)}
+          {/* {false ? (
+            // currentLatitude && currentLongitude
+            <CustomPopup
+              key="currentWaypointPopup"
               longitude={Number(currentLongitude)}
-              closeButton={true}
-              closeOnClick={true}
-              onClose={() => togglePopup(false)}
-              anchor="top"
-            >
-              <div>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={addCoordinatesToRoute}
-                >
-                  Add to route
-                </Button>
-              </div>
-            </Popup>
-          ) : null}
+              latitude={Number(currentLatitude)}
+              addCoordinatesToRoute={addCoordinatesToRoute}
+            />
+          ) : null} */}
           <Geocoder
             mapRef={mapRef}
             onViewportChange={handleGeocoderViewportChange}

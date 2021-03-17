@@ -8,3 +8,7 @@ export const routeListStyle = css`
   top: 150px;
   background: white;
 `;
+
+export const customPopupStyle = css`
+  z-index: 30;
+`;

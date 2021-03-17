@@ -25,12 +25,11 @@ export default function WaypointMarker(props: WaypointMarkerPropsType) {
     project,
     unproject,
   }: DrawMarkerPropsType) {
-    console.log('ctx: ', ctx);
-    console.log('width: ', width);
-    console.log('height: ', height);
-    console.log('project: ', project);
-
-    console.log('unproject: ', unproject([width, height]));
+    // console.log('ctx: ', ctx);
+    // console.log('width: ', width);
+    // console.log('height: ', height);
+    // console.log('project: ', project);
+    // console.log('unproject: ', unproject([width, height]));
   }
 
   return (

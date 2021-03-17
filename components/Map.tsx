@@ -3,6 +3,7 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import { ViewportType } from '../pages/travelplaner';
+import CustomPopup from './CustomPopup';
 
 type MapProps = {
   viewport: ViewportType;
@@ -10,6 +11,9 @@ type MapProps = {
   mapboxToken: string;
   handleViewportChange: (newViewport: ViewportType) => void;
   mapRef: any;
+  addCoordinatesToRoute: () => void;
+  setCurrentLatitude: (latitude: Number) => void;
+  setCurrentLongitude: (longitude: Number) => void;
 };
 
 export default function Map(props: React.PropsWithChildren<MapProps>) {
@@ -28,12 +32,15 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
   });
 
   function handleOnclick(event) {
-    console.log('pointer event: ', event);
-    console.log('pointer event point: ', event.point);
+    // console.log('pointer event: ', event);
+    // console.log('pointer event point: ', event.point);
     console.log('pointer event lnglat: ', event.lngLat);
-    console.log('clicked');
-    console.log('props.viewport: ', props.viewport);
+    // console.log('clicked');
+    // console.log('props.viewport: ', props.viewport);
+
     setCurrentMarkerPosition(event.lngLat);
+    props.setCurrentLongitude(event.lngLat[0]);
+    props.setCurrentLatitude(event.lngLat[1]);
     setMarkerSetByClick(true);
   }
 
@@ -48,21 +55,29 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       onClick={handleOnclick}
     >
       {markerSetByClick ? (
-        <Marker
-          key="currentMarker"
-          latitude={currentMarkerPosition[1]}
-          longitude={currentMarkerPosition[0]}
-          offsetLeft={-20}
-          offsetTop={-10}
-        >
-          <Image
-            src="/locationIcon.svg"
-            alt="marker"
-            width={30}
-            height={30}
-            key="currentMarkerImageKey"
+        <>
+          <Marker
+            key="currentMarker"
+            latitude={currentMarkerPosition[1]}
+            longitude={currentMarkerPosition[0]}
+            offsetLeft={-15}
+            offsetTop={-30}
+          >
+            <Image
+              src="/locationIcon.svg"
+              alt="marker"
+              width={30}
+              height={30}
+              key="currentMarkerImageKey"
+            />
+          </Marker>
+          <CustomPopup
+            key="currentWaypointPopup"
+            longitude={currentMarkerPosition[0]}
+            latitude={currentMarkerPosition[1]}
+            addCoordinatesToRoute={props.addCoordinatesToRoute} // doesn't know anything about the current long lat of the popup
           />
-        </Marker>
+        </>
       ) : null}
 
       {childrenWithProps}
