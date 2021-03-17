@@ -9,7 +9,7 @@ type DrawRoutePropsType = {
   ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
-  project: (lng: number, lat: number) => [];
+  project: (lnglat: number[]) => [];
 };
 
 export default function Route(props: RoutePropsType) {
