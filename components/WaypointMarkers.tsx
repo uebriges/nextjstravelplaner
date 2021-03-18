@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import Image from 'next/image';
-import { CanvasOverlay, Marker } from 'react-map-gl';
+import { Marker } from 'react-map-gl';
 import { CoordinatesType } from '../pages/travelplaner';
 
 type WaypointMarkerPropsType = {
@@ -17,20 +17,6 @@ type DrawMarkerPropsType = {
 
 export default function WaypointMarker(props: WaypointMarkerPropsType) {
   const waypoints = props.waypoints;
-
-  function drawMarker({
-    ctx,
-    width,
-    height,
-    project,
-    unproject,
-  }: DrawMarkerPropsType) {
-    // console.log('ctx: ', ctx);
-    // console.log('width: ', width);
-    // console.log('height: ', height);
-    // console.log('project: ', project);
-    // console.log('unproject: ', unproject([width, height]));
-  }
 
   return (
     <div>
@@ -53,7 +39,6 @@ export default function WaypointMarker(props: WaypointMarkerPropsType) {
           </Marker>
         );
       })}
-      <CanvasOverlay redraw={drawMarker} />
     </div>
   );
 }

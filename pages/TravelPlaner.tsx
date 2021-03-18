@@ -3,13 +3,15 @@ import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
+import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Marker } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import CustomPopup from '../components/CustomPopup';
 import Map from '../components/Map';
 import Route from '../components/Route';
-import WaypointMarker from '../components/WaypointMarker';
+import WaypointMarker from '../components/WaypointMarkers';
 import WaypointsList from '../components/WaypointsList';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
@@ -54,6 +56,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   >();
   const [showPopup, togglePopup] = useState(false);
   const [markerSetByClick, setMarkerSetByClick] = useState(false);
+  const [markerSetBySearchResult, setMarkerSetBySearchResult] = useState(false);
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
@@ -138,6 +141,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
   }
 
+  // Translates coordinates into location names
   async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
     if (waypoint) {
       let apiCallString;
@@ -154,6 +158,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
 
     return waypoint;
+  }
+
+  function onSearchResult() {
+    setMarkerSetBySearchResult(true);
   }
 
   useEffect(() => {
@@ -184,16 +192,34 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           setCurrentLongitude={setCurrentLongitude}
           markerSetByClick={markerSetByClick}
           setMarkerSetByClick={setMarkerSetByClick}
+          markerSetBySearchResult={markerSetBySearchResult}
+          setMarkerSetBySearchResult={setMarkerSetBySearchResult}
         >
           <Route points={currentRoute} />
           <WaypointMarker waypoints={Cookies.getJSON('waypoint')} />
-          {currentLatitude && currentLongitude ? (
-            <CustomPopup
-              key="currentWaypointPopup"
-              longitude={Number(currentLongitude)}
-              latitude={Number(currentLatitude)}
-              addCoordinatesToRoute={addCoordinatesToRoute}
-            />
+          {currentLatitude && currentLongitude && markerSetBySearchResult ? (
+            <>
+              <Marker
+                key="asdflkj"
+                latitude={currentLatitude}
+                longitude={currentLongitude}
+                offsetLeft={-20}
+                offsetTop={-10}
+              >
+                <Image
+                  src="/locationIcon.svg"
+                  alt="marker"
+                  width={30}
+                  height={30}
+                />
+              </Marker>
+              <CustomPopup
+                key="currentWaypointPopup"
+                longitude={Number(currentLongitude)}
+                latitude={Number(currentLatitude)}
+                addCoordinatesToRoute={addCoordinatesToRoute}
+              />
+            </>
           ) : null}
           <Geocoder
             mapRef={mapRef}
@@ -203,26 +229,9 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             collapsed={true}
             marker={false}
             containerRef={geoCoderContainerRef}
-            onResult={() => {
-              setMarkerSetByClick(false);
-            }}
-
+            onResult={onSearchResult}
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
-          {/* <Marker
-            key="asdflkj"
-            latitude={48.204845}
-            longitude={16.368368}
-            offsetLeft={-20}
-            offsetTop={-10}
-          >
-            <Image
-              src="/locationIcon.svg"
-              alt="marker"
-              width={30}
-              height={30}
-            />
-          </Marker> */}
         </Map>
       </div>
     </>

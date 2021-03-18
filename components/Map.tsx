@@ -16,6 +16,8 @@ type MapProps = {
   setCurrentLongitude: (longitude: Number) => void;
   markerSetByClick: boolean;
   setMarkerSetByClick: () => void;
+  setMarkerSetBySearchResult: () => void;
+  markerSetBySearchResult: boolean;
 };
 
 export default function Map(props: React.PropsWithChildren<MapProps>) {
@@ -24,12 +26,16 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     props.viewport.latitude,
   ]);
 
+  console.log('props.children: ', props.children);
+
   const childrenWithProps = React.Children.map(props.children, (child) => {
-    return React.cloneElement(child, {
-      handleViewportChange: props.handleViewportChange,
-      mapRef: props.mapRef,
-      mapboxToken: props.mapboxToken,
-    });
+    if (child) {
+      return React.cloneElement(child, {
+        handleViewportChange: props.handleViewportChange,
+        mapRef: props.mapRef,
+        mapboxToken: props.mapboxToken,
+      });
+    }
   });
 
   function handleOnclick(event) {
@@ -43,6 +49,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     props.setCurrentLongitude(event.lngLat[0]);
     props.setCurrentLatitude(event.lngLat[1]);
     props.setMarkerSetByClick(true);
+    props.setMarkerSetBySearchResult(false);
   }
 
   return (
@@ -55,7 +62,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       mapboxApiAccessToken={props.mapboxToken}
       onClick={handleOnclick}
     >
-      {props.markerSetByClick ? (
+      {props.markerSetByClick && !props.markerSetBySearchResult ? (
         <>
           <Marker
             key="currentMarker"
