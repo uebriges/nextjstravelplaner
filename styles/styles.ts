@@ -12,3 +12,11 @@ export const routeListStyle = css`
 export const customPopupStyle = css`
   z-index: 30;
 `;
+
+export const footerStlye = css`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+`;

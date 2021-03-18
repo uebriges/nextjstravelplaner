@@ -68,7 +68,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       {props.markerSetByClick && !props.markerSetBySearchResult && marker ? (
         <>
           <Marker
-            key="currentMarker"
+            // key="currentMarker"
             latitude={currentMarkerPosition[1]}
             longitude={currentMarkerPosition[0]}
             offsetLeft={-15}
@@ -79,11 +79,11 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
               alt="marker"
               width={30}
               height={30}
-              key="currentMarkerImageKey"
+              // key="currentMarkerImageKey"
             />
           </Marker>
           <CustomPopup
-            key="currentWaypointPopup"
+            // key="currentWaypointPopup"
             longitude={currentMarkerPosition[0]}
             latitude={currentMarkerPosition[1]}
             addCoordinatesToRoute={props.addCoordinatesToRoute} // doesn't know anything about the current long lat of the popup

@@ -74,7 +74,8 @@ export default function WaypointsList(props: WaypointsListType) {
                             key={
                               'Draggable' +
                               waypoint.latitude +
-                              waypoint.longitude
+                              waypoint.longitude +
+                              index
                             }
                             draggableId={
                               'Id' + waypoint.latitude + waypoint.longitude

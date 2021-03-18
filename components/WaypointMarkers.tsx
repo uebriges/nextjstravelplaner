@@ -1,12 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import Cookies from 'js-cookie';
-import Image from 'next/image';
 import { useCallback, useState } from 'react';
 import { Marker } from 'react-map-gl';
 import { CoordinatesType } from '../pages/travelplaner';
+import MarkerIcon from './MarkerIcon';
 
 type WaypointMarkerPropsType = {
   waypoints: CoordinatesType[] | undefined;
+  reversGeocodeWaypoint: (waypoint: CoordinatesType) => CoordinatesType;
 };
 
 type DrawMarkerPropsType = {
@@ -25,26 +26,33 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   const waypoints = props.waypoints;
   console.log('currentWayPoints: ', currentWayPoints);
 
-  const handleOnDragEnd = useCallback((event) => {
-    console.log('handleOnDragEnd');
-    setCurrentWayPoints(
-      currentWayPoints?.map((waypoint) => {
-        console.log('waypoint: ', waypoint);
-        if (
-          waypoint.longitude === Number(event.target.id.split('+')[0]) &&
-          waypoint.latitude === Number(event.target.id.split('+')[1])
-        ) {
-          waypoint.longitude = event.lngLat[0];
-          waypoint.latitude = event.lngLat[1];
-          console.log('waypoint new: ', waypoint);
-          return waypoint;
+  // Event handler: End of dragging
+  const handleOnDragEnd = async (event, id) => {
+    if (!currentWayPoints) {
+      return;
+    }
+    const movedWayPoint = {
+      ...currentWayPoints.find((waypoint) => waypoint.id === id),
+    };
+    // if (!movedWayPoint.id) return;
+    const newLocationName = await props.reversGeocodeWaypoint(movedWayPoint);
+
+    movedWayPoint.locationName = newLocationName.locationName;
+    movedWayPoint.longitude = event.lngLat[0];
+    movedWayPoint.latitude = event.lngLat[1];
+
+    const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
+      (waypoint) => {
+        if (waypoint.id === id) {
+          return movedWayPoint;
         }
-        console.log('waypoint new: ', waypoint);
         return waypoint;
-      }),
+      },
     );
-    Cookies.set('waypoint', JSON.stringify(currentWayPoints));
-  }, []);
+
+    setCurrentWayPoints(updatedWayPoints);
+    Cookies.set('waypoint', JSON.stringify(updatedWayPoints));
+  };
 
   const handleOnDrag = useCallback((event) => {
     console.log('event.lngLat: ', event.lngLat);
@@ -54,26 +62,19 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   return (
     <div>
       {currentWayPoints
-        ? currentWayPoints.map((waypoint) => {
+        ? currentWayPoints.map((waypoint, id) => {
             return (
               <Marker
-                key={waypoint.longitude + waypoint.latitude}
+                key={id} // waypoint.longitude + waypoint.latitude
                 latitude={waypoint.latitude}
                 longitude={waypoint.longitude}
                 offsetLeft={-20}
                 offsetTop={-10}
-                draggable={true}
-                onDragEnd={handleOnDragEnd}
+                draggable
+                onDragEnd={(event) => handleOnDragEnd(event, waypoint.id)}
                 onDrag={handleOnDrag}
               >
-                <Image
-                  id={`${waypoint.longitude}+${waypoint.latitude}`}
-                  src="/locationIcon.svg"
-                  alt="marker"
-                  width={30}
-                  height={30}
-                  key={waypoint.longitude + waypoint.latitude}
-                />
+                <MarkerIcon />
               </Marker>
             );
           })

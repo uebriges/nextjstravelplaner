@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -12,10 +11,12 @@ import CustomPopup from '../components/CustomPopup';
 import Map from '../components/Map';
 import Route from '../components/Route';
 import WaypointMarkers from '../components/WaypointMarkers';
+import WaypointsList from '../components/WaypointsList';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
 export type CoordinatesType = {
+  id: number;
   longitude: number;
   latitude: number;
   locationName: string;
@@ -93,21 +94,13 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
     // If not in cookies yet, add the new coordinates
     if (!alreadyAvailableCoordinatesInCookies) {
-      console.log('current Long: ', currentLongitude);
-      console.log('current Lat: ', currentLatitude);
-
-      console.log('not yet  available');
-      console.log(
-        'new entry: ',
-        await reversGeocodeWaypoint({
-          longitude: currentLongitude,
-          latitude: currentLatitude,
-          locationName: '',
-        }),
+      const waypointIds = cookiesContent.map(
+        (waypoint: CoordinatesType) => waypoint.id,
       );
       Cookies.set('waypoint', [
         ...cookiesContent,
         await reversGeocodeWaypoint({
+          id: Math.max(...waypointIds) + 1,
           longitude: currentLongitude,
           latitude: currentLatitude,
           locationName: '',
@@ -142,19 +135,22 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Translates coordinates into location names
   async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
-    if (waypoint) {
-      let apiCallString;
-      apiCallString = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
-      apiCallString +=
-        waypoint.longitude +
-        ',' +
-        waypoint.latitude +
-        '.json?access_token=' +
-        props.mapboxToken;
-      const response = await fetch(apiCallString);
-      const geoCodeJSON = await response.json();
-      waypoint.locationName = geoCodeJSON.features[0].place_name;
-    }
+    // if (waypoint) {
+    let apiCallString;
+    apiCallString = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
+    apiCallString +=
+      waypoint.longitude +
+      ',' +
+      waypoint.latitude +
+      '.json?access_token=' +
+      props.mapboxToken;
+    console.log('apiCallString: ', apiCallString);
+    const response = await fetch(apiCallString);
+    const geoCodeJSON = await response.json();
+    console.log('geoCodeJSON: ', geoCodeJSON);
+    waypoint.locationName = geoCodeJSON.features[0].place_name;
+    // }
+    console.log('waypoint:', waypoint);
 
     return waypoint;
   }
@@ -174,12 +170,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div style={{ height: '100vh' }}>
-        {/* <div
+        <div
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
-        /> */}
+        />
 
-        {/* <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} /> */}
+        <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} />
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}
@@ -195,7 +191,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           setMarkerSetBySearchResult={setMarkerSetBySearchResult}
         >
           <Route points={currentRoute} />
-          <WaypointMarkers waypoints={Cookies.getJSON('waypoint')} />
+          <WaypointMarkers
+            waypoints={Cookies.getJSON('waypoint')}
+            reversGeocodeWaypoint={reversGeocodeWaypoint}
+          />
           {currentLatitude && currentLongitude && markerSetBySearchResult ? (
             <>
               <Marker
