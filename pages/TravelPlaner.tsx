@@ -11,8 +11,7 @@ import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import CustomPopup from '../components/CustomPopup';
 import Map from '../components/Map';
 import Route from '../components/Route';
-import WaypointMarker from '../components/WaypointMarkers';
-import WaypointsList from '../components/WaypointsList';
+import WaypointMarkers from '../components/WaypointMarkers';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
@@ -175,12 +174,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div style={{ height: '100vh' }}>
-        <div
+        {/* <div
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
-        />
+        /> */}
 
-        <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} />
+        {/* <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} /> */}
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}
@@ -196,7 +195,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           setMarkerSetBySearchResult={setMarkerSetBySearchResult}
         >
           <Route points={currentRoute} />
-          <WaypointMarker waypoints={Cookies.getJSON('waypoint')} />
+          <WaypointMarkers waypoints={Cookies.getJSON('waypoint')} />
           {currentLatitude && currentLongitude && markerSetBySearchResult ? (
             <>
               <Marker
