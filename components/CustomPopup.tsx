@@ -19,7 +19,7 @@ export default function CustomPopup(props: CustomPopupPropsType) {
         key="currentWaypointPopup"
         latitude={props.latitude}
         longitude={props.longitude}
-        closeButton={true}
+        closeButton={false}
         closeOnClick={true}
         anchor="top"
         css={customPopupStyle}

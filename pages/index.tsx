@@ -3,27 +3,7 @@ import 'next';
 import Head from 'next/head';
 import TravelPlaner from './travelplaner';
 
-// const DynamicComponentWithNoSSR = dynamic(() => import('../components/Map'), {
-//   ssr: false,
-// });
-
-// const dynamicComponent = () => <DynamicComponentWithNoSSR />;
-// export default dynamicComponent;
-
 export default function Home() {
-  // const [viewport, setViewport] = useState({
-  //   width: '100vw',
-  //   height: '100vh',
-  //   latitude: 48.8685,
-  //   longitude: 2.328549,
-  //   zoom: 15,
-  // });
-  // const mapRef = useRef();
-  // const handleViewportChange = useCallback(
-  //   (newViewport) => setViewport(newViewport),
-  //   [],
-  // );
-
   return (
     <div>
       <Head>
