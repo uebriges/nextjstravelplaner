@@ -25,8 +25,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     props.viewport.longitude,
     props.viewport.latitude,
   ]);
-
-  console.log('props.children: ', props.children);
+  const [marker, setMarker] = useState(false);
 
   const childrenWithProps = React.Children.map(props.children, (child) => {
     if (child) {
@@ -39,17 +38,21 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
   });
 
   function handleOnclick(event) {
-    // console.log('pointer event: ', event);
-    // console.log('pointer event point: ', event.point);
-    console.log('pointer event lnglat: ', event.lngLat);
-    // console.log('clicked');
-    // console.log('props.viewport: ', props.viewport);
-
+    // Needed to position the marker + popup after clicking on the map
     setCurrentMarkerPosition(event.lngLat);
+
+    // Needed to position the view of the map to the position clicked on the map
     props.setCurrentLongitude(event.lngLat[0]);
     props.setCurrentLatitude(event.lngLat[1]);
-    props.setMarkerSetByClick(true);
+
+    // Needed to distinguish between marker+popup
+    // - After search in Geolocator search field
+    // - After clicking on the map
     props.setMarkerSetBySearchResult(false);
+    props.setMarkerSetByClick(true);
+
+    // Needed to toggle marker on and off after clicking on the map
+    setMarker(marker ? false : true);
   }
 
   return (
@@ -62,7 +65,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       mapboxApiAccessToken={props.mapboxToken}
       onClick={handleOnclick}
     >
-      {props.markerSetByClick && !props.markerSetBySearchResult ? (
+      {props.markerSetByClick && !props.markerSetBySearchResult && marker ? (
         <>
           <Marker
             key="currentMarker"
