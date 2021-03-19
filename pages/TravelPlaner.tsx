@@ -49,8 +49,11 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     (newViewport) => setViewport(newViewport),
     [],
   );
+
+  // Refs
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
+
   const [currentRoute, setCurrentRoute] = useState<
     CoordinatesType[] | undefined
   >();
@@ -81,10 +84,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     let alreadyAvailableCoordinatesInCookies;
 
     // Search for coordinates in cookies
-    if (Cookies.get('waypoint')) {
+    if (Cookies.get('waypoints')) {
       console.log('route exists');
 
-      cookiesContent = Cookies.getJSON('waypoint');
+      cookiesContent = Cookies.getJSON('waypoints');
       alreadyAvailableCoordinatesInCookies = cookiesContent.find(
         (coordinates: CoordinatesType) =>
           coordinates.longitude === currentLongitude &&
@@ -94,13 +97,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
     // If not in cookies yet, add the new coordinates
     if (!alreadyAvailableCoordinatesInCookies) {
-      const waypointIds = cookiesContent.map(
-        (waypoint: CoordinatesType) => waypoint.id,
-      );
-      Cookies.set('waypoint', [
+      const waypointIds = cookiesContent.map((waypoint: CoordinatesType) => {
+        console.log('waypoint.id: ', waypoint.id);
+        return waypoint.id;
+      });
+      console.log('waypointsIds: ', waypointIds);
+      Cookies.set('waypoints', [
         ...cookiesContent,
         await reversGeocodeWaypoint({
-          id: Math.max(...waypointIds) + 1,
+          id: waypointIds.length > 0 ? Math.max(...waypointIds) + 1 : 1,
           longitude: currentLongitude,
           latitude: currentLatitude,
           locationName: '',
@@ -113,7 +118,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
-    const route = Cookies.getJSON('waypoint');
+    const route = Cookies.getJSON('waypoints');
     if (route && route.length > 1) {
       route.map((coordinates: CoordinatesType, index: number, array: []) => {
         apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
@@ -192,7 +197,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         >
           <Route points={currentRoute} />
           <WaypointMarkers
-            waypoints={Cookies.getJSON('waypoint')}
+            waypoints={Cookies.getJSON('waypoints')}
             reversGeocodeWaypoint={reversGeocodeWaypoint}
           />
           {currentLatitude && currentLongitude && markerSetBySearchResult ? (

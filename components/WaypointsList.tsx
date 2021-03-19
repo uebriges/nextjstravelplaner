@@ -1,14 +1,16 @@
 /** @jsxImportSource @emotion/react */
 import {
+  Button,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText,
+  ListItemText
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
+import SaveIcon from '@material-ui/icons/Save';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
@@ -16,13 +18,13 @@ import {
   Draggable,
   Droppable,
   DropResult,
-  resetServerContext,
+  resetServerContext
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../pages/travelplaner';
 import { routeListStyle } from '../styles/styles';
 
 function getCurrentWaypoints() {
-  return Cookies.getJSON('waypoint');
+  return Cookies.getJSON('waypoints');
 }
 
 type WaypointsListType = {
@@ -51,7 +53,7 @@ export default function WaypointsList(props: WaypointsListType) {
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
 
-    Cookies.set('waypoint', pointsTemp);
+    Cookies.set('waypoints', pointsTemp);
     props.generateTurnByTurnRoute();
   }
 
@@ -108,7 +110,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                       onClick={() => {
                                         const route = getCurrentWaypoints();
                                         route.splice(index, 1);
-                                        Cookies.set('waypoint', route);
+                                        Cookies.set('waypoints', route);
                                         setWaypoints(route);
                                         props.generateTurnByTurnRoute();
                                       }}
@@ -125,6 +127,13 @@ export default function WaypointsList(props: WaypointsListType) {
                     )
                   : null}
               </List>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<SaveIcon />}
+              >
+                Save
+              </Button>
             </div>
           );
         }}

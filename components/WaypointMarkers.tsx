@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import Cookies from 'js-cookie';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
 import { CoordinatesType } from '../pages/travelplaner';
 import MarkerIcon from './MarkerIcon';
@@ -21,13 +21,20 @@ type DrawMarkerPropsType = {
 export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   const [currentWayPoints, setCurrentWayPoints] = useState<
     CoordinatesType[] | undefined
-  >(props.waypoints);
+  >();
+
+  // Set waypoint marker at first render
+  useEffect(() => {
+    setCurrentWayPoints(props.waypoints);
+  }, []);
+
   console.log('props.waypoints: ', props.waypoints);
   const waypoints = props.waypoints;
   console.log('currentWayPoints: ', currentWayPoints);
 
   // Event handler: End of dragging
   const handleOnDragEnd = async (event, id) => {
+    console.log('handleOnDragEnd');
     if (!currentWayPoints) {
       return;
     }
@@ -51,10 +58,11 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     );
 
     setCurrentWayPoints(updatedWayPoints);
-    Cookies.set('waypoint', JSON.stringify(updatedWayPoints));
+    Cookies.set('waypoints', JSON.stringify(updatedWayPoints));
   };
 
   const handleOnDrag = useCallback((event) => {
+    console.log('handleOnDrag');
     console.log('event.lngLat: ', event.lngLat);
     console.log('dragging...');
   }, []);
