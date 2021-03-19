@@ -199,6 +199,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           <WaypointMarkers
             waypoints={Cookies.getJSON('waypoints')}
             reversGeocodeWaypoint={reversGeocodeWaypoint}
+            generateTurnByTurnRoute={generateTurnByTurnRoute}
           />
           {currentLatitude && currentLongitude && markerSetBySearchResult ? (
             <>

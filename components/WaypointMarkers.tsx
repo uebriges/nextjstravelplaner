@@ -8,6 +8,7 @@ import MarkerIcon from './MarkerIcon';
 type WaypointMarkerPropsType = {
   waypoints: CoordinatesType[] | undefined;
   reversGeocodeWaypoint: (waypoint: CoordinatesType) => CoordinatesType;
+  generateTurnByTurnRoute: () => void;
 };
 
 type DrawMarkerPropsType = {
@@ -25,8 +26,9 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
   // Set waypoint marker at first render
   useEffect(() => {
+    console.log('props.waypoints useeffect: ', props.waypoints);
     setCurrentWayPoints(props.waypoints);
-  }, []);
+  }, [props.waypoints]);
 
   console.log('props.waypoints: ', props.waypoints);
   const waypoints = props.waypoints;
@@ -41,12 +43,22 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     const movedWayPoint = {
       ...currentWayPoints.find((waypoint) => waypoint.id === id),
     };
-    // if (!movedWayPoint.id) return;
-    const newLocationName = await props.reversGeocodeWaypoint(movedWayPoint);
 
-    movedWayPoint.locationName = newLocationName.locationName;
     movedWayPoint.longitude = event.lngLat[0];
     movedWayPoint.latitude = event.lngLat[1];
+
+    console.log('movedWayPoint: ', movedWayPoint);
+    // if (!movedWayPoint.id) return;
+    const updatedMovedWaypoint = await props.reversGeocodeWaypoint(
+      movedWayPoint,
+    );
+
+    console.log(
+      'updatedMovedWaypoint.locationName: ',
+      updatedMovedWaypoint.locationName,
+    );
+
+    movedWayPoint.locationName = updatedMovedWaypoint.locationName;
 
     const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
       (waypoint) => {
@@ -59,12 +71,13 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
     setCurrentWayPoints(updatedWayPoints);
     Cookies.set('waypoints', JSON.stringify(updatedWayPoints));
+    props.generateTurnByTurnRoute();
   };
 
   const handleOnDrag = useCallback((event) => {
-    console.log('handleOnDrag');
-    console.log('event.lngLat: ', event.lngLat);
-    console.log('dragging...');
+    // console.log('handleOnDrag');
+    // console.log('event.lngLat: ', event.lngLat);
+    // console.log('dragging...');
   }, []);
 
   return (
