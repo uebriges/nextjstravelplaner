@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Marker } from 'react-map-gl';
+import { Marker, WebMercatorViewport } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import CustomPopup from '../components/CustomPopup';
@@ -42,6 +42,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     latitude: 48.204845,
     longitude: 16.368368,
     zoom: 12,
+    transitionDuration: 1000,
   });
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
@@ -82,6 +83,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     console.log('addCoordinatesToRoute');
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
+    let updatedWaypoints;
 
     // Search for coordinates in cookies
     if (Cookies.get('waypoints')) {
@@ -102,7 +104,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         return waypoint.id;
       });
       console.log('waypointsIds: ', waypointIds);
-      Cookies.set('waypoints', [
+      updatedWaypoints = [
         ...cookiesContent,
         await reversGeocodeWaypoint({
           id: waypointIds.length > 0 ? Math.max(...waypointIds) + 1 : 1,
@@ -110,9 +112,46 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           latitude: currentLatitude,
           locationName: '',
         }),
-      ]);
+      ];
+      Cookies.set('waypoints', updatedWaypoints);
     }
+
     generateTurnByTurnRoute();
+
+    // Update viewport to show all markers on the map (most of the time it will be zooming out)
+    const allLongitudes = updatedWaypoints.map(
+      (waypoint) => waypoint.longitude,
+    );
+    const allLatitudes = updatedWaypoints.map((waypoint) => waypoint.latitude);
+    console.log('allLat: ', allLatitudes);
+
+    // Update viewport to show all existing waypoints
+    const maxLong = Math.max(...allLongitudes);
+    const maxLat = Math.max(...allLatitudes);
+    const minLong = Math.min(...allLongitudes);
+    const minLat = Math.min(...allLatitudes);
+
+    const { longitude, latitude, zoom } = new WebMercatorViewport(
+      viewport,
+    ).fitBounds(
+      [
+        [minLong, minLat],
+        [maxLong, maxLat],
+      ],
+      {
+        padding: 30,
+        offset: [0, -100],
+      },
+    );
+    setViewport({
+      ...viewport,
+      longitude,
+      latitude,
+      zoom,
+      transitionDuration: 1000,
+      // transitionInterpolator: new FlyToInterpolator(),
+      // transitionEasing: d3.easeCubic,
+    });
   }
 
   // Generate turn by turn route

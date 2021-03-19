@@ -1,4 +1,4 @@
-import postgres from 'postgres';
+import postgres, { sql } from 'postgres';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
 
 setPostgresDefaultsOnHeroku();
@@ -16,4 +16,32 @@ if (process.env.NODE_ENV === 'production') {
     globalThis.__postgresSqlClient = postgres();
   }
   sql = globalThis.__postgresSqlClient;
+}
+
+export async function createUser(
+  userName: string,
+  firstName: string,
+  lastName: string,
+  password: string,
+) {
+  const passwordHash = '';
+
+  const newUser = await sql`
+    INSERT INTO users (
+      user_name,
+      first_name,
+      last_name,
+      passwordHash
+    )
+    VALUES
+    (
+      ${userName},
+      ${firstName},
+      ${lastName},
+      ${passwordHash}
+    )
+    RETURNING *;
+  `;
+
+  return newUser;
 }

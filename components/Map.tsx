@@ -64,6 +64,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
       onViewportChange={props.handleViewportChange}
       mapboxApiAccessToken={props.mapboxToken}
       onClick={handleOnclick}
+      mapStyle="mapbox://styles/mapbox/outdoors-v11"
     >
       {props.markerSetByClick && !props.markerSetBySearchResult && marker ? (
         <>
