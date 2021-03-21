@@ -19,18 +19,18 @@ if (process.env.NODE_ENV === 'production') {
 const typeDefs = gql`
   type Trip {
     title: String
-    start: Date
-    end: Date
+    start: String
+    end: String
     notes: String
     locations: Location
   }
 
   type Location {
     id: Int
-    tripId: Id
+    tripId: ID
     notes: String
-    means_of_transport
-    visa_information
+    means_of_transport: String
+    visa_information: String
     favorite: Boolean
     coordinates: String
   }
@@ -41,13 +41,23 @@ const typeDefs = gql`
     lastName: String
     email: String
     homeCoordinates: String
-    currentlyTraveling: boolean
+    currentlyTraveling: Boolean
     userName: String
     trips: [Trip]
   }
 
   type Mutation {
-    createUser(userName: String!, firstName: String, lastName: String, passwordHash: String!): User
+    createUser(
+      userName: String!
+      firstName: String
+      lastName: String
+      passwordHash: String!
+    ): User
+  }
+
+  type Query {
+    trip: [trip]
+    user(username: string): User
   }
 `;
 
@@ -64,7 +74,9 @@ const resolvers = {
     // create User
   },
   Query: {
-    // getUser
+    user(root, args) {
+      return 'asdf';
+    },
   },
 };
 
@@ -74,6 +86,6 @@ export const config = {
 
 export const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-export default new ApolloServer(
-  { schema }.createHandler({ path: 'api/graphql' }),
-);
+export default new ApolloServer({ schema }).createHandler({
+  path: 'api/graphql',
+});

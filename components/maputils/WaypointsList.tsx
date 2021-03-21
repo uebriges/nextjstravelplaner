@@ -1,16 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import {
-  Button,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText
+  ListItemText,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
-import SaveIcon from '@material-ui/icons/Save';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
@@ -18,10 +16,10 @@ import {
   Draggable,
   Droppable,
   DropResult,
-  resetServerContext
+  resetServerContext,
 } from 'react-beautiful-dnd';
-import { CoordinatesType } from '../pages/travelplaner';
-import { routeListStyle } from '../styles/styles';
+import { CoordinatesType } from '../../pages/travelplaner';
+import { routeListStyle } from '../../styles/styles';
 
 function getCurrentWaypoints() {
   return Cookies.getJSON('waypoints');
@@ -127,13 +125,13 @@ export default function WaypointsList(props: WaypointsListType) {
                     )
                   : null}
               </List>
-              <Button
+              {/* <Button
                 variant="contained"
                 color="primary"
                 startIcon={<SaveIcon />}
               >
                 Save
-              </Button>
+              </Button> */}
             </div>
           );
         }}

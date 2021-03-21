@@ -1,17 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Marker, WebMercatorViewport } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import CustomPopup from '../components/CustomPopup';
+import Layout from '../components/Layout';
 import Map from '../components/Map';
-import Route from '../components/Route';
-import WaypointMarkers from '../components/WaypointMarkers';
-import WaypointsList from '../components/WaypointsList';
+import CustomPopup from '../components/maputils/CustomPopup';
+import Route from '../components/maputils/Route';
+import WaypointMarkers from '../components/maputils/WaypointMarkers';
+import WaypointsList from '../components/maputils/WaypointsList';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
@@ -119,39 +121,42 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     generateTurnByTurnRoute();
 
     // Update viewport to show all markers on the map (most of the time it will be zooming out)
-    const allLongitudes = updatedWaypoints.map(
-      (waypoint) => waypoint.longitude,
-    );
-    const allLatitudes = updatedWaypoints.map((waypoint) => waypoint.latitude);
-    console.log('allLat: ', allLatitudes);
+    if (updatedWaypoints && updatedWaypoints?.length > 1) {
+      const allLongitudes = updatedWaypoints.map(
+        (waypoint) => waypoint.longitude,
+      );
+      const allLatitudes = updatedWaypoints.map(
+        (waypoint) => waypoint.latitude,
+      );
+      console.log('allLat: ', allLatitudes);
 
-    // Update viewport to show all existing waypoints
-    const maxLong = Math.max(...allLongitudes);
-    const maxLat = Math.max(...allLatitudes);
-    const minLong = Math.min(...allLongitudes);
-    const minLat = Math.min(...allLatitudes);
+      const maxLong = Math.max(...allLongitudes);
+      const maxLat = Math.max(...allLatitudes);
+      const minLong = Math.min(...allLongitudes);
+      const minLat = Math.min(...allLatitudes);
 
-    const { longitude, latitude, zoom } = new WebMercatorViewport(
-      viewport,
-    ).fitBounds(
-      [
-        [minLong, minLat],
-        [maxLong, maxLat],
-      ],
-      {
-        padding: 30,
-        offset: [0, -100],
-      },
-    );
-    setViewport({
-      ...viewport,
-      longitude,
-      latitude,
-      zoom,
-      transitionDuration: 1000,
-      // transitionInterpolator: new FlyToInterpolator(),
-      // transitionEasing: d3.easeCubic,
-    });
+      const { longitude, latitude, zoom } = new WebMercatorViewport(
+        viewport,
+      ).fitBounds(
+        [
+          [minLong, minLat],
+          [maxLong, maxLat],
+        ],
+        {
+          padding: 30,
+          offset: [0, -100],
+        },
+      );
+      setViewport({
+        ...viewport,
+        longitude,
+        latitude,
+        zoom,
+        transitionDuration: 1000,
+        // transitionInterpolator: new FlyToInterpolator(),
+        // transitionEasing: d3.easeCubic,
+      });
+    }
   }
 
   // Generate turn by turn route
@@ -208,7 +213,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   }, []);
 
   return (
-    <>
+    <Layout>
       <Head>
         <title>Find your way</title>
         <link rel="icon" href="/favicon.ico" />
@@ -269,7 +274,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             onViewportChange={handleGeocoderViewportChange}
             mapboxApiAccessToken={props.mapboxToken}
             position="top-left"
-            collapsed={true}
+            // collapsed={true}
             marker={false}
             containerRef={geoCoderContainerRef}
             onResult={onSearchResult}
@@ -277,13 +282,35 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           />
         </Map>
       </div>
-    </>
+    </Layout>
   );
 };
 
 export default TravelPlaner;
 
-export function getServerSideProps(ctx: GetServerSidePropsContext) {
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const { createSessionTwoHours, deleteAllExpiredSessions } = await import(
+    '../utils/database'
+  );
+  const { serializeSecureCookieServerSide } = await import('../utils/cookies');
+
+  await deleteAllExpiredSessions();
+
+  const token =
+    ctx.req.cookies.sessionAnonymous !== 'undefined'
+      ? ctx.req.cookies.sessionAnonymous
+      : (await createSessionTwoHours()).token;
+
+  const sessionCookie = serializeSecureCookieServerSide(
+    'sessionAnonymous',
+    token,
+    60 * 120,
+  );
+
+  ctx.res.setHeader('Set-Cookie', sessionCookie);
+
+  console.log('server...');
+
   return {
     props: {
       mapboxToken: process.env.MAPBOX_API_TOKEN || null,

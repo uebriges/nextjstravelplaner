@@ -2,7 +2,7 @@
 import { Button } from '@material-ui/core';
 import { useState } from 'react';
 import { Popup } from 'react-map-gl';
-import { customPopupStyle } from '../styles/styles';
+import { customPopupStyle } from '../../styles/styles';
 
 type CustomPopupPropsType = {
   longitude: number;

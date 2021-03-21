@@ -19,12 +19,15 @@
     "apollo-server-micro": "^2.21.2",
     "argon2": "^0.27.1",
     "camelcase-keys": "^6.2.2",
+    "cookie": "^0.4.1",
+    "crypto": "^1.0.1",
     "dotenv-cli": "^4.0.0",
     "dotenv-safe": "^8.2.0",
     "graphql": "^15.5.0",
     "js-cookie": "^2.2.1",
     "ley": "^0.7.0",
     "next": "10.0.7",
+    "pg-connection-string": "^2.4.0",
     "postgres": "^1.0.2",
     "react": "17.0.1",
     "react-beautiful-dnd": "^13.0.0",
@@ -32,9 +35,11 @@
     "react-dnd-touch-backend": "^14.0.0",
     "react-dom": "17.0.1",
     "react-map-gl": "^6.1.10",
-    "react-map-gl-geocoder": "^2.1.6"
+    "react-map-gl-geocoder": "^2.1.6",
+    "valtio": "^0.8.2"
   },
   "devDependencies": {
+    "@types/cookie": "^0.4.0",
     "@types/node": "14.14.30",
     "@types/react": "17.0.2",
     "@types/react-dom": "17.0.1",

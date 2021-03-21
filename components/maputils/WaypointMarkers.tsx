@@ -2,7 +2,7 @@
 import Cookies from 'js-cookie';
 import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
-import { CoordinatesType } from '../pages/travelplaner';
+import { CoordinatesType } from '../../pages/travelplaner';
 import MarkerIcon from './MarkerIcon';
 
 type WaypointMarkerPropsType = {
