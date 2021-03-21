@@ -1,6 +1,6 @@
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
 import postgres from 'postgres';
-import { createUser } from '../../utils/database';
+import { getCurrentWaypoints } from '../../utils/database';
 
 let sql;
 
@@ -17,6 +17,21 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const typeDefs = gql`
+  type Query {
+    trip: [Trip]
+    user(userName: String): User
+    waypoints(token: String): [Location]
+  }
+
+  # type Mutation {
+  #   createUser(
+  #     userName: String!
+  #     firstName: String
+  #     lastName: String
+  #     passwordHash: String!
+  #   ): User
+  # }
+
   type Trip {
     title: String
     start: String
@@ -45,47 +60,36 @@ const typeDefs = gql`
     userName: String
     trips: [Trip]
   }
-
-  type Mutation {
-    createUser(
-      userName: String!
-      firstName: String
-      lastName: String
-      passwordHash: String!
-    ): User
-  }
-
-  type Query {
-    trip: [trip]
-    user(username: string): User
-  }
 `;
 
 const resolvers = {
-  Mutation: {
-    createUser(root, args) {
-      return createUser(
-        args.userName,
-        args.firstName,
-        args.lastName,
-        args.passwordHash,
-      );
-    },
-    // create User
-  },
   Query: {
-    user(root, args) {
-      return 'asdf';
+    user(root, { userName }) {
+      return userName;
+    },
+    waypoints(root, args) {
+      return getCurrentWaypoints(args.token);
     },
   },
+  // Mutation: {
+  //   createUser(root, args) {
+  //     return createUser(
+  //       args.userName,
+  //       args.firstName,
+  //       args.lastName,
+  //       args.passwordHash,
+  //     );
+  //   },
+  //   // create User
+  // },
 };
+
+export const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 export const config = {
   api: { bodyParser: false },
 };
 
-export const schema = makeExecutableSchema({ typeDefs, resolvers });
-
 export default new ApolloServer({ schema }).createHandler({
-  path: 'api/graphql',
+  path: '/api/graphql',
 });

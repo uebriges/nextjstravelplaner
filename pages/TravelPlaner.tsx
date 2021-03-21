@@ -91,13 +91,20 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     let updatedWaypoints;
 
     // Loggedin or not?
-    //sessionStateSnapshot
     // if not -> trip already available? -> trip with session_id available?
     // if logged in -> trip already available? -> trip with session_id
     // if logged in + trip available -> change token of trip with tripId
 
-    // Search for coordinates in cookies
+    if (sessionStateSnapshot.activeSessionType === SESSIONS.LOGGEDIN) {
+      // Insert new waypoint into DB
+    } else if (sessionStateSnapshot.activeSessionType === SESSIONS.ANONYMOUS) {
+      // Insert new waypoint into DB
+    } else if (
+      sessionStateSnapshot.activeSessionType === SESSIONS.DURINGLOGINORREGISTER
+    ) {
+    }
     if (Cookies.get('waypoints')) {
+      // Search for coordinates in cookies
       console.log('route exists');
 
       cookiesContent = Cookies.getJSON('waypoints');

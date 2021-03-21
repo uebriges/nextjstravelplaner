@@ -117,10 +117,22 @@ export async function deleteAllExpiredSessions() {
   return camelcaseKeys(sessions);
 }
 
+export async function getCurrentWaypoints(token) {
+  const route = sql`
+  SELECT *
+  FROM trip, location
+  WHERE session_id = ${token}
+  AND trip.id = location.trip_id;
+  `;
+
+  return route.map((currentRoute) => camelcaseKeys(currentRoute));
+}
+
 module.exports = {
   createUser,
   deleteAllExpiredSessions,
   createSessionFiveMinutes,
   createSessionTwoHours,
   createSessionTwentyFourHours,
+  getCurrentWaypoints,
 };
