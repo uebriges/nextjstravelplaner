@@ -21,6 +21,7 @@
     "camelcase-keys": "^6.2.2",
     "cookie": "^0.4.1",
     "crypto": "^1.0.1",
+    "csrf": "^3.1.0",
     "dotenv-cli": "^4.0.0",
     "dotenv-safe": "^8.2.0",
     "graphql": "^15.5.0",

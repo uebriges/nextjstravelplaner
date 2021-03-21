@@ -119,8 +119,8 @@ export async function deleteAllExpiredSessions() {
 
 module.exports = {
   createUser,
-  createSessionFiveMinutes,
   deleteAllExpiredSessions,
+  createSessionFiveMinutes,
   createSessionTwoHours,
   createSessionTwentyFourHours,
 };

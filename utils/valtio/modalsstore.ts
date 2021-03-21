@@ -16,8 +16,4 @@ const modalsStore: ModalsStoreType = proxy({
   activateModal: (modal) => (modalsStore.activeModal = modal),
 });
 
-// subscribe(displayStore, () => {
-//   console.log('store changed');
-// });
-
 export default modalsStore;

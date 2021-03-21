@@ -8,12 +8,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Marker, WebMercatorViewport } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { useSnapshot } from 'valtio';
 import Layout from '../components/Layout';
 import Map from '../components/Map';
 import CustomPopup from '../components/maputils/CustomPopup';
 import Route from '../components/maputils/Route';
 import WaypointMarkers from '../components/maputils/WaypointMarkers';
 import WaypointsList from '../components/maputils/WaypointsList';
+import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
@@ -38,6 +40,7 @@ export type TravelPlanerPropsType = {
 };
 
 const TravelPlaner = (props: TravelPlanerPropsType) => {
+  const sessionStateSnapshot = useSnapshot(sessionStore);
   const [viewport, setViewport] = useState({
     width: '100vw',
     height: '100vh',
@@ -86,6 +89,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
     let updatedWaypoints;
+
+    // Loggedin or not?
+    //sessionStateSnapshot
+    // if not -> trip already available? -> trip with session_id available?
+    // if logged in -> trip already available? -> trip with session_id
+    // if logged in + trip available -> change token of trip with tripId
 
     // Search for coordinates in cookies
     if (Cookies.get('waypoints')) {
@@ -293,23 +302,32 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     '../utils/database'
   );
   const { serializeSecureCookieServerSide } = await import('../utils/cookies');
+  const { snapshot } = await import('valtio/vanilla');
+
+  // Set session state to the correct session
+  //
+  const sessionSnapshot = snapshot(sessionStore);
 
   await deleteAllExpiredSessions();
 
-  const token =
-    ctx.req.cookies.sessionAnonymous !== 'undefined'
-      ? ctx.req.cookies.sessionAnonymous
-      : (await createSessionTwoHours()).token;
+  let token;
 
-  const sessionCookie = serializeSecureCookieServerSide(
-    'sessionAnonymous',
-    token,
-    60 * 120,
-  );
+  // if new session needed = 2 hours token
+  if (ctx.req.cookies.session === 'undefined' || !ctx.req.cookies.session) {
+    // Set 2 hours token -> Anonymous
+    token = (await createSessionTwoHours()).token;
+    sessionSnapshot.setSession(SESSIONS.ANONYMOUS, token);
 
-  ctx.res.setHeader('Set-Cookie', sessionCookie);
+    const sessionCookie = serializeSecureCookieServerSide(
+      'session',
+      token,
+      60 * 120,
+    );
 
-  console.log('server...');
+    ctx.res.setHeader('Set-Cookie', sessionCookie);
+  } else {
+    token = sessionSnapshot.activeSessionToken;
+  }
 
   return {
     props: {
