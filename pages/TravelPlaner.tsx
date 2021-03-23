@@ -168,49 +168,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       ) {
       }
 
-      /// -------------------- Can be removed later on --------------------
-      if (Cookies.get('waypoints')) {
-        // Search for coordinates in cookies
-        console.log('route exists');
-
-        cookiesContent = Cookies.getJSON('waypoints');
-        alreadyAvailableCoordinatesInCookies = cookiesContent.find(
-          (coordinates: CoordinatesType) =>
-            coordinates.longitude === currentLongitude &&
-            coordinates.latitude === currentLatitude,
-        );
-      }
-
-      // If not in cookies yet, add the new coordinates
-      if (!alreadyAvailableCoordinatesInCookies) {
-        const waypointIds = cookiesContent.map((waypoint: CoordinatesType) => {
-          console.log('waypoint.id: ', waypoint.id);
-          return waypoint.id;
-        });
-        console.log('waypointsIds: ', waypointIds);
-        updatedWaypoints = [
-          ...cookiesContent,
-          await reversGeocodeWaypoint({
-            id: waypointIds.length > 0 ? Math.max(...waypointIds) + 1 : 1,
-            longitude: currentLongitude,
-            latitude: currentLatitude,
-            waypointName: '',
-          }),
-        ];
-        Cookies.set('waypoints', updatedWaypoints);
-      }
-
-      /// -------------------- Can be removed later on -------------------- end
-
       generateTurnByTurnRoute();
 
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
-      if (updatedWaypoints && updatedWaypoints?.length > 1) {
-        const allLongitudes = updatedWaypoints.map(
-          (waypoint) => waypoint.longitude,
+      if (waypoints.data?.waypoints && waypoints.data?.waypoints.length > 1) {
+        const allLongitudes = waypoints.data.waypoints.map(
+          (waypoint: CoordinatesType) => waypoint.longitude,
         );
-        const allLatitudes = updatedWaypoints.map(
-          (waypoint) => waypoint.latitude,
+        const allLatitudes = waypoints.data.waypoints.map(
+          (waypoint: CoordinatesType) => waypoint.latitude,
         );
         console.log('allLat: ', allLatitudes);
 
@@ -257,25 +223,14 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
               : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
         },
       );
-
       console.log('apiCallString: ', apiCallString);
-
-      // const route = Cookies.getJSON('waypoints');
-      // if (route && route.length > 1) {
-      //   route.map((coordinates: CoordinatesType, index: number, array: []) => {
-      //     apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
-      //     apiCallString +=
-      //       index < array.length - 1
-      //         ? '%3B'
-      //         : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
-      //   });
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
-      Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
+      // Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
       setCurrentRoute(waypoints.data?.waypoints);
-      Cookies.set('finalRoute', waypoints.data?.waypoints);
+      // Cookies.set('finalRoute', waypoints.data?.waypoints);
     }
   }
 
@@ -319,7 +274,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
         />
 
-        <WaypointsList generateTurnByTurnRoute={generateTurnByTurnRoute} />
+        <WaypointsList
+          generateTurnByTurnRoute={generateTurnByTurnRoute}
+          sessionToken={props.sessionToken}
+        />
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}

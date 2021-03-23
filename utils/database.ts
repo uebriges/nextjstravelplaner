@@ -189,13 +189,18 @@ export async function setNewWaypoint(
 
     // Add new waypoint (trip_id and coordinates are unique base on
     // table constraint) -> therefore the try/catch block
+
+    const orderNumber = await getNextOrderNumber(tripId);
+
+    console.log('orderNumber: ', orderNumber);
     let newWaypoint;
+
     try {
       newWaypoint = await sql`
       INSERT INTO waypoint
-        (trip_id, longitude, latitude)
+        (trip_id, longitude, latitude, order_number)
       VALUES
-        (${tripId}, ${longitude}, ${latitude})
+        (${tripId}, ${longitude}, ${latitude}, ${orderNumber})
       RETURNING *;
     `;
     } catch (event) {
@@ -216,6 +221,20 @@ export async function setNewWaypoint(
   }
 }
 
+export async function deleteWaypoint(waypointId: number) {
+  console.log('DB deleted waypoint');
+
+  const deletedWaypoint = await sql`
+    DELETE FROM waypoint
+    WHERE id = ${waypointId}
+    RETURNING *;
+    ;
+  `;
+  console.log('deletedWaypoint: ', deletedWaypoint[0]);
+
+  return deletedWaypoint[0];
+}
+
 export async function getSessionIdByToken(token: String) {
   console.log('getSessionIdByToken: ');
   console.log('token: ', token);
@@ -231,6 +250,42 @@ export async function getSessionIdByToken(token: String) {
   return camelcaseKeys(sessionId.slice(-2));
 }
 
+//Todo -> updates a moved waypoint on the card or updates the order of the list of waypoints
+// Needs to be adopted so that multiple values can be updated in the DB
+// Needs to be able to update the order
+// export async function updateWaypoints(
+//   id: number,
+//   longitude: string,
+//   latitude: string,
+// ) {
+//   const updatedWaypoint = await sql`
+//     UPDATE waypoint
+//     SET
+//       longitude = ${longitude},
+//       latitude = ${latitude}
+//     where id = ${id}
+//     RETURNING *;
+//   `;
+
+//   console.log('updatedWaypoint: ', updatedWaypoint);
+// }
+
+async function getNextOrderNumber(tripId: number) {
+  let lastOrderNumber = await sql`
+  SELECT max(order_number)
+  FROM waypoint
+  WHERE trip_id = ${tripId};
+  `;
+
+  console.log('lasterOrderNumber: ', lastOrderNumber[0].max);
+  lastOrderNumber = lastOrderNumber[0].max;
+  lastOrderNumber = !lastOrderNumber
+    ? (lastOrderNumber = 1)
+    : lastOrderNumber + 1;
+
+  return lastOrderNumber;
+}
+
 module.exports = {
   createUser,
   deleteAllExpiredSessions,
@@ -239,4 +294,6 @@ module.exports = {
   createSessionTwentyFourHours,
   getCurrentWaypoints,
   setNewWaypoint,
+  deleteWaypoint,
+  // updateWaypoints,
 };

@@ -9,6 +9,7 @@ exports.up = async (sql) => {
 		visa_information text,
 		favorite boolean,
 		coordinates varchar(50),
+		order_number int,
 		UNIQUE (trip_id, coordinates),
 		PRIMARY KEY(id),
 		CONSTRAINT fk_trip_id

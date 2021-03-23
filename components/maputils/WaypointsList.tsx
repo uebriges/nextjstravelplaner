@@ -1,41 +1,63 @@
 /** @jsxImportSource @emotion/react */
+import { useMutation, useQuery } from '@apollo/client';
 import {
-    IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemSecondaryAction,
-    ListItemText
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
-    DragDropContext,
-    Draggable,
-    Droppable,
-    DropResult,
-    resetServerContext
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+  resetServerContext,
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
+import graphqlQueries from '../../utils/graphqlQueries';
 
-function getCurrentWaypoints() {
-  return Cookies.getJSON('waypoints');
-}
+// function getCurrentWaypoints() {
+//   return Cookies.getJSON('waypoints');
+// }
 
 type WaypointsListType = {
   generateTurnByTurnRoute: () => void;
+  sessionToken: string;
 };
 
 export default function WaypointsList(props: WaypointsListType) {
-  const [waypoints, setWaypoints] = useState(getCurrentWaypoints());
+  console.log('111111111111111111');
+  const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
+    variables: { token: props.sessionToken },
+  });
+
+  // Delete waypoint from DB
+  const [deleteWaypoint, { dataDeletedWaypoint }] = useMutation(
+    graphqlQueries.deleteWaypoint,
+  );
+
+  console.log('wapoints waypointlist: ', waypointsFromDB);
+  // Store the moved waypoint and it's updated long/lat and waypoint name
+
+  // const [updateMovedWaypoint, { dataMovedWaypoint }] = useMutation(
+  //   graphqlQueries.updateWaypoints,
+  // );
+
+  const [waypoints, setWaypoints] = useState(
+    waypointsFromDB.data ? waypointsFromDB.data.waypoints : null,
+  );
   resetServerContext();
 
   function onDragEnd(result: DropResult) {
     const { destination, source } = result;
-    const pointsTemp = Array.from(getCurrentWaypoints());
+    const pointsTemp = waypointsFromDB.data.waypoints;
 
     if (!destination) {
       return;
@@ -51,13 +73,14 @@ export default function WaypointsList(props: WaypointsListType) {
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
 
-    Cookies.set('waypoints', pointsTemp);
+    Cookies.set('waypoints', pointsTemp); // needs to be written into DB in new order
     props.generateTurnByTurnRoute();
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="1">
+        {/* provided is served by Droppable */}
         {(provided) => {
           return (
             <div css={routeListStyle}>
@@ -66,8 +89,8 @@ export default function WaypointsList(props: WaypointsListType) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {getCurrentWaypoints()
-                  ? getCurrentWaypoints().map(
+                {waypointsFromDB.data
+                  ? waypointsFromDB.data.waypoints.map(
                       (waypoint: CoordinatesType, index: number) => {
                         return (
                           <Draggable
@@ -105,12 +128,24 @@ export default function WaypointsList(props: WaypointsListType) {
                                       }
                                       edge="end"
                                       aria-label="delete"
-                                      onClick={() => {
-                                        const route = getCurrentWaypoints();
+                                      onClick={async () => {
+                                        const route = Array.from(
+                                          waypointsFromDB.data.waypoints,
+                                        );
+                                        console.log('route: ', route);
                                         route.splice(index, 1);
-                                        Cookies.set('waypoints', route);
+                                        await deleteWaypoint({
+                                          variables: {
+                                            waypointId: waypoint.id,
+                                          },
+                                        });
+                                        console.log(
+                                          'route after deletion: ',
+                                          route,
+                                        );
                                         setWaypoints(route);
                                         props.generateTurnByTurnRoute();
+                                        waypointsFromDB.refetch();
                                       }}
                                     >
                                       <CloseIcon />

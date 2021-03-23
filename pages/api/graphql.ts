@@ -1,6 +1,10 @@
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
 import postgres from 'postgres';
-import { getCurrentWaypoints, setNewWaypoint } from '../../utils/database';
+import {
+  deleteWaypoint,
+  getCurrentWaypoints,
+  setNewWaypoint,
+} from '../../utils/database';
 
 let sql;
 
@@ -35,6 +39,12 @@ const typeDefs = gql`
       longitude: String!
       latitude: String!
     ): Waypoint
+    # updateWaypoints(
+    #   id: Int!
+    #   longitude: String!
+    #   latitude:String!
+    # )
+    deleteWaypoint(waypointId: Int!): Waypoint
   }
 
   type Trip {
@@ -90,6 +100,12 @@ const resolvers = {
     },
     setNewWaypoint(root, args) {
       return setNewWaypoint(args.token, args.longitude, args.latitude);
+    },
+    // updateWaypoints(root, args) {
+    //   return updateWaypoints(args.id, args.longitude, args.latitude);
+    // },
+    deleteWaypoint(root, args) {
+      return deleteWaypoint(args.waypointId);
     },
   },
 };
