@@ -117,15 +117,118 @@ export async function deleteAllExpiredSessions() {
   return camelcaseKeys(sessions);
 }
 
-export async function getCurrentWaypoints(token) {
-  const route = sql`
+export async function getCurrentWaypoints(token: String) {
+  const sessionId = await getSessionIdByToken(token);
+  console.log('sessionId getcurrentwaypoints: ', sessionId);
+
+  console.log('in database');
+  const route = await sql`
   SELECT *
-  FROM trip, location
-  WHERE session_id = ${token}
-  AND trip.id = location.trip_id;
+  FROM trip, waypoint
+  WHERE session_id = ${sessionId[0].id.toString()}
+  AND trip.id = waypoint.trip_id;
   `;
 
+  console.log('route: ', route);
+  console.log('route here');
+
   return route.map((currentRoute) => camelcaseKeys(currentRoute));
+}
+
+type waypointDBType = {
+  id: number;
+  trip_id: number;
+  notes: string;
+  means_of_transport: string;
+  visa_information: string;
+  favorite: boolean;
+  longitude: string;
+  latitude: string;
+};
+
+// Set a new waypoint to the map
+export async function setNewWaypoint(
+  token: String,
+  longitude: String,
+  latitude: String,
+) {
+  console.log('setNewWaypoint');
+
+  // Get the session id of the current session
+  const sessionId = await getSessionIdByToken(token);
+
+  if (sessionId.length > 0) {
+    // Get the tripId to the corresponding sessionId
+    let tripId = await sql`
+    SELECT id
+    FROM trip
+    WHERE session_id = ${sessionId[0].id.toString()}
+  ;`;
+
+    console.log('is array: ', Array.isArray(tripId));
+    console.log('tripId before: ', tripId.length);
+    // tripId = tripId.slice(-2);
+    console.log('tripId AFTER: ', tripId);
+
+    // If no trip created yet, create a new one
+    if (tripId.length < 1) {
+      console.log('no trip id');
+      tripId = await sql`
+      INSERT INTO trip
+        (start_date, session_id)
+      VALUES
+        (${new Date().toISOString()}, ${sessionId[0].id.toString()})
+      RETURNING *
+  ;`;
+
+      console.log('newTrip: ', tripId);
+    }
+
+    console.log('tripId new: ', tripId);
+    tripId = tripId[0].id;
+
+    // Add new waypoint (trip_id and coordinates are unique base on
+    // table constraint) -> therefore the try/catch block
+    let newWaypoint;
+    try {
+      newWaypoint = await sql`
+      INSERT INTO waypoint
+        (trip_id, longitude, latitude)
+      VALUES
+        (${tripId}, ${longitude}, ${latitude})
+      RETURNING *;
+    `;
+    } catch (event) {
+      console.log('event: ', event);
+      newWaypoint = [];
+    }
+
+    console.log('new waypoint: ', newWaypoint);
+
+    newWaypoint = newWaypoint.map((currentWaypoint: waypointDBType) => {
+      console.log('camel case: ', camelcaseKeys(currentWaypoint));
+      return camelcaseKeys(currentWaypoint);
+    });
+
+    // handle case if no new waypoint was set because already available!
+    console.log('newpoint last: ', newWaypoint);
+    return newWaypoint[0];
+  }
+}
+
+export async function getSessionIdByToken(token: String) {
+  console.log('getSessionIdByToken: ');
+  console.log('token: ', token);
+
+  const sessionId = await sql`
+      SELECT id
+      FROM session
+      WHERE token = ${token};
+    `;
+
+  console.log('sessionId: ', sessionId.slice(-2));
+
+  return camelcaseKeys(sessionId.slice(-2));
 }
 
 module.exports = {
@@ -135,4 +238,5 @@ module.exports = {
   createSessionTwoHours,
   createSessionTwentyFourHours,
   getCurrentWaypoints,
+  setNewWaypoint,
 };

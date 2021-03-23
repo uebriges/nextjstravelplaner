@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { useMutation, useQuery } from '@apollo/client';
 import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
@@ -15,15 +16,22 @@ import CustomPopup from '../components/maputils/CustomPopup';
 import Route from '../components/maputils/Route';
 import WaypointMarkers from '../components/maputils/WaypointMarkers';
 import WaypointsList from '../components/maputils/WaypointsList';
+import graphqlQueries from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
+
+type LocationInDBType = {
+  id: string;
+  longitude: string;
+  latitude: string;
+};
 
 export type CoordinatesType = {
   id: number;
   longitude: number;
   latitude: number;
-  locationName: string;
+  waypointName: string;
 };
 
 export type ViewportType = {
@@ -37,10 +45,19 @@ export type ViewportType = {
 export type TravelPlanerPropsType = {
   routeInCookies: CoordinatesType[];
   mapboxToken: string;
+  sessionToken: string;
 };
 
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const sessionStateSnapshot = useSnapshot(sessionStore);
+
+  // set initial session state
+  useEffect(() => {
+    if (sessionStateSnapshot.activeSessionToken === '') {
+      sessionStateSnapshot.setSession(SESSIONS.ANONYMOUS, props.sessionToken);
+    }
+  }, [props.sessionToken, sessionStateSnapshot]);
+
   const [viewport, setViewport] = useState({
     width: '100vw',
     height: '100vh',
@@ -54,6 +71,18 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   const handleViewportChange = useCallback(
     (newViewport) => setViewport(newViewport),
     [],
+  );
+
+  // GraphQL queries
+  // Get current waypoints
+  // console.log('props.sessionToken: ', props.sessionToken);
+  const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
+    variables: { token: props.sessionToken },
+  });
+
+  // Store new waypoint in DB
+  const [setNewWaypoint, { dataNewWaypoint }] = useMutation(
+    graphqlQueries.setNewWaypoint,
   );
 
   // Refs
@@ -86,9 +115,13 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Adds new coordinates to the cookies
   async function addCoordinatesToRoute() {
     console.log('addCoordinatesToRoute');
+    // Cookies variables
     let cookiesContent = [];
     let alreadyAvailableCoordinatesInCookies;
     let updatedWaypoints;
+
+    // DB/Graphql variables
+    let alreadyAvailableCoordinatesInDB;
 
     // Loggedin or not?
     // if not -> trip already available? -> trip with session_id available?
@@ -98,103 +131,151 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     if (sessionStateSnapshot.activeSessionType === SESSIONS.LOGGEDIN) {
       // Insert new waypoint into DB
     } else if (sessionStateSnapshot.activeSessionType === SESSIONS.ANONYMOUS) {
-      // Insert new waypoint into DB
-    } else if (
-      sessionStateSnapshot.activeSessionType === SESSIONS.DURINGLOGINORREGISTER
-    ) {
-    }
-    if (Cookies.get('waypoints')) {
-      // Search for coordinates in cookies
-      console.log('route exists');
+      console.log('data in addcoord: ', waypoints.data);
+      if (waypoints.data.waypoints.length > 0) {
+        alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
+          (waypoint: LocationInDBType) => {
+            return (
+              waypoint.longitude === currentLongitude.toString() &&
+              waypoint.latitude === currentLatitude.toString()
+            );
+          },
+        );
+      }
 
-      cookiesContent = Cookies.getJSON('waypoints');
-      alreadyAvailableCoordinatesInCookies = cookiesContent.find(
-        (coordinates: CoordinatesType) =>
-          coordinates.longitude === currentLongitude &&
-          coordinates.latitude === currentLatitude,
-      );
-    }
-
-    // If not in cookies yet, add the new coordinates
-    if (!alreadyAvailableCoordinatesInCookies) {
-      const waypointIds = cookiesContent.map((waypoint: CoordinatesType) => {
-        console.log('waypoint.id: ', waypoint.id);
-        return waypoint.id;
-      });
-      console.log('waypointsIds: ', waypointIds);
-      updatedWaypoints = [
-        ...cookiesContent,
-        await reversGeocodeWaypoint({
-          id: waypointIds.length > 0 ? Math.max(...waypointIds) + 1 : 1,
+      if (!alreadyAvailableCoordinatesInDB) {
+        console.log('not yet int here');
+        const newWaypoint = await reversGeocodeWaypoint({
+          id: 0, // could be any number, because waypoint id is defined by the DB
           longitude: currentLongitude,
           latitude: currentLatitude,
-          locationName: '',
-        }),
-      ];
-      Cookies.set('waypoints', updatedWaypoints);
-    }
+          waypointName: '',
+        });
+        console.log('newwaypoint revers: ', newWaypoint);
+        await setNewWaypoint({
+          variables: {
+            token: props.sessionToken,
+            longitude: currentLongitude.toString(),
+            latitude: currentLatitude.toString(),
+            waypointName: newWaypoint.waypointName,
+          },
+        });
 
-    generateTurnByTurnRoute();
+        waypoints.refetch();
+      } else if (
+        sessionStateSnapshot.activeSessionType ===
+        SESSIONS.DURINGLOGINORREGISTER
+      ) {
+      }
 
-    // Update viewport to show all markers on the map (most of the time it will be zooming out)
-    if (updatedWaypoints && updatedWaypoints?.length > 1) {
-      const allLongitudes = updatedWaypoints.map(
-        (waypoint) => waypoint.longitude,
-      );
-      const allLatitudes = updatedWaypoints.map(
-        (waypoint) => waypoint.latitude,
-      );
-      console.log('allLat: ', allLatitudes);
+      /// -------------------- Can be removed later on --------------------
+      if (Cookies.get('waypoints')) {
+        // Search for coordinates in cookies
+        console.log('route exists');
 
-      const maxLong = Math.max(...allLongitudes);
-      const maxLat = Math.max(...allLatitudes);
-      const minLong = Math.min(...allLongitudes);
-      const minLat = Math.min(...allLatitudes);
+        cookiesContent = Cookies.getJSON('waypoints');
+        alreadyAvailableCoordinatesInCookies = cookiesContent.find(
+          (coordinates: CoordinatesType) =>
+            coordinates.longitude === currentLongitude &&
+            coordinates.latitude === currentLatitude,
+        );
+      }
 
-      const { longitude, latitude, zoom } = new WebMercatorViewport(
-        viewport,
-      ).fitBounds(
-        [
-          [minLong, minLat],
-          [maxLong, maxLat],
-        ],
-        {
-          padding: 30,
-          offset: [0, -100],
-        },
-      );
-      setViewport({
-        ...viewport,
-        longitude,
-        latitude,
-        zoom,
-        transitionDuration: 1000,
-        // transitionInterpolator: new FlyToInterpolator(),
-        // transitionEasing: d3.easeCubic,
-      });
+      // If not in cookies yet, add the new coordinates
+      if (!alreadyAvailableCoordinatesInCookies) {
+        const waypointIds = cookiesContent.map((waypoint: CoordinatesType) => {
+          console.log('waypoint.id: ', waypoint.id);
+          return waypoint.id;
+        });
+        console.log('waypointsIds: ', waypointIds);
+        updatedWaypoints = [
+          ...cookiesContent,
+          await reversGeocodeWaypoint({
+            id: waypointIds.length > 0 ? Math.max(...waypointIds) + 1 : 1,
+            longitude: currentLongitude,
+            latitude: currentLatitude,
+            waypointName: '',
+          }),
+        ];
+        Cookies.set('waypoints', updatedWaypoints);
+      }
+
+      /// -------------------- Can be removed later on -------------------- end
+
+      generateTurnByTurnRoute();
+
+      // Update viewport to show all markers on the map (most of the time it will be zooming out)
+      if (updatedWaypoints && updatedWaypoints?.length > 1) {
+        const allLongitudes = updatedWaypoints.map(
+          (waypoint) => waypoint.longitude,
+        );
+        const allLatitudes = updatedWaypoints.map(
+          (waypoint) => waypoint.latitude,
+        );
+        console.log('allLat: ', allLatitudes);
+
+        const maxLong = Math.max(...allLongitudes);
+        const maxLat = Math.max(...allLatitudes);
+        const minLong = Math.min(...allLongitudes);
+        const minLat = Math.min(...allLatitudes);
+
+        const { longitude, latitude, zoom } = new WebMercatorViewport(
+          viewport,
+        ).fitBounds(
+          [
+            [minLong, minLat],
+            [maxLong, maxLat],
+          ],
+          {
+            padding: 30,
+            offset: [0, -100],
+          },
+        );
+        setViewport({
+          ...viewport,
+          longitude,
+          latitude,
+          zoom,
+          transitionDuration: 1000,
+          // transitionInterpolator: new FlyToInterpolator(),
+          // transitionEasing: d3.easeCubic,
+        });
+      }
     }
   }
 
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
-    const route = Cookies.getJSON('waypoints');
-    if (route && route.length > 1) {
-      route.map((coordinates: CoordinatesType, index: number, array: []) => {
-        apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
-        apiCallString +=
-          index < array.length - 1
-            ? '%3B'
-            : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
-      });
+    if (waypoints.data?.waypoints && waypoints.data.waypoints.length > 1) {
+      waypoints.data.waypoints.map(
+        (waypoint: CoordinatesType, index: number, array: []) => {
+          apiCallString += waypoint.longitude + '%2C' + waypoint.latitude;
+          apiCallString +=
+            index < array.length - 1
+              ? '%3B'
+              : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
+        },
+      );
+
+      console.log('apiCallString: ', apiCallString);
+
+      // const route = Cookies.getJSON('waypoints');
+      // if (route && route.length > 1) {
+      //   route.map((coordinates: CoordinatesType, index: number, array: []) => {
+      //     apiCallString += coordinates.longitude + '%2C' + coordinates.latitude;
+      //     apiCallString +=
+      //       index < array.length - 1
+      //         ? '%3B'
+      //         : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
+      //   });
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
-      console.log('response: ', response);
       Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
-      setCurrentRoute(route);
-      Cookies.set('finalRoute', route);
+      setCurrentRoute(waypoints.data?.waypoints);
+      Cookies.set('finalRoute', waypoints.data?.waypoints);
     }
   }
 
@@ -209,11 +290,9 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       waypoint.latitude +
       '.json?access_token=' +
       props.mapboxToken;
-    console.log('apiCallString: ', apiCallString);
     const response = await fetch(apiCallString);
     const geoCodeJSON = await response.json();
-    console.log('geoCodeJSON: ', geoCodeJSON);
-    waypoint.locationName = geoCodeJSON.features[0].place_name;
+    waypoint.waypointName = geoCodeJSON.features[0].place_name;
     // }
     console.log('waypoint:', waypoint);
 
@@ -297,6 +376,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
         </Map>
+        <button onClick={() => refetch()}>refetch</button>
       </div>
     </Layout>
   );
@@ -309,11 +389,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     '../utils/database'
   );
   const { serializeSecureCookieServerSide } = await import('../utils/cookies');
-  const { snapshot } = await import('valtio/vanilla');
-
-  // Set session state to the correct session
-  //
-  const sessionSnapshot = snapshot(sessionStore);
 
   await deleteAllExpiredSessions();
 
@@ -321,9 +396,9 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   // if new session needed = 2 hours token
   if (ctx.req.cookies.session === 'undefined' || !ctx.req.cookies.session) {
+    console.log('no session available yet');
     // Set 2 hours token -> Anonymous
     token = (await createSessionTwoHours()).token;
-    sessionSnapshot.setSession(SESSIONS.ANONYMOUS, token);
 
     const sessionCookie = serializeSecureCookieServerSide(
       'session',
@@ -333,13 +408,15 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
     ctx.res.setHeader('Set-Cookie', sessionCookie);
   } else {
-    token = sessionSnapshot.activeSessionToken;
+    token = ctx.req.cookies.session;
+    console.log(' session available ');
   }
 
   return {
     props: {
       mapboxToken: process.env.MAPBOX_API_TOKEN || null,
       routeInCookies: ctx.req.cookies.route || null,
+      sessionToken: token || null,
     },
   };
 }

@@ -26,13 +26,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
   // Set waypoint marker at first render
   useEffect(() => {
-    console.log('props.waypoints useeffect: ', props.waypoints);
     setCurrentWayPoints(props.waypoints);
   }, [props.waypoints]);
 
-  console.log('props.waypoints: ', props.waypoints);
   const waypoints = props.waypoints;
-  console.log('currentWayPoints: ', currentWayPoints);
 
   // Event handler: End of dragging
   const handleOnDragEnd = async (event, id) => {
@@ -55,10 +52,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
     console.log(
       'updatedMovedWaypoint.locationName: ',
-      updatedMovedWaypoint.locationName,
+      updatedMovedWaypoint.waypointName,
     );
 
-    movedWayPoint.locationName = updatedMovedWaypoint.locationName;
+    movedWayPoint.waypointName = updatedMovedWaypoint.waypointName;
 
     const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
       (waypoint) => {

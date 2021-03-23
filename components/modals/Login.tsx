@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client';
 import {
   Button,
   Dialog,
@@ -6,14 +7,22 @@ import {
   DialogTitle,
   TextField,
 } from '@material-ui/core';
+import { userQuery } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 
 export default function Login(props) {
+  const { loading, error, data } = useQuery(userQuery);
+
+  if (loading) return 'Loading …';
+  if (error) return 'Something went wrong!';
+
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
   }
 
-  function handleLogin() {}
+  function handleLogin() {
+    console.log('data: ', data);
+  }
 
   function handleRegister() {
     modalsStore.activateModal(MODALS.REGISTER);

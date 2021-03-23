@@ -1,22 +1,22 @@
 /** @jsxImportSource @emotion/react */
 import {
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
+    IconButton,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemSecondaryAction,
+    ListItemText
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-  resetServerContext,
+    DragDropContext,
+    Draggable,
+    Droppable,
+    DropResult,
+    resetServerContext
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
@@ -94,7 +94,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                     <MenuIcon />
                                   </ListItemIcon>
                                   <ListItemText
-                                    primary={waypoint.locationName}
+                                    primary={waypoint.waypointName}
                                   />
                                   <ListItemSecondaryAction>
                                     <IconButton

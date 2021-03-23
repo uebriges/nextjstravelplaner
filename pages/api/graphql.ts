@@ -1,6 +1,6 @@
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
 import postgres from 'postgres';
-import { getCurrentWaypoints } from '../../utils/database';
+import { getCurrentWaypoints, setNewWaypoint } from '../../utils/database';
 
 let sql;
 
@@ -20,34 +20,41 @@ const typeDefs = gql`
   type Query {
     trip: [Trip]
     user(userName: String): User
-    waypoints(token: String): [Location]
+    waypoints(token: String): [Waypoint]
   }
 
-  # type Mutation {
-  #   createUser(
-  #     userName: String!
-  #     firstName: String
-  #     lastName: String
-  #     passwordHash: String!
-  #   ): User
-  # }
+  type Mutation {
+    createUser(
+      userName: String!
+      firstName: String
+      lastName: String
+      passwordHash: String!
+    ): User
+    setNewWaypoint(
+      token: String!
+      longitude: String!
+      latitude: String!
+    ): Waypoint
+  }
 
   type Trip {
     title: String
     start: String
     end: String
     notes: String
-    locations: Location
+    locations: Waypoint
   }
 
-  type Location {
+  type Waypoint {
     id: Int
     tripId: ID
     notes: String
     means_of_transport: String
     visa_information: String
     favorite: Boolean
-    coordinates: String
+    longitude: String
+    latitude: String
+    waypointName: String
   }
 
   type User {
@@ -65,23 +72,26 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     user(root, { userName }) {
-      return userName;
+      return { userName };
     },
     waypoints(root, args) {
+      console.log('args.token: ', args.token);
       return getCurrentWaypoints(args.token);
     },
   },
-  // Mutation: {
-  //   createUser(root, args) {
-  //     return createUser(
-  //       args.userName,
-  //       args.firstName,
-  //       args.lastName,
-  //       args.passwordHash,
-  //     );
-  //   },
-  //   // create User
-  // },
+  Mutation: {
+    createUser(root, args) {
+      return createUser(
+        args.userName,
+        args.firstName,
+        args.lastName,
+        args.passwordHash,
+      );
+    },
+    setNewWaypoint(root, args) {
+      return setNewWaypoint(args.token, args.longitude, args.latitude);
+    },
+  },
 };
 
 export const schema = makeExecutableSchema({ typeDefs, resolvers });
