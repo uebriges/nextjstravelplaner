@@ -43,7 +43,7 @@ export default function WaypointsList(props: WaypointsListType) {
     graphqlQueries.deleteWaypoint,
   );
 
-  console.log('wapoints waypointlist: ', waypointsFromDB);
+  console.log('waypoints waypointlist: ', waypointsFromDB);
   // Store the moved waypoint and it's updated long/lat and waypoint name
 
   // const [updateMovedWaypoint, { dataMovedWaypoint }] = useMutation(

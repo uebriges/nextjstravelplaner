@@ -151,6 +151,7 @@ export async function setNewWaypoint(
   token: String,
   longitude: String,
   latitude: String,
+  waypointName: String,
 ) {
   console.log('setNewWaypoint');
 
@@ -198,9 +199,9 @@ export async function setNewWaypoint(
     try {
       newWaypoint = await sql`
       INSERT INTO waypoint
-        (trip_id, longitude, latitude, order_number)
+        (trip_id, longitude, latitude, order_number, waypoint_name)
       VALUES
-        (${tripId}, ${longitude}, ${latitude}, ${orderNumber})
+        (${tripId}, ${longitude}, ${latitude}, ${orderNumber}, ${waypointName})
       RETURNING *;
     `;
     } catch (event) {

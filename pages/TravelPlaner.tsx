@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
-import Cookies from 'js-cookie';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
@@ -172,6 +171,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
       if (waypoints.data?.waypoints && waypoints.data?.waypoints.length > 1) {
+        console.log('in viewport change????');
         const allLongitudes = waypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.longitude,
         );
@@ -294,7 +294,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         >
           <Route points={currentRoute} />
           <WaypointMarkers
-            waypoints={Cookies.getJSON('waypoints')}
+            waypoints={waypoints.data?.waypoints}
             reversGeocodeWaypoint={reversGeocodeWaypoint}
             generateTurnByTurnRoute={generateTurnByTurnRoute}
           />

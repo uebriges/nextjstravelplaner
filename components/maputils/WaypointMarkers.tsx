@@ -84,8 +84,8 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
             return (
               <Marker
                 key={id} // waypoint.longitude + waypoint.latitude
-                latitude={waypoint.latitude}
-                longitude={waypoint.longitude}
+                latitude={Number(waypoint.latitude)}
+                longitude={Number(waypoint.longitude)}
                 offsetLeft={-20}
                 offsetTop={-10}
                 draggable

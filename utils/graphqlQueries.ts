@@ -21,8 +21,18 @@ export const getCurrentWaypoints = gql`
 `;
 
 export const setNewWaypoint = gql`
-  mutation($token: String!, $longitude: String!, $latitude: String!) {
-    setNewWaypoint(token: $token, longitude: $longitude, latitude: $latitude) {
+  mutation(
+    $token: String!
+    $longitude: String!
+    $latitude: String!
+    $waypointName: String!
+  ) {
+    setNewWaypoint(
+      token: $token
+      longitude: $longitude
+      latitude: $latitude
+      waypointName: $waypointName
+    ) {
       id
       longitude
       latitude

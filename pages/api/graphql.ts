@@ -38,6 +38,7 @@ const typeDefs = gql`
       token: String!
       longitude: String!
       latitude: String!
+      waypointName: String!
     ): Waypoint
     # updateWaypoints(
     #   id: Int!
@@ -99,7 +100,12 @@ const resolvers = {
       );
     },
     setNewWaypoint(root, args) {
-      return setNewWaypoint(args.token, args.longitude, args.latitude);
+      return setNewWaypoint(
+        args.token,
+        args.longitude,
+        args.latitude,
+        args.waypointName,
+      );
     },
     // updateWaypoints(root, args) {
     //   return updateWaypoints(args.id, args.longitude, args.latitude);
