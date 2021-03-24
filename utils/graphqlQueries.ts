@@ -41,17 +41,17 @@ export const setNewWaypoint = gql`
   }
 `;
 
-// export const updateWaypoints = gql`
-//   mutation($waypoints: waypointDBType) {
-//     updateWaypoints(waypoints: $waypoints) {
-//       id
-//       longitude
-//       latitude
-//       waypointName
-//       orderNumber
-//     }
-//   }
-// `;
+export const updateWaypoints = gql`
+  mutation($waypoints: [Waypoint]) {
+    updateWaypoints(waypoints: $waypoints) {
+      id
+      longitude
+      latitude
+      waypointName
+      orderNumber
+    }
+  }
+`;
 
 export const deleteWaypoint = gql`
   mutation($waypointId: Int!) {
@@ -66,6 +66,6 @@ module.exports = {
   userQuery,
   getCurrentWaypoints: getCurrentWaypoints,
   setNewWaypoint,
-  // updateWaypoints,
+  updateWaypoints,
   deleteWaypoint,
 };

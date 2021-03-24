@@ -4,6 +4,7 @@ import {
   deleteWaypoint,
   getCurrentWaypoints,
   setNewWaypoint,
+  updateWaypoints,
 } from '../../utils/database';
 
 let sql;
@@ -40,10 +41,21 @@ const typeDefs = gql`
       latitude: String!
       waypointName: String!
     ): Waypoint
-    # updateWaypoints(
-    #   waypoints: Waypoint []
-    # ): Waypoint []
+    updateWaypoints(waypoints: [WaypointInput]): Waypoint
     deleteWaypoint(waypointId: Int!): Waypoint
+  }
+
+  input WaypointInput {
+    id: Int
+    tripId: ID
+    notes: String
+    meansOfTransport: String
+    visaInformation: String
+    favorite: Boolean
+    longitude: String
+    latitude: String
+    waypointName: String
+    orderNumber: Int
   }
 
   type Trip {
@@ -106,9 +118,10 @@ const resolvers = {
         args.waypointName,
       );
     },
-    // updateWaypoints(root, args) {
-    //   return updateWaypoints(args.waypoints);
-    // },
+    updateWaypoints(root, args) {
+      console.log('updateWaypoints gql: ', updateWaypoints);
+      return updateWaypoints(args.waypoints);
+    },
     deleteWaypoint(root, args) {
       return deleteWaypoint(args.waypointId);
     },

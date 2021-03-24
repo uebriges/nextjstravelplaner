@@ -299,5 +299,5 @@ module.exports = {
   getCurrentWaypoints,
   setNewWaypoint,
   deleteWaypoint,
-  // updateWaypoints,
+  updateWaypoints,
 };
