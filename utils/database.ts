@@ -129,8 +129,8 @@ export async function getCurrentWaypoints(token: String) {
   AND trip.id = waypoint.trip_id;
   `;
 
-  console.log('route: ', route);
-  console.log('route here');
+  // console.log('route: ', route);
+  // console.log('route here');
 
   return route.map((currentRoute) => camelcaseKeys(currentRoute));
 }
@@ -193,7 +193,7 @@ export async function setNewWaypoint(
     // Add new waypoint (trip_id and coordinates are unique base on
     // table constraint) -> therefore the try/catch block
 
-    const orderNumber = await getNextOrderNumber(tripId);
+    const orderNumber = await getLastOrderNumber(tripId);
 
     console.log('orderNumber: ', orderNumber);
     let newWaypoint;
@@ -257,24 +257,26 @@ export async function getSessionIdByToken(token: String) {
 // Needs to be adopted so that multiple values can be updated in the DB
 // Needs to be able to update the order
 export async function updateWaypoints(waypoints: waypointDBType[]) {
-  console.log('udpate waypoints db');
+  let sqlQuery =
+    'update waypoint as w  set    order_number = w2.order_number from (values  ';
 
-  const updatedWaypoints = waypoints.map(async (waypoint) => {
-    return await sql`
-    UPDATE waypoint
-    SET
-      longitude = ${waypoint.longitude},
-      latitude = ${waypoint.latitude},
-      order_number = ${waypoint.orderNumber}
-    where id = ${waypoint.id}
-    RETURNING *;
-  `;
+  waypoints.map((waypoint, index, array) => {
+    sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber})`;
+    sqlQuery += index === array.length - 1 ? '' : ',';
   });
 
-  console.log('updatedWaypoints: ', updatedWaypoints);
+  sqlQuery += ' ) AS w2(id, order_number) WHERE w2.id = w.id RETURNING *;';
+
+  const updatedWayoints = await sql.unsafe(sqlQuery);
+
+  console.log('result: ', updatedWayoints);
+  return updatedWayoints.map((updatedWaypoint: waypointDBType) => {
+    return camelcaseKeys(updatedWaypoint);
+  });
 }
 
-async function getNextOrderNumber(tripId: number) {
+// Returns the last order number of a waypoints in a specific trip
+async function getLastOrderNumber(tripId: number) {
   let lastOrderNumber = await sql`
   SELECT max(order_number)
   FROM waypoint

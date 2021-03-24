@@ -16,6 +16,7 @@ export const getCurrentWaypoints = gql`
       longitude
       latitude
       waypointName
+      orderNumber
     }
   }
 `;
@@ -42,7 +43,7 @@ export const setNewWaypoint = gql`
 `;
 
 export const updateWaypoints = gql`
-  mutation($waypoints: [Waypoint]) {
+  mutation($waypoints: [WaypointInput]!) {
     updateWaypoints(waypoints: $waypoints) {
       id
       longitude

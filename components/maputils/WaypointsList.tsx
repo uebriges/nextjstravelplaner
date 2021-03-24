@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
-import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
   DragDropContext,
@@ -23,10 +22,6 @@ import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
 import graphqlQueries from '../../utils/graphqlQueries';
 
-// function getCurrentWaypoints() {
-//   return Cookies.getJSON('waypoints');
-// }
-
 type WaypointsListType = {
   generateTurnByTurnRoute: () => void;
   sessionToken: string;
@@ -34,6 +29,7 @@ type WaypointsListType = {
 
 export default function WaypointsList(props: WaypointsListType) {
   console.log('111111111111111111');
+  // Retrieve current waypoints from DB
   const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: { token: props.sessionToken },
   });
@@ -43,26 +39,27 @@ export default function WaypointsList(props: WaypointsListType) {
     graphqlQueries.deleteWaypoint,
   );
 
-  // Delete waypoint from DB
-  // const [updateWaypoints, { dataUpdatedWaypoints }] = useMutation(
-  //   graphqlQueries.updateWaypoints,
-  // );
+  // Update waypoints in DB
+  const [updateWaypoints, { dataUpdatedWaypoints }] = useMutation(
+    graphqlQueries.updateWaypoints,
+  );
 
-  // console.log('waypoints waypointlist: ', waypointsFromDB);
   // Store the moved waypoint and it's updated long/lat and waypoint name
-
-  // const [updateMovedWaypoint, { dataMovedWaypoint }] = useMutation(
-  //   graphqlQueries.updateWaypoints,
-  // );
-
   const [waypoints, setWaypoints] = useState(
     waypointsFromDB.data ? waypointsFromDB.data.waypoints : null,
   );
+
+  // useEffect(() => {
+  //   props.generateTurnByTurnRoute();
+  // }, [dataUpdatedWaypoints, props]);
+
   resetServerContext();
 
   async function onDragEnd(result: DropResult) {
     const { destination, source } = result;
-    const pointsTemp = Array.from(waypointsFromDB.data.waypoints);
+    const pointsTemp = [...waypointsFromDB.data.waypoints];
+
+    console.log('pointsTemp: ', pointsTemp);
 
     if (!destination) {
       return;
@@ -78,21 +75,27 @@ export default function WaypointsList(props: WaypointsListType) {
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
 
+    console.log('points Temp: ', pointsTemp);
+
     // Update the order numbers
-    pointsTemp.map((point, index) => {
-      point.orderNumber = index + 1;
+    const newlyOrderedPoints = pointsTemp.map((point, index) => {
+      point = { ...point, orderNumber: index + 1 };
+      return point;
     });
 
-    console.log('pointsTemp: ', pointsTemp);
+    console.log('pointsTemp: ', newlyOrderedPoints);
 
     await updateWaypoints({
       variables: {
-        waypoints: pointsTemp,
+        waypoints: newlyOrderedPoints,
       },
     });
 
-    Cookies.set('waypoints', pointsTemp); // needs to be written into DB in new order
+    console.log('updatedWaypoints in drag end: ', dataUpdatedWaypoints);
+
     props.generateTurnByTurnRoute();
+
+    // Cookies.set('waypoints', newlyOrderedPoints); // needs to be written into DB in new order
   }
 
   return (
@@ -150,7 +153,6 @@ export default function WaypointsList(props: WaypointsListType) {
                                         const route = Array.from(
                                           waypointsFromDB.data.waypoints,
                                         );
-                                        console.log('route: ', route);
                                         route.splice(index, 1);
                                         await deleteWaypoint({
                                           variables: {
