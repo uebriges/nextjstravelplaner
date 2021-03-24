@@ -41,10 +41,8 @@ const typeDefs = gql`
       waypointName: String!
     ): Waypoint
     # updateWaypoints(
-    #   id: Int!
-    #   longitude: String!
-    #   latitude:String!
-    # )
+    #   waypoints: Waypoint []
+    # ): Waypoint []
     deleteWaypoint(waypointId: Int!): Waypoint
   }
 
@@ -60,12 +58,13 @@ const typeDefs = gql`
     id: Int
     tripId: ID
     notes: String
-    means_of_transport: String
-    visa_information: String
+    meansOfTransport: String
+    visaInformation: String
     favorite: Boolean
     longitude: String
     latitude: String
     waypointName: String
+    orderNumber: Int
   }
 
   type User {
@@ -108,7 +107,7 @@ const resolvers = {
       );
     },
     // updateWaypoints(root, args) {
-    //   return updateWaypoints(args.id, args.longitude, args.latitude);
+    //   return updateWaypoints(args.waypoints);
     // },
     deleteWaypoint(root, args) {
       return deleteWaypoint(args.waypointId);

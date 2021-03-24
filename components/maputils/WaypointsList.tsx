@@ -43,7 +43,12 @@ export default function WaypointsList(props: WaypointsListType) {
     graphqlQueries.deleteWaypoint,
   );
 
-  console.log('waypoints waypointlist: ', waypointsFromDB);
+  // Delete waypoint from DB
+  // const [updateWaypoints, { dataUpdatedWaypoints }] = useMutation(
+  //   graphqlQueries.updateWaypoints,
+  // );
+
+  // console.log('waypoints waypointlist: ', waypointsFromDB);
   // Store the moved waypoint and it's updated long/lat and waypoint name
 
   // const [updateMovedWaypoint, { dataMovedWaypoint }] = useMutation(
@@ -55,9 +60,9 @@ export default function WaypointsList(props: WaypointsListType) {
   );
   resetServerContext();
 
-  function onDragEnd(result: DropResult) {
+  async function onDragEnd(result: DropResult) {
     const { destination, source } = result;
-    const pointsTemp = waypointsFromDB.data.waypoints;
+    const pointsTemp = Array.from(waypointsFromDB.data.waypoints);
 
     if (!destination) {
       return;
@@ -72,6 +77,19 @@ export default function WaypointsList(props: WaypointsListType) {
 
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
+
+    // Update the order numbers
+    pointsTemp.map((point, index) => {
+      point.orderNumber = index + 1;
+    });
+
+    console.log('pointsTemp: ', pointsTemp);
+
+    await updateWaypoints({
+      variables: {
+        waypoints: pointsTemp,
+      },
+    });
 
     Cookies.set('waypoints', pointsTemp); // needs to be written into DB in new order
     props.generateTurnByTurnRoute();

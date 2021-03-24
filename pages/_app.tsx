@@ -10,11 +10,14 @@ import '../styles/globals.css';
 
 const defaultOptions: DefaultOptions = {
   watchQuery: {
-    fetchPolicy: 'no-cache',
+    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   },
   query: {
-    fetchPolicy: 'no-cache',
+    fetchPolicy: 'network-only',
+    errorPolicy: 'all',
+  },
+  mutate: {
     errorPolicy: 'all',
   },
 };
@@ -22,7 +25,7 @@ const defaultOptions: DefaultOptions = {
 const client = new ApolloClient({
   uri: 'http://localhost:3000/api/graphql',
   cache: new InMemoryCache(),
-  // defaultOptions,
+  defaultOptions,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

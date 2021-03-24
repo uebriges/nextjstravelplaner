@@ -42,12 +42,13 @@ export const setNewWaypoint = gql`
 `;
 
 // export const updateWaypoints = gql`
-//   mutation($id: Int!, $longitude: String!, $latitude: String!) {
-//     updateWaypoints(id: $id, longitude: $longitude, latitude: $latitude) {
+//   mutation($waypoints: waypointDBType) {
+//     updateWaypoints(waypoints: $waypoints) {
 //       id
 //       longitude
 //       latitude
 //       waypointName
+//       orderNumber
 //     }
 //   }
 // `;

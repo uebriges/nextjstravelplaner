@@ -24,7 +24,7 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     CoordinatesType[] | undefined
   >();
 
-  // Set waypoint marker at first render
+  // Set waypoint marker as soon as props.waypoints changes
   useEffect(() => {
     setCurrentWayPoints(props.waypoints);
   }, [props.waypoints]);
@@ -45,29 +45,29 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     movedWayPoint.latitude = event.lngLat[1];
 
     console.log('movedWayPoint: ', movedWayPoint);
-    // if (!movedWayPoint.id) return;
+    if (!movedWayPoint.id) return;
     const updatedMovedWaypoint = await props.reversGeocodeWaypoint(
       movedWayPoint,
     );
 
-    console.log(
-      'updatedMovedWaypoint.locationName: ',
-      updatedMovedWaypoint.waypointName,
-    );
+    // console.log(
+    //   'updatedMovedWaypoint.locationName: ',
+    //   updatedMovedWaypoint.waypointName,
+    // );
 
     movedWayPoint.waypointName = updatedMovedWaypoint.waypointName;
 
-    const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
-      (waypoint) => {
-        if (waypoint.id === id) {
-          return movedWayPoint;
-        }
-        return waypoint;
-      },
-    );
+    // const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
+    //   (waypoint) => {
+    //     if (waypoint.id === id) {
+    //       return movedWayPoint;
+    //     }
+    //     return waypoint;
+    //   },
+    // );
 
-    setCurrentWayPoints(updatedWayPoints);
-    Cookies.set('waypoints', JSON.stringify(updatedWayPoints));
+    // setCurrentWayPoints(updatedWayPoints);
+    Cookies.set('waypoints', JSON.stringify(currentWayPoints));
     props.generateTurnByTurnRoute();
   };
 

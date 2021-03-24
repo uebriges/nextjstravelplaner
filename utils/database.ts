@@ -135,15 +135,17 @@ export async function getCurrentWaypoints(token: String) {
   return route.map((currentRoute) => camelcaseKeys(currentRoute));
 }
 
-type waypointDBType = {
+export type waypointDBType = {
   id: number;
   trip_id: number;
   notes: string;
-  means_of_transport: string;
-  visa_information: string;
+  meansOfTransport: string;
+  visaInformation: string;
   favorite: boolean;
   longitude: string;
   latitude: string;
+  orderNumber: number;
+  waypointName: string;
 };
 
 // Set a new waypoint to the map
@@ -254,22 +256,23 @@ export async function getSessionIdByToken(token: String) {
 //Todo -> updates a moved waypoint on the card or updates the order of the list of waypoints
 // Needs to be adopted so that multiple values can be updated in the DB
 // Needs to be able to update the order
-// export async function updateWaypoints(
-//   id: number,
-//   longitude: string,
-//   latitude: string,
-// ) {
-//   const updatedWaypoint = await sql`
-//     UPDATE waypoint
-//     SET
-//       longitude = ${longitude},
-//       latitude = ${latitude}
-//     where id = ${id}
-//     RETURNING *;
-//   `;
+export async function updateWaypoints(waypoints: waypointDBType[]) {
+  console.log('udpate waypoints db');
 
-//   console.log('updatedWaypoint: ', updatedWaypoint);
-// }
+  const updatedWaypoints = waypoints.map(async (waypoint) => {
+    return await sql`
+    UPDATE waypoint
+    SET
+      longitude = ${waypoint.longitude},
+      latitude = ${waypoint.latitude},
+      order_number = ${waypoint.orderNumber}
+    where id = ${waypoint.id}
+    RETURNING *;
+  `;
+  });
+
+  console.log('updatedWaypoints: ', updatedWaypoints);
+}
 
 async function getNextOrderNumber(tripId: number) {
   let lastOrderNumber = await sql`

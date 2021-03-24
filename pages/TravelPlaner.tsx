@@ -82,6 +82,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Store new waypoint in DB
   const [setNewWaypoint, { dataNewWaypoint }] = useMutation(
     graphqlQueries.setNewWaypoint,
+    {
+      refetchQueries: [
+        {
+          query: graphqlQueries.getCurrentWaypoints,
+          variables: { token: props.sessionToken },
+        },
+      ],
+      awaitRefetchQueries: true,
+    },
   );
 
   // Refs
@@ -111,6 +120,16 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     [handleViewportChange],
   );
 
+  async function refetchWaypoints() {
+    console.log('refetching.....');
+    waypoints.refetch();
+  }
+
+  useEffect(() => {
+    console.log('useEffect generate turn by turn');
+    generateTurnByTurnRoute();
+  }, [waypoints.data]);
+
   // Adds new coordinates to the cookies
   async function addCoordinatesToRoute() {
     console.log('addCoordinatesToRoute');
@@ -131,7 +150,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       // Insert new waypoint into DB
     } else if (sessionStateSnapshot.activeSessionType === SESSIONS.ANONYMOUS) {
       console.log('data in addcoord: ', waypoints.data);
-      if (waypoints.data.waypoints.length > 0) {
+      if (waypoints.data && waypoints.data.waypoints.length > 0) {
         alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
           (waypoint: LocationInDBType) => {
             return (
@@ -160,18 +179,25 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           },
         });
 
-        waypoints.refetch();
+        console.log('new waypoint created');
+
+        refetchWaypoints();
+        console.log('new data: ', waypoints);
+        // waypoints.refetch();
       } else if (
         sessionStateSnapshot.activeSessionType ===
         SESSIONS.DURINGLOGINORREGISTER
       ) {
+        console.log(
+          'sessionStateSnapshot.activeSessionType: ',
+          sessionStateSnapshot.activeSessionType,
+        );
       }
 
-      generateTurnByTurnRoute();
+      // generateTurnByTurnRoute();
 
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
       if (waypoints.data?.waypoints && waypoints.data?.waypoints.length > 1) {
-        console.log('in viewport change????');
         const allLongitudes = waypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.longitude,
         );
@@ -212,6 +238,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
+    console.log('data in generateTurnByTurnRoute: ', waypoints.data);
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
     if (waypoints.data?.waypoints && waypoints.data.waypoints.length > 1) {
       waypoints.data.waypoints.map(
@@ -229,6 +256,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       // Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
+      console.log('else waypoints: ', waypoints.data?.waypoints);
       setCurrentRoute(waypoints.data?.waypoints);
       // Cookies.set('finalRoute', waypoints.data?.waypoints);
     }
@@ -334,7 +362,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
         </Map>
-        <button onClick={() => refetch()}>refetch</button>
+        <button onClick={() => waypoints.refetch()}>refetch</button>
       </div>
     </Layout>
   );
