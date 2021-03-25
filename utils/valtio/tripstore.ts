@@ -4,22 +4,23 @@ import { proxy } from 'valtio';
 
 type Waypoint = {
   id: number;
-  longitude: number;
-  latitude: number;
+  long: string;
+  lat: string;
   locationName: string;
+  orderNumber: number;
 };
 
 type TripStoreType = {
   waypoints: Waypoint[] | null;
   finalRoute: number[][] | null;
-  addWaypoint: (long: number, lat: number, locationName: string) => void;
+  addWaypoint: (newWaypoint: Waypoint) => void;
 };
 
 const tripStore: TripStoreType = proxy({
   waypoints: null,
   finalRoute: null,
-  // addWaypoint: (long, lat, locationName) => {
-  //   tripStore.push([]) = type;
+  // addWaypoint: (newWaypoint: Waypoint) => {
+  //   tripStore.waypoints.push([]) = type;
   //   tripStore.activeSessionToken = token;
   // },
 });

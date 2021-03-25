@@ -238,10 +238,23 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
-    console.log('data in generateTurnByTurnRoute: ', waypoints.data);
+    // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
+    let newWaypointsArray = [];
+    if (waypoints.data) {
+      newWaypointsArray = Array.from(waypoints.data.waypoints);
+      // console.log('waypoints new generateTurnByTurn: ', newWaypointsArray);
+      newWaypointsArray.sort((a, b) => {
+        // console.log('a: ', a);
+        // console.log('b: ', b);
+        return a.orderNumber - b.orderNumber;
+      });
+    }
+
+    console.log('waypoints new in order: ', newWaypointsArray);
+
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
-    if (waypoints.data?.waypoints && waypoints.data.waypoints.length > 1) {
-      waypoints.data.waypoints.map(
+    if (newWaypointsArray.length > 1) {
+      newWaypointsArray.map(
         (waypoint: CoordinatesType, index: number, array: []) => {
           apiCallString += waypoint.longitude + '%2C' + waypoint.latitude;
           apiCallString +=

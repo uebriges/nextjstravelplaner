@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DragDropContext,
   Draggable,
@@ -29,19 +29,29 @@ type WaypointsListType = {
 
 export default function WaypointsList(props: WaypointsListType) {
   console.log('111111111111111111');
+
   // Retrieve current waypoints from DB
   const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: { token: props.sessionToken },
   });
 
   // Delete waypoint from DB
-  const [deleteWaypoint, { dataDeletedWaypoint }] = useMutation(
+  const [deleteWaypoint, dataDeletedWaypoints] = useMutation(
     graphqlQueries.deleteWaypoint,
   );
 
   // Update waypoints in DB
-  const [updateWaypoints, { dataUpdatedWaypoints }] = useMutation(
+  const [updateWaypoints, dataUpdatedWaypoints] = useMutation(
     graphqlQueries.updateWaypoints,
+    {
+      refetchQueries: [
+        {
+          query: graphqlQueries.getCurrentWaypoints,
+          variables: { token: props.sessionToken },
+        },
+      ],
+      awaitRefetchQueries: true,
+    },
   );
 
   // Store the moved waypoint and it's updated long/lat and waypoint name
@@ -49,9 +59,25 @@ export default function WaypointsList(props: WaypointsListType) {
     waypointsFromDB.data ? waypointsFromDB.data.waypoints : null,
   );
 
-  // useEffect(() => {
-  //   props.generateTurnByTurnRoute();
-  // }, [dataUpdatedWaypoints, props]);
+  useEffect(() => {
+    if (waypointsFromDB.data) {
+      console.log('useeffect WaypointList');
+      console.log('useeffect waypoints: ', waypointsFromDB.data.waypoints);
+      const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
+      console.log('waypoints new: ', waypointsArray);
+      waypointsArray.sort((a, b) => {
+        return a.orderNumber - b.orderNumber;
+      });
+      console.log('useEffect waypoints after: ', waypointsArray);
+      setWaypoints(waypointsArray);
+      props.generateTurnByTurnRoute();
+    }
+  }, [waypointsFromDB.data]);
+
+  function refetchWaypoints() {
+    console.log('refetching...');
+    waypointsFromDB.refetch();
+  }
 
   resetServerContext();
 
@@ -59,9 +85,8 @@ export default function WaypointsList(props: WaypointsListType) {
     const { destination, source } = result;
     const pointsTemp = [...waypointsFromDB.data.waypoints];
 
-    console.log('pointsTemp: ', pointsTemp);
-
     if (!destination) {
+      console.log('no destination');
       return;
     }
 
@@ -69,13 +94,21 @@ export default function WaypointsList(props: WaypointsListType) {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
+      console.log('not droppable');
       return;
     }
 
+    console.log('source.index: ', source.index);
+    console.log('destination.index: ', destination.index);
+    console.log('points temp before splice of movable: ', [...pointsTemp]);
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
-    pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
+    console.log('pointsTemp after extracting: ', [...pointsTemp]);
+    console.log('point to be moved', [...pointToBeMoved]);
 
-    console.log('points Temp: ', pointsTemp);
+    pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
+    // console.log('point to be moved', pointToBeMoved);
+
+    console.log('points Temp (orderNumber wrong): ', pointsTemp);
 
     // Update the order numbers
     const newlyOrderedPoints = pointsTemp.map((point, index) => {
@@ -83,19 +116,25 @@ export default function WaypointsList(props: WaypointsListType) {
       return point;
     });
 
-    console.log('pointsTemp: ', newlyOrderedPoints);
+    console.log('pointsTemp (orderNumber correct): ', newlyOrderedPoints);
 
     await updateWaypoints({
       variables: {
         waypoints: newlyOrderedPoints,
       },
+      // refetchQueries: [
+      //   {
+      //     query: graphqlQueries.getCurrentWaypoints,
+      //     variables: { token: props.sessionToken },
+      //   },
+      // ],
+      // awaitRefetchQueries: true,
     });
 
-    console.log('updatedWaypoints in drag end: ', dataUpdatedWaypoints);
+    waypointsFromDB.refetch();
 
-    props.generateTurnByTurnRoute();
-
-    // Cookies.set('waypoints', newlyOrderedPoints); // needs to be written into DB in new order
+    console.log('updatedWaypoints in drag end: ', waypointsFromDB.data); // wrong values
+    console.log('state waypoints: ', waypoints); // wrong value
   }
 
   return (
@@ -110,9 +149,10 @@ export default function WaypointsList(props: WaypointsListType) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {waypointsFromDB.data
-                  ? waypointsFromDB.data.waypoints.map(
+                {waypoints
+                  ? waypoints.map(
                       (waypoint: CoordinatesType, index: number) => {
+                        // console.log('render waypoint: ', waypoint);
                         return (
                           <Draggable
                             key={
@@ -159,10 +199,6 @@ export default function WaypointsList(props: WaypointsListType) {
                                             waypointId: waypoint.id,
                                           },
                                         });
-                                        console.log(
-                                          'route after deletion: ',
-                                          route,
-                                        );
                                         setWaypoints(route);
                                         props.generateTurnByTurnRoute();
                                         waypointsFromDB.refetch();

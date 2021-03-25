@@ -126,7 +126,8 @@ export async function getCurrentWaypoints(token: String) {
   SELECT *
   FROM trip, waypoint
   WHERE session_id = ${sessionId[0].id.toString()}
-  AND trip.id = waypoint.trip_id;
+  AND trip.id = waypoint.trip_id
+  ORDER BY order_number;
   `;
 
   // console.log('route: ', route);
