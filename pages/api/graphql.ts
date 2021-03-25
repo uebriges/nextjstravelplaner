@@ -1,10 +1,13 @@
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
+import argon2 from 'argon2';
 import postgres from 'postgres';
 import {
   deleteWaypoint,
   getCurrentWaypoints,
+  registerUser,
   setNewWaypoint,
   updateWaypoints,
+  userNameExists,
 } from '../../utils/database';
 
 let sql;
@@ -29,12 +32,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    createUser(
-      userName: String!
-      firstName: String
-      lastName: String
-      passwordHash: String!
-    ): User
+    registerUser(user: UserInput): User
     setNewWaypoint(
       token: String!
       longitude: String!
@@ -43,6 +41,14 @@ const typeDefs = gql`
     ): Waypoint
     updateWaypoints(waypoints: [WaypointInput]!): Waypoint
     deleteWaypoint(waypointId: Int!): Waypoint
+  }
+
+  input UserInput {
+    userName: String
+    firstName: String
+    lastName: String
+    email: String
+    password: String
   }
 
   input WaypointInput {
@@ -102,13 +108,28 @@ const resolvers = {
     },
   },
   Mutation: {
-    createUser(root, args) {
-      return createUser(
-        args.userName,
-        args.firstName,
-        args.lastName,
-        args.passwordHash,
-      );
+    async registerUser(root, args) {
+      const userData = args.user;
+
+      // User exists already
+      if (await userNameExists(userData.userName)) {
+        return { id: 0 };
+      }
+
+      // User doesn't exist
+      const passwordHash = await argon2.hash(userData.password);
+      const newUser = await registerUser({
+        id: 0, // doesn't matter, because new id is given by DB
+        username: userData.userName,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        homeCoordinates: '',
+        currentlyTraveling: false,
+        password: passwordHash,
+      });
+
+      return newUser;
     },
     setNewWaypoint(root, args) {
       return setNewWaypoint(

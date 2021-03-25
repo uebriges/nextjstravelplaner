@@ -9,6 +9,15 @@ export const userQuery = gql`
   }
 `;
 
+export const registerUser = gql`
+  mutation($user: UserInput) {
+    registerUser(user: $user) {
+      id
+      userName
+    }
+  }
+`;
+
 export const getCurrentWaypoints = gql`
   query($token: String!) {
     waypoints(token: $token) {
@@ -69,4 +78,5 @@ module.exports = {
   setNewWaypoint,
   updateWaypoints,
   deleteWaypoint,
+  registerUser,
 };

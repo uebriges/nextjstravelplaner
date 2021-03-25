@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client';
 import {
   Button,
   Dialog,
@@ -7,21 +6,59 @@ import {
   DialogTitle,
   TextField,
 } from '@material-ui/core';
-import { userQuery } from '../../utils/graphqlQueries';
+import Alert from '@material-ui/lab/Alert';
+import { useState } from 'react';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 
 export default function Login(props) {
-  const { loading, error, data } = useQuery(userQuery);
+  const [userName, setUserName] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [error, setError] = useState('');
+  // const [];
 
-  if (loading) return 'Loading …';
-  if (error) return 'Something went wrong!';
+  // const { loading, error, data } = useQuery(userQuery);
+
+  // if (loading) return 'Loading …';
+  // if (error) return 'Something went wrong!';
 
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
   }
 
-  function handleLogin() {
-    console.log('data: ', data);
+  function handleLogin(event) {
+    event.preventDefault();
+    if (userName === '' || userPassword === '') {
+      setError('User name or password missing.');
+    }
+
+    // const response = await fetch('/api/users/login', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     token: props.token,
+    //     username,
+    //     password,
+    //   }),
+    // });
+
+    // const result = await response.json();
+
+    // if (response.status === 401) {
+    //   setError('Username or password incorrect');
+    // } else if (response.status === 500) {
+    //   setError('Internal server error.');
+    // } else {
+    //   cookies.setCookiesClientSide('token', result.token);
+    //   dispatchUserState({
+    //     type: ACTIONS.LOGIN,
+    //     payload: {
+    //       username,
+    //       isAdmin:
+    //         result.isAdmin === null || result.isAdmin === false ? false : true,
+    //       userId: result.customerId,
+    //     },
+    //   });
+    //   router.push('/');
   }
 
   function handleRegister() {
@@ -45,6 +82,7 @@ export default function Login(props) {
           label="User name"
           type="text"
           fullWidth
+          onChange={(e) => setUserName(e.target.value)}
         />
         <TextField
           autoFocus
@@ -53,7 +91,9 @@ export default function Login(props) {
           label="Password"
           type="text"
           fullWidth
+          onChange={(e) => setUserPassword(e.target.value)}
         />
+        {error ? <Alert severity="error">{error}</Alert> : null}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="primary">

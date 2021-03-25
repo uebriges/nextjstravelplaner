@@ -254,9 +254,7 @@ export async function getSessionIdByToken(token: String) {
   return camelcaseKeys(sessionId.slice(-2));
 }
 
-//Todo -> updates a moved waypoint on the card or updates the order of the list of waypoints
-// Needs to be adopted so that multiple values can be updated in the DB
-// Needs to be able to update the order
+// Used for moving waypoints or changing the order of waypoints
 export async function updateWaypoints(waypoints: waypointDBType[]) {
   let sqlQuery =
     'update waypoint as w  set order_number = w2.order_number, longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name from (values  ';
@@ -297,6 +295,63 @@ async function getLastOrderNumber(tripId: number) {
   return lastOrderNumber;
 }
 
+// ------------------------------- User related -------------------------------
+
+type UserDBType = {
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  homeCoordinates: string;
+  currentlyTraveling: boolean;
+  password: string;
+};
+
+export async function registerUser(user: UserDBType) {
+  const newUser = await sql`
+    INSERT INTO
+      users (
+          users_name,
+          first_name,
+          last_name,
+          email,
+          password_hash
+      )
+    VALUES (
+      ${user.username}, ${user.firstName}, ${user.lastName}, ${user.email}, ${user.password}
+    );
+  `;
+
+  return newUser.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
+}
+
+// Check if user name exists
+export async function userNameExists(username: string) {
+  const users = await sql`
+    SELECT *
+    FROM users
+    WHERE users_name = ${username};
+  `;
+
+  return users.length !== 0;
+}
+
+// Retrieve user by user name
+export async function getUserByUserName(username: string) {
+  const user = await sql`
+    SELECT *
+    FROM users
+    WHERE user_name = ${username};
+  `;
+
+  if (user.length !== 0) {
+    return user.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
+  } else {
+    return { id: 0 };
+  }
+}
+
 module.exports = {
   createUser,
   deleteAllExpiredSessions,
@@ -307,4 +362,6 @@ module.exports = {
   setNewWaypoint,
   deleteWaypoint,
   updateWaypoints,
+  registerUser,
+  userNameExists,
 };

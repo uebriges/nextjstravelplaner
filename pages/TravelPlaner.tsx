@@ -101,7 +101,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   const [currentRoute, setCurrentRoute] = useState<
     CoordinatesType[] | undefined
   >();
-  const [showPopup, togglePopup] = useState(false);
+  // const [showPopup, togglePopup] = useState(false);
   const [markerSetByClick, setMarkerSetByClick] = useState(false);
   const [markerSetBySearchResult, setMarkerSetBySearchResult] = useState(false);
 
@@ -180,8 +180,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           },
         });
 
-        console.log('new waypoint created');
-
         refetchWaypoints();
         console.log('new data: ', waypoints);
         // waypoints.refetch();
@@ -195,10 +193,9 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         );
       }
 
-      // generateTurnByTurnRoute();
-
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
       if (waypoints.data?.waypoints && waypoints.data?.waypoints.length > 1) {
+        console.log('viewport adaptation waypoints.data: ', waypoints.data);
         const allLongitudes = waypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.longitude,
         );
