@@ -4,7 +4,7 @@ import {
   deleteWaypoint,
   getCurrentWaypoints,
   setNewWaypoint,
-  updateWaypoints
+  updateWaypoints,
 } from '../../utils/database';
 
 let sql;
@@ -119,9 +119,9 @@ const resolvers = {
       );
     },
     updateWaypoints(root, args) {
-      console.log('updateWaypoints gql: ', updateWaypoints);
-      console.log('updated waypoints asdf:');
-      const resvoledResult = updateWaypoints(args.waypoints);
+      // console.log('updateWaypoints gql: ', updateWaypoints);
+      // console.log('updated waypoints asdf:');
+      // const resvoledResult = updateWaypoints(args.waypoints);
       return updateWaypoints(args.waypoints);
     },
     deleteWaypoint(root, args) {

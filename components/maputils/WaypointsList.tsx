@@ -28,8 +28,6 @@ type WaypointsListType = {
 };
 
 export default function WaypointsList(props: WaypointsListType) {
-  console.log('111111111111111111');
-
   // Retrieve current waypoints from DB
   const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: { token: props.sessionToken },
@@ -61,14 +59,10 @@ export default function WaypointsList(props: WaypointsListType) {
 
   useEffect(() => {
     if (waypointsFromDB.data) {
-      console.log('useeffect WaypointList');
-      console.log('useeffect waypoints: ', waypointsFromDB.data.waypoints);
       const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
-      console.log('waypoints new: ', waypointsArray);
       waypointsArray.sort((a, b) => {
         return a.orderNumber - b.orderNumber;
       });
-      console.log('useEffect waypoints after: ', waypointsArray);
       setWaypoints(waypointsArray);
       props.generateTurnByTurnRoute();
     }
@@ -86,7 +80,6 @@ export default function WaypointsList(props: WaypointsListType) {
     const pointsTemp = [...waypointsFromDB.data.waypoints];
 
     if (!destination) {
-      console.log('no destination');
       return;
     }
 
@@ -94,29 +87,18 @@ export default function WaypointsList(props: WaypointsListType) {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
-      console.log('not droppable');
       return;
     }
 
-    console.log('source.index: ', source.index);
-    console.log('destination.index: ', destination.index);
-    console.log('points temp before splice of movable: ', [...pointsTemp]);
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
-    console.log('pointsTemp after extracting: ', [...pointsTemp]);
-    console.log('point to be moved', [...pointToBeMoved]);
 
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
-    // console.log('point to be moved', pointToBeMoved);
-
-    console.log('points Temp (orderNumber wrong): ', pointsTemp);
 
     // Update the order numbers
     const newlyOrderedPoints = pointsTemp.map((point, index) => {
       point = { ...point, orderNumber: index + 1 };
       return point;
     });
-
-    console.log('pointsTemp (orderNumber correct): ', newlyOrderedPoints);
 
     await updateWaypoints({
       variables: {

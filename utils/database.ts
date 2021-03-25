@@ -259,14 +259,18 @@ export async function getSessionIdByToken(token: String) {
 // Needs to be able to update the order
 export async function updateWaypoints(waypoints: waypointDBType[]) {
   let sqlQuery =
-    'update waypoint as w  set    order_number = w2.order_number from (values  ';
+    'update waypoint as w  set order_number = w2.order_number, longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name from (values  ';
 
+  console.log('database before map: ', waypoints);
   waypoints.map((waypoint, index, array) => {
-    sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber})`;
+    sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber}, ${waypoint.longitude}, ${waypoint.latitude}, '${waypoint.waypointName}')`;
     sqlQuery += index === array.length - 1 ? '' : ',';
   });
 
-  sqlQuery += ' ) AS w2(id, order_number) WHERE w2.id = w.id RETURNING *;';
+  sqlQuery +=
+    ' ) AS w2(id, order_number, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;';
+
+  console.log('sqlQuery: ', sqlQuery);
 
   const updatedWayoints = await sql.unsafe(sqlQuery);
 

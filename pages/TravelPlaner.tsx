@@ -31,6 +31,7 @@ export type CoordinatesType = {
   longitude: number;
   latitude: number;
   waypointName: string;
+  orderNumber: number;
 };
 
 export type ViewportType = {
