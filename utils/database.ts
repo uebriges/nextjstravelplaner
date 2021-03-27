@@ -116,8 +116,8 @@ export async function deleteSessionByToken(token: string) {
 }
 
 export async function getSessionIdByToken(token: String) {
-  console.log('getSessionIdByToken: ');
-  console.log('token: ', token);
+  // console.log('getSessionIdByToken: ');
+  // console.log('token: ', token);
 
   const sessionId = await sql`
       SELECT id
@@ -125,9 +125,61 @@ export async function getSessionIdByToken(token: String) {
       WHERE token = ${token};
     `;
 
-  console.log('sessionId: ', sessionId.slice(-2));
+  // console.log('sessionId: ', sessionId.slice(-2));
 
   return camelcaseKeys(sessionId.slice(-2));
+}
+
+export async function updateSessionOfCorrespondingTrip(
+  currentToken: string,
+  newToken?: string,
+) {
+  console.log('updateSessionOfCorrespondingTrip');
+  console.log('currentToken: ', currentToken);
+
+  let newTokenObject;
+  let newTokenId;
+  // If new token is needed, because there is no fallback token in sessionStore
+  if (!newToken) {
+    newTokenObject = await createSessionFiveMinutes();
+    newToken = newTokenObject[0].token;
+    newTokenId = newTokenObject[0].id;
+  } else {
+    newTokenId = (
+      await sql`
+    SELECT id
+    FROM session
+    WHERE token = ${newToken};
+  `
+    )[0].id;
+  }
+
+  console.log('new token: ', newToken);
+  console.log('new token object: ', newTokenObject);
+
+  // Lookup the id of currentToken
+  let currentTokenObject = await sql`
+    SELECT id
+    FROM session
+    WHERE token = ${currentToken};
+  `;
+
+  const currentTokenId = currentTokenObject[0].id;
+
+  console.log('new token id: ', newTokenId);
+  console.log('current token: ', currentTokenId);
+  // currentTokenId = currentTokenId[0].id;
+  // replace current token id of trip with new token
+
+  await sql`
+    UPDATE trip
+    SET session_id = ${newTokenId}
+    WHERE session_id = ${currentTokenId.toString()};
+  `;
+
+  // replace token of current trip with new token
+
+  return newToken;
 }
 
 // -------------------------------------------------------------------- Trip planning --------------------------------------------------------
@@ -360,6 +412,7 @@ module.exports = {
   createSessionFiveMinutes,
   createSessionTwoHours,
   createSessionTwentyFourHours,
+  updateSessionOfCorrespondingTrip,
   getCurrentWaypoints,
   setNewWaypoint,
   deleteWaypoint,

@@ -23,7 +23,6 @@ type DrawMarkerPropsType = {
 };
 
 export default function WaypointMarkers(props: WaypointMarkerPropsType) {
-  console.log('111111111111111111');
   const [currentWayPoints, setCurrentWayPoints] = useState<
     CoordinatesType[] | undefined
   >();
@@ -37,7 +36,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   // Retrieves current token
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
-  console.log('session token: ', sessionStateSnapshot.activeSessionToken);
+  console.log(
+    'session token in state: ',
+    sessionStateSnapshot.activeSessionToken,
+  );
   // Update waypoints in DB
   const [updateWaypoints] = useMutation(graphqlQueries.updateWaypoints, {
     refetchQueries: [

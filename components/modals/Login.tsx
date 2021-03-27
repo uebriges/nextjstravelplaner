@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import graphqlQueries from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
-import sessionStore from '../../utils/valtio/sessionstore';
+import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
 export default function Login(props) {
   const [userName, setUserName] = useState('');
@@ -35,8 +35,6 @@ export default function Login(props) {
     },
   });
 
-  console.log('login error: ', loginError);
-
   // const [];
 
   // const { loading, error, data } = useQuery(userQuery);
@@ -55,7 +53,9 @@ export default function Login(props) {
       return;
     }
 
-    await loginUserDB({
+    console.log('csrf before login: ', sessionStateSnapshot.csrfToken);
+
+    const loggedIn = await loginUserDB({
       variables: {
         user: {
           username: userName,
@@ -66,43 +66,16 @@ export default function Login(props) {
       },
     });
 
-    // console.log('loginError: ', loginError);
+    console.log('logged in: ', loggedIn);
 
-    // if (!loggedIn.data.loginUser) {
-    //   setError('User name or password wrong');
-    // }
+    // Update session token in sessionStore + update csrf
+    sessionStateSnapshot.setSession(
+      SESSIONS.LOGGEDIN,
+      loggedIn.data.loginUser.tokens.token,
+    );
+    sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
 
-    // csrf token instead of session token is needed, because session token
-    // for 24 hours still needs to be created
-
-    // const response = await fetch('/api/users/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     token: props.token,
-    //     username,
-    //     password,
-    //   }),
-    // });
-
-    // const result = await response.json();
-
-    // if (response.status === 401) {
-    //   setError('Username or password incorrect');
-    // } else if (response.status === 500) {
-    //   setError('Internal server error.');
-    // } else {
-    //   cookies.setCookiesClientSide('token', result.token);
-    //   dispatchUserState({
-    //     type: ACTIONS.LOGIN,
-    //     payload: {
-    //       username,
-    //       isAdmin:
-    //         result.isAdmin === null || result.isAdmin === false ? false : true,
-    //       userId: result.customerId,
-    //     },
-    //   });
-    //   router.push('/');
+    console.log('sessionStoreSnapshot: ', sessionStateSnapshot);
   }
 
   function handleRegister() {

@@ -21,8 +21,14 @@ export const registerUser = gql`
 export const loginUser = gql`
   mutation($user: UserLoginInput) {
     loginUser(user: $user) {
-      id
-      userName
+      user {
+        id
+        userName
+      }
+      tokens {
+        token
+        csrf
+      }
     }
   }
 `;
@@ -81,6 +87,12 @@ export const deleteWaypoint = gql`
   }
 `;
 
+export const updateSessionOfCorrespondingTrip = gql`
+  mutation($sessions: UpdateSessionInput) {
+    updateSessionOfCorrespondingTrip(sessions: $sessions)
+  }
+`;
+
 module.exports = {
   userQuery,
   getCurrentWaypoints: getCurrentWaypoints,
@@ -89,4 +101,5 @@ module.exports = {
   deleteWaypoint,
   registerUser,
   loginUser,
+  updateSessionOfCorrespondingTrip,
 };

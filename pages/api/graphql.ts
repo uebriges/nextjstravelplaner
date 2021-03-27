@@ -2,7 +2,7 @@ import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
 import argon2 from 'argon2';
 import postgres from 'postgres';
 import {
-  doesCsrfTokenMatchSessionToken,
+  createCsrfToken,
   doesPasswordMatchPasswordHash,
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
@@ -13,6 +13,7 @@ import {
   getUserByUserName,
   registerUser,
   setNewWaypoint,
+  updateSessionOfCorrespondingTrip,
   updateWaypoints,
   userNameExists,
 } from '../../utils/database';
@@ -47,7 +48,23 @@ const typeDefs = gql`
     ): Waypoint
     updateWaypoints(waypoints: [WaypointInput]!): Waypoint
     deleteWaypoint(waypointId: Int!): Waypoint
-    loginUser(user: UserLoginInput): User
+    loginUser(user: UserLoginInput): LoginResult
+    updateSessionOfCorrespondingTrip(sessions: UpdateSessionInput): [String]
+  }
+
+  type LoginResult {
+    user: User
+    tokens: TokenAndCSRF
+  }
+
+  type TokenAndCSRF {
+    token: String
+    csrf: String
+  }
+
+  input UpdateSessionInput {
+    currentToken: String!
+    newToken: String
   }
 
   input UserRegisterInput {
@@ -149,17 +166,19 @@ const resolvers = {
     async loginUser(root, args, context) {
       const { user } = args;
 
-      // console.log('context: ', context);
+      console.log('user in graphql: ', user);
       // Check CSRF token
-      if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
-        throw new Error('CSRF Token does not match');
-      }
+      // if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
+      //   throw new Error('CSRF Token does not match');
+      // }
 
       // Search for user in DB
       const userWithPasswordHash = await getUserByUserName(user.username);
 
+      console.log('user with passwordhas: ', userWithPasswordHash);
+
       // Error out if the username does not exist
-      if (userWithPasswordHash.id === 0) {
+      if (userWithPasswordHash[0].id === 0) {
         throw new Error('Username or password does not match');
       }
 
@@ -174,10 +193,19 @@ const resolvers = {
       if (!passwordMatches) {
         throw new Error('Username or password does not match');
       }
-      // // At this point, we are  successfully authenticated
-      const session = await createSessionTwentyFourHours(user.id);
 
-      console.log('session: ', session);
+      console.log('user.id: ', foundUser.id);
+      // // At this point, we are  successfully authenticated
+      const session = await createSessionTwentyFourHours(foundUser.id);
+
+      console.log('session1: ', session);
+
+      await updateSessionOfCorrespondingTrip(
+        user.sessionToken, // current token
+        session[0].token, // new token
+      );
+
+      console.log('session2: ', session);
 
       const sessionCookie = serializeSecureCookieServerSide(
         'session',
@@ -188,10 +216,12 @@ const resolvers = {
 
       context.res.setHeader('Set-Cookie', sessionCookie);
 
-      // context.res.send({
-      //   user: foundUser,
-      // });
-      return foundUser;
+      const newCsrfToken = createCsrfToken(session[0].token);
+
+      return {
+        user: foundUser,
+        tokens: { token: session[0].token, csrf: newCsrfToken },
+      };
     },
     setNewWaypoint(root, args) {
       return setNewWaypoint(
@@ -209,6 +239,24 @@ const resolvers = {
     },
     deleteWaypoint(root, args) {
       return deleteWaypoint(args.waypointId);
+    },
+    async updateSessionOfCorrespondingTrip(root, args, context) {
+      console.log('update update: ', args);
+      const newSessionToken = await updateSessionOfCorrespondingTrip(
+        args.sessions.currentToken,
+        args.sessions.newToken,
+      );
+
+      const newSessionCookie = serializeSecureCookieServerSide(
+        'session',
+        newSessionToken,
+      );
+
+      // New session cookie needs also a new csrf token
+      const newCsrfToken = createCsrfToken(newSessionCookie);
+
+      context.res.setHeader('Set-Cookie', newSessionCookie);
+      return [newSessionToken, newCsrfToken];
     },
   },
 };

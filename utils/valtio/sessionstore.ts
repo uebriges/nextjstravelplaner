@@ -11,11 +11,14 @@ type SessionStoreType = {
   activeSessionToken: string;
   csrfToken: string;
   tripId: number | undefined;
+  fallbackSessionToken?: string;
   setSession: (
     activeSessionType: string,
     activeSessionToken: string,
     tripId?: number,
+    // needed if 5 mins session token get's invalid -> Fallback will be the 2 hours token
   ) => void;
+  setFallbackSession: () => void;
   setCSRFToken: (token: string) => void;
 };
 
@@ -24,13 +27,26 @@ const sessionStore: SessionStoreType = proxy({
   activeSessionToken: '',
   csrfToken: '',
   tripId: undefined,
+  fallbackSessionToken: '',
   setSession: (type, token, tripId) => {
+    console.log('set session;');
+    console.log('type: ', type);
+    console.log('token: ', token);
     sessionStore.activeSessionType = type;
     sessionStore.activeSessionToken = token;
     sessionStore.tripId = tripId;
+
+    console.log(
+      'sessionStore.activeSessionType: ',
+      sessionStore.activeSessionType,
+    );
   },
   setCSRFToken: (token) => {
     sessionStore.csrfToken = token;
+  },
+  setFallbackSession: () => {
+    console.log('set fallback');
+    sessionStore.fallbackSessionToken = sessionStore.activeSessionToken;
   },
 });
 
