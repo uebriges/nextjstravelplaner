@@ -30,5 +30,3 @@ export function doesCsrfTokenMatchSessionToken(
   const secret = createCsrfSecret(sessionToken);
   return tokens.verify(secret, csrfToken);
 }
-
-export function

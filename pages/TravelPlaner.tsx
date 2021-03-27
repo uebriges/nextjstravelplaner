@@ -46,6 +46,7 @@ export type TravelPlanerPropsType = {
   routeInCookies: CoordinatesType[];
   mapboxToken: string;
   sessionToken: string;
+  csrfToken: string;
 };
 
 const TravelPlaner = (props: TravelPlanerPropsType) => {
@@ -55,6 +56,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   useEffect(() => {
     if (sessionStateSnapshot.activeSessionToken === '') {
       sessionStateSnapshot.setSession(SESSIONS.ANONYMOUS, props.sessionToken);
+      sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
   }, [props.sessionToken, sessionStateSnapshot]);
 
@@ -373,7 +375,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             //render -> Renders HTML into result -> use for add and mark as favorite
           />
         </Map>
-        <button onClick={() => waypoints.refetch()}>refetch</button>
       </div>
     </Layout>
   );
@@ -386,6 +387,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     '../utils/database'
   );
   const { serializeSecureCookieServerSide } = await import('../utils/cookies');
+  const { createCsrfToken } = await import('../utils/auth');
 
   await deleteAllExpiredSessions();
 
@@ -409,11 +411,14 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     console.log(' session available ');
   }
 
+  const csrfToken = createCsrfToken(token);
+
   return {
     props: {
       mapboxToken: process.env.MAPBOX_API_TOKEN || null,
       routeInCookies: ctx.req.cookies.route || null,
       sessionToken: token || null,
+      csrfToken: csrfToken || null,
     },
   };
 }

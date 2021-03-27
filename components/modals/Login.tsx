@@ -1,3 +1,4 @@
+import { useMutation } from '@apollo/client';
 import {
   Button,
   Dialog,
@@ -8,12 +9,34 @@ import {
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
+import { useSnapshot } from 'valtio';
+import graphqlQueries from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
+import sessionStore from '../../utils/valtio/sessionstore';
 
 export default function Login(props) {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [error, setError] = useState('');
+  const sessionStateSnapshot = useSnapshot(sessionStore);
+
+  const [
+    loginUserDB,
+    { error: loginError, loading: loginLoading },
+  ] = useMutation(graphqlQueries.loginUser, {
+    onCompleted({ loggedIn }) {
+      return loggedIn;
+      //   console.log('in onCompleted: ', loggedIn);
+      //   if (loggedIn && loggedIn.errors[0]) {
+      //     console.log('error in onCompleted');
+      //     throw new Error(loggedIn.errors[0].message);
+      //   }
+      //   return loggedIn;
+    },
+  });
+
+  console.log('login error: ', loginError);
+
   // const [];
 
   // const { loading, error, data } = useQuery(userQuery);
@@ -25,11 +48,32 @@ export default function Login(props) {
     modalsStore.activateModal(MODALS.NONE);
   }
 
-  function handleLogin(event) {
+  async function handleLogin(event) {
     event.preventDefault();
     if (userName === '' || userPassword === '') {
       setError('User name or password missing.');
+      return;
     }
+
+    await loginUserDB({
+      variables: {
+        user: {
+          username: userName,
+          password: userPassword,
+          sessionToken: sessionStateSnapshot.activeSessionToken,
+          csrfToken: sessionStateSnapshot.csrfToken,
+        },
+      },
+    });
+
+    // console.log('loginError: ', loginError);
+
+    // if (!loggedIn.data.loginUser) {
+    //   setError('User name or password wrong');
+    // }
+
+    // csrf token instead of session token is needed, because session token
+    // for 24 hours still needs to be created
 
     // const response = await fetch('/api/users/login', {
     //   method: 'POST',

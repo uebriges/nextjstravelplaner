@@ -58,7 +58,8 @@ export default function WaypointsList(props: WaypointsListType) {
   );
 
   useEffect(() => {
-    if (waypointsFromDB.data) {
+    console.log('waypointsFromDB.data: ', waypointsFromDB.data);
+    if (waypointsFromDB.data && waypointsFromDB.data.waypoints !== null) {
       const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
       waypointsArray.sort((a, b) => {
         return a.orderNumber - b.orderNumber;

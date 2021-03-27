@@ -40,7 +40,7 @@ export default function Register(props) {
     const newUser = await registerUser({
       variables: {
         user: {
-          userName: userName,
+          username: userName,
           firstName: userFirstName,
           lastName: userLastName,
           email: userEmail,

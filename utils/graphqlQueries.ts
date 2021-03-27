@@ -10,8 +10,17 @@ export const userQuery = gql`
 `;
 
 export const registerUser = gql`
-  mutation($user: UserInput) {
+  mutation($user: UserRegisterInput) {
     registerUser(user: $user) {
+      id
+      userName
+    }
+  }
+`;
+
+export const loginUser = gql`
+  mutation($user: UserLoginInput) {
+    loginUser(user: $user) {
       id
       userName
     }
@@ -79,4 +88,5 @@ module.exports = {
   updateWaypoints,
   deleteWaypoint,
   registerUser,
+  loginUser,
 };

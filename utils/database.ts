@@ -21,33 +21,7 @@ if (process.env.NODE_ENV === 'production') {
   sql = globalThis.__postgresSqlClient;
 }
 
-export async function createUser(
-  userName: string,
-  firstName: string,
-  lastName: string,
-  password: string,
-) {
-  const passwordHash = '';
-
-  const newUser = await sql`
-    INSERT INTO users (
-      user_name,
-      first_name,
-      last_name,
-      passwordHash
-    )
-    VALUES
-    (
-      ${userName},
-      ${firstName},
-      ${lastName},
-      ${passwordHash}
-    )
-    RETURNING *;
-  `;
-
-  return camelcaseKeys(newUser);
-}
+// ------------------------------------------------------ Session ---------------------------------------------------------------------
 
 // Used for time constraint for log in/register process
 export async function createSessionFiveMinutes() {
@@ -88,17 +62,19 @@ export async function createSessionTwoHours() {
 }
 
 // Used for trip planning and being logged in.
-export async function createSessionTwentyFourHours() {
+// - Might need a userId as parameter
+export async function createSessionTwentyFourHours(userId: number) {
   const token = generateSession();
 
   const newSessionTwentyFourHours = await sql`
   INSERT INTO session (
-    token, expiry_timestamp
+    token, expiry_timestamp, user_id
   )
   VALUES
   (
     ${token},
-    NOW() + INTERVAL '24 hours'
+    NOW() + INTERVAL '24 hours',
+    ${userId}
   )
   RETURNING *;
 `;
@@ -116,6 +92,45 @@ export async function deleteAllExpiredSessions() {
 
   return camelcaseKeys(sessions);
 }
+
+export async function deleteSessionById(id: number) {
+  const sessions = await sql`
+    DELETE FROM
+      sessions
+    WHERE
+      id = ${id}
+    RETURNING *
+  `;
+  return camelcaseKeys(sessions)[0];
+}
+
+export async function deleteSessionByToken(token: string) {
+  const sessions = await sql`
+    DELETE FROM
+      sessions
+    WHERE
+      token = ${token}
+    RETURNING *
+  `;
+  return camelcaseKeys(sessions)[0];
+}
+
+export async function getSessionIdByToken(token: String) {
+  console.log('getSessionIdByToken: ');
+  console.log('token: ', token);
+
+  const sessionId = await sql`
+      SELECT id
+      FROM session
+      WHERE token = ${token};
+    `;
+
+  console.log('sessionId: ', sessionId.slice(-2));
+
+  return camelcaseKeys(sessionId.slice(-2));
+}
+
+// -------------------------------------------------------------------- Trip planning --------------------------------------------------------
 
 export async function getCurrentWaypoints(token: String) {
   const sessionId = await getSessionIdByToken(token);
@@ -239,21 +254,6 @@ export async function deleteWaypoint(waypointId: number) {
   return deletedWaypoint[0];
 }
 
-export async function getSessionIdByToken(token: String) {
-  console.log('getSessionIdByToken: ');
-  console.log('token: ', token);
-
-  const sessionId = await sql`
-      SELECT id
-      FROM session
-      WHERE token = ${token};
-    `;
-
-  console.log('sessionId: ', sessionId.slice(-2));
-
-  return camelcaseKeys(sessionId.slice(-2));
-}
-
 // Used for moving waypoints or changing the order of waypoints
 export async function updateWaypoints(waypoints: waypointDBType[]) {
   let sqlQuery =
@@ -295,7 +295,7 @@ async function getLastOrderNumber(tripId: number) {
   return lastOrderNumber;
 }
 
-// ------------------------------- User related -------------------------------
+// -------------------------------------------------------------------- User related ----------------------------------------------------------------
 
 type UserDBType = {
   id: number;
@@ -339,11 +339,14 @@ export async function userNameExists(username: string) {
 
 // Retrieve user by user name
 export async function getUserByUserName(username: string) {
+  console.log('in getuser call');
   const user = await sql`
     SELECT *
     FROM users
-    WHERE user_name = ${username};
+    WHERE users_name = ${username};
   `;
+
+  console.log('tried to get user', user);
 
   if (user.length !== 0) {
     return user.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
@@ -353,7 +356,6 @@ export async function getUserByUserName(username: string) {
 }
 
 module.exports = {
-  createUser,
   deleteAllExpiredSessions,
   createSessionFiveMinutes,
   createSessionTwoHours,
@@ -364,4 +366,5 @@ module.exports = {
   updateWaypoints,
   registerUser,
   userNameExists,
+  getUserByUserName,
 };

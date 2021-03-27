@@ -9,15 +9,28 @@ export const SESSIONS = {
 type SessionStoreType = {
   activeSessionType: string;
   activeSessionToken: string;
-  setSession: (activeSessionType: string, activeSessionToken: string) => void;
+  csrfToken: string;
+  tripId: number | undefined;
+  setSession: (
+    activeSessionType: string,
+    activeSessionToken: string,
+    tripId?: number,
+  ) => void;
+  setCSRFToken: (token: string) => void;
 };
 
 const sessionStore: SessionStoreType = proxy({
   activeSessionType: '',
   activeSessionToken: '',
-  setSession: (type, token) => {
+  csrfToken: '',
+  tripId: undefined,
+  setSession: (type, token, tripId) => {
     sessionStore.activeSessionType = type;
     sessionStore.activeSessionToken = token;
+    sessionStore.tripId = tripId;
+  },
+  setCSRFToken: (token) => {
+    sessionStore.csrfToken = token;
   },
 });
 
