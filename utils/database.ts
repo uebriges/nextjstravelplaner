@@ -117,8 +117,8 @@ export async function deleteSessionByToken(token: string) {
 }
 
 export async function getSessionIdByToken(token: String) {
-  // console.log('getSessionIdByToken: ');
-  // console.log('token: ', token);
+  console.log('getSessionIdByToken: ');
+  console.log('token: ', token);
 
   const sessionId = await sql`
       SELECT id
@@ -189,13 +189,12 @@ export async function getCurrentWaypoints(token: String) {
   const sessionId = await getSessionIdByToken(token);
   console.log('sessionId getcurrentwaypoints: ', sessionId);
 
-  console.log('in database');
+  console.log('Check for trip+waypoints of specific session id');
   const route = await sql`
-  SELECT *
-  FROM trip, waypoint
-  WHERE session_id = ${sessionId[0].id.toString()}
-  AND trip.id = waypoint.trip_id
-  ORDER BY order_number;
+    SELECT * from trip tripTable
+    INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
+    INNER JOIN waypoint waypointTable ON joinTable.waypoint_id=waypointTable.id
+    WHERE tripTable.session_id = ${sessionId[0].id.toString()};
   `;
 
   // console.log('route: ', route);
@@ -270,11 +269,22 @@ export async function setNewWaypoint(
     try {
       newWaypoint = await sql`
       INSERT INTO waypoint
-        (trip_id, longitude, latitude, order_number, waypoint_name)
+        (longitude, latitude, waypoint_name)
       VALUES
-        (${tripId}, ${longitude}, ${latitude}, ${orderNumber}, ${waypointName})
+        (${longitude}, ${latitude}, ${waypointName})
       RETURNING *;
     `;
+
+      console.log('newwaypoint: ', newWaypoint[0]);
+      newWaypoint = newWaypoint[0];
+      const newTripWaypoint = await sql`
+        INSERT INTO trip_waypoint
+          (trip_id, waypoint_id, order_number)
+        VALUES
+          (${tripId}, ${newWaypoint.id}, ${orderNumber})
+        RETURNING *;
+      `;
+      newWaypoint = newTripWaypoint;
     } catch (event) {
       console.log('event: ', event);
       newWaypoint = [];
@@ -296,37 +306,52 @@ export async function setNewWaypoint(
 export async function deleteWaypoint(waypointId: number) {
   console.log('DB deleted waypoint');
 
-  const deletedWaypoint = await sql`
+  const deletedWaypointFromTripWaypoint = await sql`
+  DELETE FROM trip_waypoint
+  WHERE waypoint_id = ${waypointId}
+  RETURNING *;
+  `;
+
+  const deletedWaypointFromWaypoint = await sql`
     DELETE FROM waypoint
     WHERE id = ${waypointId}
     RETURNING *;
     ;
   `;
-  console.log('deletedWaypoint: ', deletedWaypoint[0]);
 
-  return deletedWaypoint[0];
+  console.log('deletedWaypoint: ', deletedWaypointFromWaypoint[0]);
+
+  return deletedWaypointFromWaypoint[0];
 }
 
 // Used for moving waypoints or changing the order of waypoints
 export async function updateWaypoints(waypoints: waypointDBType[]) {
+  // 1. Update coordinates and waypoint name of moved waypoint
   let sqlQuery =
-    'update waypoint as w  set order_number = w2.order_number, longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name from (values  ';
-
-  console.log('database before map: ', waypoints);
+    'UPDATE waypoint as w SET longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name FROM (values  ';
   waypoints.map((waypoint, index, array) => {
-    sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber}, ${waypoint.longitude}, ${waypoint.latitude}, '${waypoint.waypointName}')`;
+    sqlQuery += ` (${waypoint.id}, ${waypoint.longitude}, ${waypoint.latitude}, '${waypoint.waypointName}')`;
     sqlQuery += index === array.length - 1 ? '' : ',';
   });
-
   sqlQuery +=
-    ' ) AS w2(id, order_number, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;';
+    ' ) AS w2(id, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;';
 
-  console.log('sqlQuery: ', sqlQuery);
+  const updatedWayointPosition = await sql.unsafe(sqlQuery);
 
-  const updatedWayoints = await sql.unsafe(sqlQuery);
+  // 2. Update order number of waypoints in the list
+  sqlQuery =
+    'UPDATE trip_waypoint as tw SET order_number = tw2.order_number FROM (values  ';
+  waypoints.map((waypoint, index, array) => {
+    sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber})`;
+    sqlQuery += index === array.length - 1 ? '' : ',';
+  });
+  sqlQuery +=
+    ' ) AS tw2(id, order_number) WHERE tw2.id = tw.waypoint_id RETURNING *;';
 
-  console.log('result: ', updatedWayoints);
-  return updatedWayoints.map((updatedWaypoint: waypointDBType) => {
+  const updatedWayointOrder = await sql.unsafe(sqlQuery);
+
+  // It is enough to return the first result, because changes are already made in the tables.
+  return updatedWayointPosition.map((updatedWaypoint: waypointDBType) => {
     return camelcaseKeys(updatedWaypoint);
   });
 }
@@ -335,7 +360,7 @@ export async function updateWaypoints(waypoints: waypointDBType[]) {
 async function getLastOrderNumber(tripId: number) {
   let lastOrderNumber = await sql`
   SELECT max(order_number)
-  FROM waypoint
+  FROM trip_waypoint
   WHERE trip_id = ${tripId};
   `;
 
@@ -428,6 +453,8 @@ export async function createUserTrip(userId: number, tripId: number) {
   // `;
 }
 
+export async function logoutUser(userId: number) {}
+
 module.exports = {
   deleteAllExpiredSessions,
   createSessionFiveMinutes,
@@ -442,4 +469,5 @@ module.exports = {
   userNameExists,
   getUserByUserName,
   getUserTrips,
+  deleteSessionByToken,
 };

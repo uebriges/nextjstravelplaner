@@ -8,6 +8,7 @@ import {
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
   createSessionTwentyFourHours,
+  deleteSessionByToken,
   deleteWaypoint,
   getCurrentWaypoints,
   getUserByUserName,
@@ -52,6 +53,7 @@ const typeDefs = gql`
     deleteWaypoint(waypointId: Int!): Waypoint
     loginUser(user: UserLoginInput): LoginResult
     updateSessionOfCorrespondingTrip(sessions: UpdateSessionInput): [String]
+    deleteSessionByToken(token: String): String
   }
 
   type LoginResult {
@@ -247,6 +249,7 @@ const resolvers = {
       return deleteWaypoint(args.waypointId);
     },
     async updateSessionOfCorrespondingTrip(root, args, context) {
+      console.log('args: ', args);
       console.log('update update: ', args);
       const newSessionToken = await updateSessionOfCorrespondingTrip(
         args.sessions.currentToken,
@@ -263,6 +266,10 @@ const resolvers = {
 
       context.res.setHeader('Set-Cookie', newSessionCookie);
       return [newSessionToken, newCsrfToken];
+    },
+    async deleteSessionByToken(root, args) {
+      const deletedSession = await deleteSessionByToken(args.token);
+      return deletedSession;
     },
   },
 };

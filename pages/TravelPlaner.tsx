@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Marker, WebMercatorViewport } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { subscribe, useSnapshot } from 'valtio';
+import { useSnapshot } from 'valtio';
 import Layout from '../components/Layout';
 import Map from '../components/Map';
 import CustomPopup from '../components/map/CustomPopup';
@@ -49,12 +49,6 @@ export type TravelPlanerPropsType = {
   csrfToken: string;
 };
 
-const unsubscribe = subscribe(sessionStore, () =>
-  console.log('state has changed to', sessionStore),
-);
-// Unsubscribe by calling the result
-// unsubscribe()
-
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
@@ -80,6 +74,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     (newViewport) => setViewport(newViewport),
     [],
   );
+
+  console.log('rerender');
 
   // GraphQL queries
   // Get current waypoints
@@ -154,10 +150,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     // DB/Graphql variables
     let alreadyAvailableCoordinatesInDB;
 
-    // Loggedin or not?
-    // if not -> trip already available? -> trip with session_id available?
-    // if logged in -> trip already available? -> trip with session_id
-    // if logged in + trip available -> change token of trip with tripId
+    // Waypoint with exact same current logitude/latitude already part of the trip?
     console.log('data in addcoord: ', waypoints.data);
     if (waypoints.data.waypoints && waypoints.data.waypoints.length > 0) {
       alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
@@ -170,6 +163,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       );
     }
 
+    // Waypoint not yet part of the trip
     if (!alreadyAvailableCoordinatesInDB) {
       console.log('coordinates not yet part of the trip ');
       const newWaypoint = await reversGeocodeWaypoint({
@@ -296,6 +290,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   }
 
   useEffect(() => {
+    waypoints.refetch();
     generateTurnByTurnRoute();
   }, []);
 
