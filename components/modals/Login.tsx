@@ -19,6 +19,7 @@ export default function Login(props) {
   const [userPassword, setUserPassword] = useState('');
   const [error, setError] = useState('');
   const sessionStateSnapshot = useSnapshot(sessionStore);
+  const modalStateSnapshot = useSnapshot(modalsStore);
 
   const [
     loginUserDB,
@@ -26,18 +27,8 @@ export default function Login(props) {
   ] = useMutation(graphqlQueries.loginUser, {
     onCompleted({ loggedIn }) {
       return loggedIn;
-      //   console.log('in onCompleted: ', loggedIn);
-      //   if (loggedIn && loggedIn.errors[0]) {
-      //     console.log('error in onCompleted');
-      //     throw new Error(loggedIn.errors[0].message);
-      //   }
-      //   return loggedIn;
     },
   });
-
-  // const [];
-
-  // const { loading, error, data } = useQuery(userQuery);
 
   // if (loading) return 'Loading …';
   // if (error) return 'Something went wrong!';
@@ -74,6 +65,11 @@ export default function Login(props) {
       loggedIn.data.loginUser.tokens.token,
     );
     sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
+    sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
+
+    setTimeout(() => {
+      modalStateSnapshot.activateModal(MODALS.NONE);
+    }, 1500);
 
     console.log('sessionStoreSnapshot: ', sessionStateSnapshot);
   }

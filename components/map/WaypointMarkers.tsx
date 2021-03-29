@@ -36,10 +36,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   // Retrieves current token
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
-  console.log(
-    'session token in state: ',
-    sessionStateSnapshot.activeSessionToken,
-  );
   // Update waypoints in DB
   const [updateWaypoints] = useMutation(graphqlQueries.updateWaypoints, {
     refetchQueries: [

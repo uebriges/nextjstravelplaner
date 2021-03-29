@@ -1,5 +1,6 @@
 import camelcaseKeys from 'camelcase-keys';
 import postgres from 'postgres';
+import { UserTripType } from '../components/modals/UserProfile';
 import generateSession from './session';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
 
@@ -407,6 +408,26 @@ export async function getUserByUserName(username: string) {
   }
 }
 
+export async function getUserTrips(userId: number) {
+  const tripsOfUser = await sql`
+    SELECT *
+    FROM user_trip, trip
+    WHERE user_trip.user_id = ${userId}
+  `;
+
+  console.log('tripsOfUser db: ', tripsOfUser);
+
+  return tripsOfUser.map((currentTrip: UserTripType) =>
+    camelcaseKeys(currentTrip),
+  );
+}
+
+export async function createUserTrip(userId: number, tripId: number) {
+  // await sql`
+  //   UPDATE TABLE user_trip
+  // `;
+}
+
 module.exports = {
   deleteAllExpiredSessions,
   createSessionFiveMinutes,
@@ -420,4 +441,5 @@ module.exports = {
   registerUser,
   userNameExists,
   getUserByUserName,
+  getUserTrips,
 };

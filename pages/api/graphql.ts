@@ -11,6 +11,7 @@ import {
   deleteWaypoint,
   getCurrentWaypoints,
   getUserByUserName,
+  getUserTrips,
   registerUser,
   setNewWaypoint,
   updateSessionOfCorrespondingTrip,
@@ -37,6 +38,7 @@ const typeDefs = gql`
     trip: [Trip]
     user(userName: String): User
     waypoints(token: String): [Waypoint]
+    getUserTrips(userId: Int): [Trip]
   }
   type Mutation {
     registerUser(user: UserRegisterInput): User
@@ -96,6 +98,7 @@ const typeDefs = gql`
   }
 
   type Trip {
+    id: Int
     title: String
     start: String
     end: String
@@ -136,6 +139,9 @@ const resolvers = {
     waypoints(root, args) {
       console.log('args.token: ', args.token);
       return getCurrentWaypoints(args.token);
+    },
+    getUserTrips(root, { userId }) {
+      return getUserTrips(userId);
     },
   },
   Mutation: {

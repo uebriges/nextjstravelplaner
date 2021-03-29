@@ -10,9 +10,10 @@ import { footerStlye } from '../styles/styles';
 import graphqlQueries from '../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
-import RouteIcon from './maputils/RouteIcon';
+import RouteIcon from './map/RouteIcon';
 import Login from './modals/Login';
 import Register from './modals/Register';
+import UserProfile from './modals/UserProfile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,18 +26,22 @@ export default function Layout(props: LayoutProps) {
     graphqlQueries.updateSessionOfCorrespondingTrip,
   );
 
+  // Handle click on user symbol
   async function handleUserFunctionality(e) {
-    modalsStore.activateModal(MODALS.LOGIN);
+    console.log('session type: ', sessionStoreSnapshot.activeSessionType);
+    console.log('modal type: ', modalsStore.activeModal);
+    // If user is already logged in
+    if (sessionStoreSnapshot.activeSessionType === SESSIONS.LOGGEDIN) {
+      modalStateSnapshot.activateModal(MODALS.USERPROFILE);
+    }
+
     console.log('handleUserFunctionality');
     console.log('sessionStoreSnapshot before: ', sessionStoreSnapshot);
 
-    // If session type is not DURINGLOGINORREGISTER or not LOGGEDIN
-    if (
-      sessionStoreSnapshot.activeSessionType !==
-        SESSIONS.DURINGLOGINORREGISTER &&
-      sessionStoreSnapshot.activeSessionType !== SESSIONS.LOGGEDIN
-    ) {
+    // If session type is not LOGGEDIN
+    if (sessionStoreSnapshot.activeSessionType !== SESSIONS.LOGGEDIN) {
       console.log('token not yet 5 mins');
+      modalStateSnapshot.activateModal(MODALS.LOGIN);
 
       // Change session id of trip to 5 mins session token
       const newTokenAndCSRF = await updateSessionOfCorrespondingTrip({
@@ -83,6 +88,9 @@ export default function Layout(props: LayoutProps) {
         {modalStateSnapshot.activeModal === MODALS.LOGIN ? <Login /> : null}
         {modalStateSnapshot.activeModal === MODALS.REGISTER ? (
           <Register />
+        ) : null}
+        {modalStateSnapshot.activeModal === MODALS.USERPROFILE ? (
+          <UserProfile />
         ) : null}
         {props.children}
       </main>

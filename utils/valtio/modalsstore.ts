@@ -4,6 +4,7 @@ export const MODALS = {
   NONE: 'none',
   LOGIN: 'login',
   REGISTER: 'register',
+  USERPROFILE: 'userprofile',
 };
 
 type ModalsStoreType = {

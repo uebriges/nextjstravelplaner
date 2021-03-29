@@ -93,6 +93,14 @@ export const updateSessionOfCorrespondingTrip = gql`
   }
 `;
 
+export const getUserTrips = gql`
+  query($userId: Int) {
+    getUserTrips(userId: $userId) {
+      id
+    }
+  }
+`;
+
 module.exports = {
   userQuery,
   getCurrentWaypoints: getCurrentWaypoints,
@@ -102,4 +110,5 @@ module.exports = {
   registerUser,
   loginUser,
   updateSessionOfCorrespondingTrip,
+  getUserTrips,
 };

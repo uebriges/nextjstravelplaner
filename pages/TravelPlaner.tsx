@@ -11,10 +11,10 @@ import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { subscribe, useSnapshot } from 'valtio';
 import Layout from '../components/Layout';
 import Map from '../components/Map';
-import CustomPopup from '../components/maputils/CustomPopup';
-import Route from '../components/maputils/Route';
-import WaypointMarkers from '../components/maputils/WaypointMarkers';
-import WaypointsList from '../components/maputils/WaypointsList';
+import CustomPopup from '../components/map/CustomPopup';
+import Route from '../components/map/Route';
+import WaypointMarkers from '../components/map/WaypointMarkers';
+import WaypointsList from '../components/map/WaypointsList';
 import graphqlQueries from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 
@@ -83,11 +83,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // GraphQL queries
   // Get current waypoints
-  // console.log('props.sessionToken: ', props.sessionToken);
-  // console.log(
-  //   'sessionStateSnapshot after rerender: ',
-  //   sessionStateSnapshot.activeSessionToken,
-  // );
   const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: {
       token:
@@ -164,7 +159,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     // if logged in -> trip already available? -> trip with session_id
     // if logged in + trip available -> change token of trip with tripId
     console.log('data in addcoord: ', waypoints.data);
-    if (waypoints.data && waypoints.data.waypoints.length > 0) {
+    if (waypoints.data.waypoints && waypoints.data.waypoints.length > 0) {
       alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
         (waypoint: LocationInDBType) => {
           return (
@@ -318,7 +313,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
         <WaypointsList
           generateTurnByTurnRoute={generateTurnByTurnRoute}
-          sessionToken={props.sessionToken}
+          sessionToken={sessionStateSnapshot.activeSessionToken}
         />
         <Map
           mapboxToken={props.mapboxToken}
