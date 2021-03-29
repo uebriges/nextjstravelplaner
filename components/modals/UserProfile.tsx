@@ -10,7 +10,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText
+  ListItemText,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -74,6 +74,7 @@ export default function UserProfile() {
       variables: {
         sessions: {
           currentToken: sessionStore.activeSessionToken,
+          action: 'logout',
         },
       },
     });
@@ -95,7 +96,10 @@ export default function UserProfile() {
     });
 
     // Set new session in session state
-    sessionStateSnapshot.setSession(SESSIONS.ANONYMOUS, newToken.data.updateSessionOfCorrespondingTrip[0]);
+    sessionStateSnapshot.setSession(
+      SESSIONS.ANONYMOUS,
+      newToken.data.updateSessionOfCorrespondingTrip[0],
+    );
   }
 
   return (

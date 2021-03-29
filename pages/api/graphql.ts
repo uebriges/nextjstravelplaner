@@ -68,6 +68,7 @@ const typeDefs = gql`
 
   input UpdateSessionInput {
     currentToken: String!
+    action: String
     newToken: String
   }
 
@@ -210,6 +211,7 @@ const resolvers = {
 
       await updateSessionOfCorrespondingTrip(
         user.sessionToken, // current token
+        '', // action which calls this function. Only needed for logout, not here.
         session[0].token, // new token
       );
 
@@ -253,8 +255,11 @@ const resolvers = {
       console.log('update update: ', args);
       const newSessionToken = await updateSessionOfCorrespondingTrip(
         args.sessions.currentToken,
+        args.sessions.action,
         args.sessions.newToken,
       );
+
+      console.log('new Session token: ', newSessionToken);
 
       const newSessionCookie = serializeSecureCookieServerSide(
         'session',

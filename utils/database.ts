@@ -133,6 +133,7 @@ export async function getSessionIdByToken(token: String) {
 
 export async function updateSessionOfCorrespondingTrip(
   currentToken: string,
+  action?: string,
   newToken?: string,
 ) {
   console.log('updateSessionOfCorrespondingTrip');
@@ -142,10 +143,21 @@ export async function updateSessionOfCorrespondingTrip(
   let newTokenId;
   // If new token is needed, because there is no fallback token in sessionStore
   if (!newToken) {
-    newTokenObject = await createSessionFiveMinutes();
-    newToken = newTokenObject[0].token;
-    newTokenId = newTokenObject[0].id;
+    console.log('no new token');
+    if (action === 'logout') {
+      console.log('action logout');
+      newTokenObject = await createSessionTwoHours();
+      console.log('new token object: ', newTokenObject);
+      newToken = newTokenObject.token;
+      newTokenId = newTokenObject.id;
+    } else {
+      console.log('other action');
+      newTokenObject = await createSessionFiveMinutes();
+      newToken = newTokenObject[0].token;
+      newTokenId = newTokenObject[0].id;
+    }
   } else {
+    console.log('new token given ');
     newTokenId = (
       await sql`
     SELECT id
