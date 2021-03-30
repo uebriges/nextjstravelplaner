@@ -144,6 +144,8 @@ export async function updateSessionOfCorrespondingTrip(
   // If new token is needed, because there is no fallback token in sessionStore
   if (!newToken) {
     console.log('no new token');
+    // Logout: New token -> 2 hours valid
+    // Any other action: 5 mins (e.g. start login process)
     if (action === 'logout') {
       console.log('action logout');
       newTokenObject = await createSessionTwoHours();
@@ -177,20 +179,23 @@ export async function updateSessionOfCorrespondingTrip(
     WHERE token = ${currentToken};
   `;
 
-  const currentTokenId = currentTokenObject[0].id;
+  // Current token is also in the DB
+  if (currentTokenObject.length > 0) {
+    const currentTokenId = currentTokenObject[0].id;
 
-  console.log('new token id: ', newTokenId);
-  console.log('current token: ', currentTokenId);
-  // currentTokenId = currentTokenId[0].id;
-  // replace current token id of trip with new token
+    console.log('new token id: ', newTokenId);
+    console.log('current token: ', currentTokenId);
+    // currentTokenId = currentTokenId[0].id;
+    // replace current token id of trip with new token
 
-  await sql`
-    UPDATE trip
-    SET session_id = ${newTokenId}
-    WHERE session_id = ${currentTokenId.toString()};
-  `;
+    await sql`
+      UPDATE trip
+      SET session_id = ${newTokenId}
+      WHERE session_id = ${currentTokenId.toString()};
+    `;
 
-  // replace token of current trip with new token
+    // replace token of current trip with new token
+  }
 
   return newToken;
 }
@@ -199,19 +204,20 @@ export async function updateSessionOfCorrespondingTrip(
 
 export async function getCurrentWaypoints(token: String) {
   const sessionId = await getSessionIdByToken(token);
+  let route = [];
   console.log('sessionId getcurrentwaypoints: ', sessionId);
+  if (sessionId.length > 0) {
+    console.log('Check for trip+waypoints of specific session id');
+    route = await sql`
+      SELECT * from trip tripTable
+      INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
+      INNER JOIN waypoint waypointTable ON joinTable.waypoint_id=waypointTable.id
+      WHERE tripTable.session_id = ${sessionId[0].id.toString()};
+    `;
 
-  console.log('Check for trip+waypoints of specific session id');
-  const route = await sql`
-    SELECT * from trip tripTable
-    INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
-    INNER JOIN waypoint waypointTable ON joinTable.waypoint_id=waypointTable.id
-    WHERE tripTable.session_id = ${sessionId[0].id.toString()};
-  `;
-
-  // console.log('route: ', route);
-  // console.log('route here');
-
+    // console.log('route: ', route);
+  }
+  console.log('route here');
   return route.map((currentRoute) => camelcaseKeys(currentRoute));
 }
 
