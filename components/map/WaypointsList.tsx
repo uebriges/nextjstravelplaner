@@ -91,15 +91,25 @@ export default function WaypointsList(props: WaypointsListType) {
       return;
     }
 
+    console.log('source: ', source.index);
+    console.log('target: ', destination.index);
+    console.log('points temp before: ', ...pointsTemp);
+
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
 
+    console.log('point to be moved: ', ...pointToBeMoved);
+
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
+
+    console.log('points Temp:', ...pointsTemp);
 
     // Update the order numbers
     const newlyOrderedPoints = pointsTemp.map((point, index) => {
       point = { ...point, orderNumber: index + 1 };
       return point;
     });
+
+    console.log('newly order points: ', ...newlyOrderedPoints);
 
     await updateWaypoints({
       variables: {

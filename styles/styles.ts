@@ -20,3 +20,11 @@ export const footerStlye = css`
   right: 0;
   z-index: 50;
 `;
+
+export const mapOptionsStyle = css`
+  position: absolute;
+  left: 20px;
+  z-index: 10;
+  top: 100px;
+  background: white;
+`;

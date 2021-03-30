@@ -12,6 +12,7 @@ import { useSnapshot } from 'valtio';
 import Layout from '../components/Layout';
 import Map from '../components/Map';
 import CustomPopup from '../components/map/CustomPopup';
+import MapOptions from '../components/map/MapOptions';
 import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
@@ -306,6 +307,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
         />
 
+        <MapOptions />
         <WaypointsList
           generateTurnByTurnRoute={generateTurnByTurnRoute}
           sessionToken={sessionStateSnapshot.activeSessionToken}

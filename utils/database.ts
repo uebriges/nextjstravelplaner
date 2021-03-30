@@ -212,7 +212,8 @@ export async function getCurrentWaypoints(token: String) {
       SELECT * from trip tripTable
       INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
       INNER JOIN waypoint waypointTable ON joinTable.waypoint_id=waypointTable.id
-      WHERE tripTable.session_id = ${sessionId[0].id.toString()};
+      WHERE tripTable.session_id = ${sessionId[0].id.toString()}
+      ORDER BY joinTable.order_number;
     `;
 
     // console.log('route: ', route);
