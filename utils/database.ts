@@ -126,7 +126,10 @@ export async function getSessionIdByToken(token: String) {
       WHERE token = ${token};
     `;
 
-  // console.log('sessionId: ', sessionId.slice(-2));
+  console.log('sessionId length: ', camelcaseKeys(sessionId).length);
+  console.log('sessionId : ', sessionId.length);
+  // console.log('sessionId only: ', camelcaseKeys(sessionId)[0]);
+  // console.log('sessionId: ', camelcaseKeys(sessionId.slice(-2)[0].id));
 
   return camelcaseKeys(sessionId.slice(-2));
 }
@@ -150,12 +153,12 @@ export async function updateSessionOfCorrespondingTrip(
       console.log('action logout');
       newTokenObject = await createSessionTwoHours();
       console.log('new token object: ', newTokenObject);
-      newToken = newTokenObject.token;
+      newToken = newTokenObject.token as string;
       newTokenId = newTokenObject.id;
     } else {
       console.log('other action');
       newTokenObject = await createSessionFiveMinutes();
-      newToken = newTokenObject[0].token;
+      newToken = newTokenObject[0].token as string;
       newTokenId = newTokenObject[0].id;
     }
   } else {
@@ -173,7 +176,7 @@ export async function updateSessionOfCorrespondingTrip(
   console.log('new token object: ', newTokenObject);
 
   // Lookup the id of currentToken
-  let currentTokenObject = await sql`
+  const currentTokenObject = await sql`
     SELECT id
     FROM session
     WHERE token = ${currentToken};
@@ -466,13 +469,20 @@ export async function getUserTrips(userId: number) {
   );
 }
 
-export async function createUserTrip(userId: number, tripId: number) {
-  // await sql`
-  //   UPDATE TABLE user_trip
-  // `;
-}
+export async function saveUserTrip(userId: number, sessionId: number) {
+  const tripId = await sql`
+    SELECT id
+    FROM trip
+    WHERE session_id = ${sessionId.toString()};
+  `;
 
-export async function logoutUser(userId: number) {}
+  const storedUserTrip = await sql`
+    INSERT INTO user_trip
+    VALUES (${tripId[0].id},${userId}) ON CONFLICT (trip_id, user_id) DO NOTHING;
+  `;
+
+  return 'Saved trip';
+}
 
 module.exports = {
   deleteAllExpiredSessions,
@@ -489,4 +499,6 @@ module.exports = {
   getUserByUserName,
   getUserTrips,
   deleteSessionByToken,
+  getSessionIdByToken,
+  saveUserTrip,
 };

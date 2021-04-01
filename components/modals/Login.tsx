@@ -11,13 +11,17 @@ import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import graphqlQueries from '../../utils/graphqlQueries';
-import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
+import modalsStore, {
+  INITIALACTION,
+  MODALS,
+} from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
 export default function Login(props) {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const sessionStateSnapshot = useSnapshot(sessionStore);
   const modalStateSnapshot = useSnapshot(modalsStore);
 
@@ -43,9 +47,11 @@ export default function Login(props) {
       setError('User name or password missing.');
       return;
     }
-
     console.log('csrf before login: ', sessionStateSnapshot.csrfToken);
-
+    console.log(
+      'session token before login: ',
+      sessionStateSnapshot.activeSessionToken,
+    );
     const loggedIn = await loginUserDB({
       variables: {
         user: {
@@ -56,22 +62,32 @@ export default function Login(props) {
         },
       },
     });
-
     console.log('logged in: ', loggedIn);
-
     // Update session token in sessionStore + update csrf
-    sessionStateSnapshot.setSession(
-      SESSIONS.LOGGEDIN,
-      loggedIn.data.loginUser.tokens.token,
-    );
-    sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
-    sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
+    if (loggedIn.data.loginUser) {
+      sessionStateSnapshot.setSession(
+        SESSIONS.LOGGEDIN,
+        loggedIn.data.loginUser.tokens.token,
+      );
+      sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
+      sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
 
-    setTimeout(() => {
-      modalStateSnapshot.activateModal(MODALS.NONE);
-    }, 1500);
-
-    console.log('sessionStoreSnapshot: ', sessionStateSnapshot);
+      setSuccessMessage('Log in succeeded');
+      // setTimeout(() => {
+      console.log('modalStateSnapshot: ', modalStateSnapshot);
+      if (modalStateSnapshot.initialAction === INITIALACTION.SAVETRIP) {
+        console.log('initial action save trip');
+        // modalStateSnapshot.activateModal(MODALS.NONE);
+        modalStateSnapshot.activateModal(MODALS.SAVETRIP);
+      } else {
+        console.log('not inital action save trip');
+        modalStateSnapshot.activateModal(MODALS.NONE);
+      }
+      // }, 1000);
+    } else {
+      setError('User name or password wrong');
+    }
+    // console.log('sessionStoreSnapshot: ', sessionStateSnapshot);
   }
 
   function handleRegister() {
@@ -98,7 +114,6 @@ export default function Login(props) {
           onChange={(e) => setUserName(e.target.value)}
         />
         <TextField
-          autoFocus
           margin="dense"
           id="password"
           label="Password"
@@ -107,6 +122,9 @@ export default function Login(props) {
           onChange={(e) => setUserPassword(e.target.value)}
         />
         {error ? <Alert severity="error">{error}</Alert> : null}
+        {successMessage ? (
+          <Alert severity="success">{successMessage}</Alert>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="primary">

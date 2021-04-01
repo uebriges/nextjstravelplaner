@@ -3,6 +3,7 @@ import argon2 from 'argon2';
 import postgres from 'postgres';
 import {
   createCsrfToken,
+  doesCsrfTokenMatchSessionToken,
   doesPasswordMatchPasswordHash,
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
@@ -11,9 +12,11 @@ import {
   deleteSessionByToken,
   deleteWaypoint,
   getCurrentWaypoints,
+  getSessionIdByToken,
   getUserByUserName,
   getUserTrips,
   registerUser,
+  saveUserTrip,
   setNewWaypoint,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
@@ -40,6 +43,7 @@ const typeDefs = gql`
     user(userName: String): User
     waypoints(token: String): [Waypoint]
     getUserTrips(userId: Int): [Trip]
+    getSessionIdByToken(token: String): Int
   }
   type Mutation {
     registerUser(user: UserRegisterInput): User
@@ -54,6 +58,7 @@ const typeDefs = gql`
     loginUser(user: UserLoginInput): LoginResult
     updateSessionOfCorrespondingTrip(sessions: UpdateSessionInput): [String]
     deleteSessionByToken(token: String): String
+    saveUserTrip(userId: Int, sessionId: Int): String
   }
 
   type LoginResult {
@@ -146,6 +151,16 @@ const resolvers = {
     getUserTrips(root, { userId }) {
       return getUserTrips(userId);
     },
+    async getSessionIdByToken(root, args) {
+      console.log('grapql arg: ', args);
+      const sessionIdArray = await getSessionIdByToken(args.token);
+      console.log(
+        'grapql getSessionIdByToken sessionIdArray: ',
+        sessionIdArray,
+      );
+      // console.log('extracted type: ', typeof sessionIdArray[0].id);
+      return sessionIdArray.length > 0 ? sessionIdArray[0].id : 0;
+    },
   },
   Mutation: {
     async registerUser(root, args) {
@@ -177,9 +192,9 @@ const resolvers = {
 
       console.log('user in graphql: ', user);
       // Check CSRF token
-      // if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
-      //   throw new Error('CSRF Token does not match');
-      // }
+      if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
+        throw new Error('CSRF Token does not match');
+      }
 
       // Search for user in DB
       const userWithPasswordHash = await getUserByUserName(user.username);
@@ -267,7 +282,7 @@ const resolvers = {
       );
 
       // New session cookie needs also a new csrf token
-      const newCsrfToken = createCsrfToken(newSessionCookie);
+      const newCsrfToken = createCsrfToken(newSessionToken);
 
       context.res.setHeader('Set-Cookie', newSessionCookie);
       return [newSessionToken, newCsrfToken];
@@ -275,6 +290,12 @@ const resolvers = {
     async deleteSessionByToken(root, args) {
       const deletedSession = await deleteSessionByToken(args.token);
       return deletedSession;
+    },
+    async saveUserTrip(root, args) {
+      console.log('resolver save trip');
+      console.log('resolver args', args);
+
+      return await saveUserTrip(args.userId, args.sessionId);
     },
   },
 };

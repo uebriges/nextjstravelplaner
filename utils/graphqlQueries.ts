@@ -107,6 +107,18 @@ export const deleteSessionByToken = gql`
   }
 `;
 
+export const getSessionIdByToken = gql`
+  query($token: String) {
+    getSessionIdByToken(token: $token)
+  }
+`;
+
+export const saveUserTrip = gql`
+  mutation($userId: Int, $sessionId: Int) {
+    saveUserTrip(userId: $userId, sessionId: $sessionId)
+  }
+`;
+
 module.exports = {
   userQuery,
   getCurrentWaypoints: getCurrentWaypoints,
@@ -118,4 +130,6 @@ module.exports = {
   updateSessionOfCorrespondingTrip,
   getUserTrips,
   deleteSessionByToken,
+  getSessionIdByToken,
+  saveUserTrip,
 };

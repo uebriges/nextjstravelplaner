@@ -77,6 +77,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   );
 
   console.log('rerender');
+  console.log('store session: ', sessionStateSnapshot.activeSessionToken);
+  console.log('props session: ', props.sessionToken);
 
   // GraphQL queries
   // Get current waypoints
@@ -88,6 +90,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           : props.sessionToken,
     },
   });
+
+  console.log('1');
 
   // Store new waypoint in DB
   const [setNewWaypoint, { dataNewWaypoint }] = useMutation(
@@ -103,6 +107,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     },
   );
 
+  console.log('2');
+
   // Refs
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
@@ -113,6 +119,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // const [showPopup, togglePopup] = useState(false);
   const [markerSetByClick, setMarkerSetByClick] = useState(false);
   const [markerSetBySearchResult, setMarkerSetBySearchResult] = useState(false);
+
+  console.log('3');
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
@@ -130,17 +138,21 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     [handleViewportChange],
   );
 
+  console.log('4');
   async function refetchWaypoints() {
     console.log('refetching.....');
     waypoints.refetch();
   }
+  console.log('5');
 
   useEffect(() => {
     console.log('useEffect generate turn by turn');
     generateTurnByTurnRoute();
   }, [waypoints.data]);
 
-  // Adds new coordinates to the cookies
+  console.log('6');
+
+  // Adds new coordinates to the DB
   async function addCoordinatesToRoute() {
     console.log('addCoordinatesToRoute');
     // Cookies variables
@@ -153,7 +165,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
     // Waypoint with exact same current logitude/latitude already part of the trip?
     console.log('data in addcoord: ', waypoints.data);
-    if (waypoints.data.waypoints && waypoints.data.waypoints.length > 0) {
+    if (waypoints.data && waypoints.data.waypoints.length > 0) {
       alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
         (waypoint: LocationInDBType) => {
           return (
@@ -163,6 +175,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         },
       );
     }
+
+    console.log('7');
 
     // Waypoint not yet part of the trip
     if (!alreadyAvailableCoordinatesInDB) {
@@ -227,6 +241,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
   }
 
+  console.log('8');
+
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
@@ -266,6 +282,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
   }
 
+  console.log('9');
+
   // Translates coordinates into location names
   async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
     // if (waypoint) {
@@ -286,14 +304,20 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     return waypoint;
   }
 
+  console.log('10');
+
   function onSearchResult() {
     setMarkerSetBySearchResult(true);
   }
+
+  console.log('11');
 
   useEffect(() => {
     waypoints.refetch();
     generateTurnByTurnRoute();
   }, []);
+
+  console.log('12');
 
   return (
     <Layout>

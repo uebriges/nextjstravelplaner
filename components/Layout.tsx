@@ -13,6 +13,7 @@ import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import RouteIcon from './map/RouteIcon';
 import Login from './modals/Login';
 import Register from './modals/Register';
+import SaveTrip from './modals/SaveTrip';
 import UserProfile from './modals/UserProfile';
 
 interface LayoutProps {
@@ -91,6 +92,9 @@ export default function Layout(props: LayoutProps) {
         ) : null}
         {modalStateSnapshot.activeModal === MODALS.USERPROFILE ? (
           <UserProfile />
+        ) : null}
+        {modalStateSnapshot.activeModal === MODALS.SAVETRIP ? (
+          <SaveTrip />
         ) : null}
         {props.children}
       </main>
