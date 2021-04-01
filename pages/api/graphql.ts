@@ -58,7 +58,7 @@ const typeDefs = gql`
     loginUser(user: UserLoginInput): LoginResult
     updateSessionOfCorrespondingTrip(sessions: UpdateSessionInput): [String]
     deleteSessionByToken(token: String): String
-    saveUserTrip(userId: Int, sessionId: Int): String
+    saveUserTrip(userId: Int, tripId: Int, tripTitle: String): String
   }
 
   type LoginResult {
@@ -94,7 +94,7 @@ const typeDefs = gql`
 
   input WaypointInput {
     id: Int
-    tripId: ID
+    tripId: Int
     notes: String
     meansOfTransport: String
     visaInformation: String
@@ -248,13 +248,18 @@ const resolvers = {
         tokens: { token: session[0].token, csrf: newCsrfToken },
       };
     },
-    setNewWaypoint(root, args) {
-      return setNewWaypoint(
+    async setNewWaypoint(root, args) {
+      console.log('set new waypoint resolver');
+      const newWaypoint = await setNewWaypoint(
         args.token,
         args.longitude,
         args.latitude,
         args.waypointName,
       );
+
+      console.log('newWaypoint resolver: ', newWaypoint);
+
+      return newWaypoint;
     },
     updateWaypoints(root, args) {
       // console.log('updateWaypoints gql: ', updateWaypoints);
@@ -294,8 +299,13 @@ const resolvers = {
     async saveUserTrip(root, args) {
       console.log('resolver save trip');
       console.log('resolver args', args);
-
-      return await saveUserTrip(args.userId, args.sessionId);
+      const savedTrip = await saveUserTrip(
+        args.userId,
+        args.tripId,
+        args.tripTitle,
+      );
+      console.log('saved trip in resolver: ', savedTrip);
+      return savedTrip;
     },
   },
 };

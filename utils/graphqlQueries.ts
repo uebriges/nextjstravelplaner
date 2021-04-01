@@ -62,6 +62,7 @@ export const setNewWaypoint = gql`
       longitude
       latitude
       waypointName
+      tripId
     }
   }
 `;
@@ -114,8 +115,8 @@ export const getSessionIdByToken = gql`
 `;
 
 export const saveUserTrip = gql`
-  mutation($userId: Int, $sessionId: Int) {
-    saveUserTrip(userId: $userId, sessionId: $sessionId)
+  mutation($userId: Int, $tripId: Int, $tripTitle: String) {
+    saveUserTrip(userId: $userId, tripId: $tripId, tripTitle: $tripTitle)
   }
 `;
 

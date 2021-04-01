@@ -22,6 +22,7 @@ type SessionStoreType = {
   setFallbackSession: () => void;
   setCSRFToken: (token: string) => void;
   setUserId: (userId: number) => void;
+  setTripId: (tripId: number) => void;
 };
 
 const sessionStore: SessionStoreType = proxy({
@@ -53,6 +54,9 @@ const sessionStore: SessionStoreType = proxy({
   },
   setUserId: (userId) => {
     sessionStore.userId = userId;
+  },
+  setTripId: (tripId) => {
+    sessionStore.tripId = tripId;
   },
 });
 

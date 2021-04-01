@@ -188,7 +188,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         waypointName: '',
       });
       console.log('newwaypoint revers: ', newWaypoint);
-      await setNewWaypoint({
+      let newWaypointData = await setNewWaypoint({
         variables: {
           token: sessionStateSnapshot.activeSessionToken,
           longitude: currentLongitude.toString(),
@@ -196,6 +196,14 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           waypointName: newWaypoint.waypointName,
         },
       });
+
+      console.log(
+        'setting tripId....',
+        typeof newWaypointData.data.setNewWaypoint.tripId,
+      );
+      sessionStateSnapshot.setTripId(
+        Number(newWaypointData.data.setNewWaypoint.tripId),
+      );
 
       refetchWaypoints();
       console.log('new data: ', waypoints);

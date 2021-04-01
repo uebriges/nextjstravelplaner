@@ -319,6 +319,7 @@ export async function setNewWaypoint(
       return camelcaseKeys(currentWaypoint);
     });
 
+    console.log('tripId extracted: ', tripId);
     // handle case if no new waypoint was set because already available!
     console.log('newpoint last: ', newWaypoint);
     return newWaypoint[0];
@@ -469,17 +470,24 @@ export async function getUserTrips(userId: number) {
   );
 }
 
-export async function saveUserTrip(userId: number, sessionId: number) {
-  const tripId = await sql`
-    SELECT id
-    FROM trip
-    WHERE session_id = ${sessionId.toString()};
+export async function saveUserTrip(
+  userId: number,
+  tripId: number,
+  tripTitle: string,
+) {
+  console.log('userId: ', typeof userId);
+  console.log('tripId: ', typeof tripId);
+  console.log('tripTitle: ', tripTitle);
+  await sql`
+    INSERT INTO user_trip
+    VALUES (${tripId},${userId}) ON CONFLICT (trip_id, user_id) DO NOTHING;
   `;
 
-  const storedUserTrip = await sql`
-    INSERT INTO user_trip
-    VALUES (${tripId[0].id},${userId}) ON CONFLICT (trip_id, user_id) DO NOTHING;
-  `;
+  await sql`
+  UPDATE trip
+  SET title = ${tripTitle}
+  WHERE id = ${tripId};
+`;
 
   return 'Saved trip';
 }

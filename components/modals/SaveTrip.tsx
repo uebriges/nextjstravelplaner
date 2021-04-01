@@ -51,19 +51,19 @@ export default function SaveTrip() {
 
   function handleSave() {
     console.log('Session id current: ', sessionId.data.getSessionIdByToken);
+    console.log('trip title: ', tripTitle);
+    console.log('trip id: ', sessionStoreSnapshot.tripId);
     if (sessionId.data.getSessionIdByToken) {
       console.log('in if');
       saveUserTrip({
         variables: {
           userId: sessionStoreSnapshot.userId,
-          sessionId: sessionId.data.getSessionIdByToken,
+          tripId: sessionStoreSnapshot.tripId,
+          tripTitle: tripTitle,
         },
       });
     }
-
-    console.log('waypoints: ', typeof sessionId);
-    console.log('session token: ', typeof sessionId.data.getSessionIdByToken);
-    console.log('user_id: ', typeof sessionStoreSnapshot.userId);
+    modalStoreSnapshot.activateModal(MODALS.NONE);
   }
 
   return (
