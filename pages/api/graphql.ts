@@ -108,8 +108,8 @@ const typeDefs = gql`
   type Trip {
     id: Int
     title: String
-    start: String
-    end: String
+    startDate: String
+    endDate: String
     notes: String
     locations: Waypoint
   }

@@ -5,15 +5,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
+  Paper,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import MenuIcon from '@material-ui/icons/Menu';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
@@ -24,12 +22,38 @@ import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 export type UserTripType = {
   id: number;
   title: string;
-  start: string;
-  end: string;
+  startDate: string;
+  endDate: string;
   notes: string;
   sessionId: number;
-  userId;
+  userId: number;
 };
+
+interface Column {
+  id: number;
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+}
+
+const columnHeaders: Column[] = [
+  { id: 'id', label: 'Id', minWidth: 100 },
+  { id: 'title', label: 'Title', minWidth: 300 },
+  {
+    id: 'start',
+    label: 'Start',
+    minWidth: 170,
+    align: 'right',
+  },
+  {
+    id: 'end',
+    label: 'End',
+    minWidth: 170,
+    align: 'right',
+  },
+];
+
+const tripsTableRows = ['Id', 'Title', 'Start Date', 'End Date'];
 
 export default function UserProfile() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -64,6 +88,10 @@ export default function UserProfile() {
 
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
+  }
+
+  function handleTableRowClick(event) {
+    console.log('event: ', event);
   }
 
   async function handleLogout() {
@@ -111,32 +139,78 @@ export default function UserProfile() {
     >
       <DialogTitle id="profileDialogTitle">Profile</DialogTitle>
       <DialogContent>
-        <List>
-          {userTrips.data && userTrips.data.getUserTrips.length > 0
-            ? userTrips.data.getUserTrips.map((currentTrip: UserTripType) => {
-                return (
-                  <ListItem key={currentTrip.id} button="true">
-                    <ListItemIcon>
-                      <MenuIcon />
-                    </ListItemIcon>
-                    <ListItemText>
-                      <div key={currentTrip.id}>{currentTrip.id}</div>
-                    </ListItemText>
-                    <ListItemSecondaryAction>
-                      <IconButton edge="end" aria-label="delete">
-                        <CloseIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                );
-              })
-            : null}
-        </List>
-
-        {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
-        {successMessage ? (
-          <Alert severity="success">{successMessage}</Alert>
-        ) : null}
+        <Paper>
+          <TableContainer>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columnHeaders.map((column) => (
+                    <TableCell
+                      id={column.id.toString()}
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              {userTrips.data && userTrips.data.getUserTrips.length > 0
+                ? userTrips.data.getUserTrips.map(
+                    (currentTrip: UserTripType) => {
+                      console.log('current trip: ', currentTrip);
+                      return (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={currentTrip.id.toString()}
+                        >
+                          <TableCell
+                            align="center"
+                            onClick={handleTableRowClick}
+                            id={currentTrip.id.toString()}
+                          >
+                            {currentTrip.id}
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            onClick={handleTableRowClick}
+                            id={currentTrip.id.toString()}
+                          >
+                            {currentTrip.title}
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            onClick={handleTableRowClick}
+                            id={currentTrip.id.toString()}
+                          >
+                            {new Date(
+                              Number(currentTrip.startDate) * 1000,
+                            ).toLocaleString()}
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            onClick={handleTableRowClick}
+                            id={currentTrip.id.toString()}
+                          >
+                            {currentTrip.endDate}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    },
+                  )
+                : null}
+              {errorMessage ? (
+                <Alert severity="error">{errorMessage}</Alert>
+              ) : null}
+              {successMessage ? (
+                <Alert severity="success">{successMessage}</Alert>
+              ) : null}
+            </Table>
+          </TableContainer>
+        </Paper>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleLogout} color="primary">

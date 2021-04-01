@@ -98,6 +98,9 @@ export const getUserTrips = gql`
   query($userId: Int) {
     getUserTrips(userId: $userId) {
       id
+      title
+      startDate
+      endDate
     }
   }
 `;
