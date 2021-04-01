@@ -123,9 +123,27 @@ export const saveUserTrip = gql`
   }
 `;
 
+export const startNewTrip = gql`
+  mutation($token: String) {
+    startNewTrip(token: $token)
+  }
+`;
+
+export const getWaypointsByTripId = gql`
+  query($tripId: Int) {
+    getWaypointsByTripId(tripId: $tripId) {
+      id
+      longitude
+      latitude
+      waypointName
+      orderNumber
+    }
+  }
+`;
+
 module.exports = {
   userQuery,
-  getCurrentWaypoints: getCurrentWaypoints,
+  getCurrentWaypoints,
   setNewWaypoint,
   updateWaypoints,
   deleteWaypoint,
@@ -136,4 +154,6 @@ module.exports = {
   deleteSessionByToken,
   getSessionIdByToken,
   saveUserTrip,
+  startNewTrip,
+  getWaypointsByTripId,
 };

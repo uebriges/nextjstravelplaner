@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import {
   Button,
   Dialog,
@@ -69,6 +69,11 @@ export default function UserProfile() {
     },
   });
 
+  // Get waypoints of specific trip
+  const [getWaypointsByTripId] = useLazyQuery(
+    graphqlQueries.getWaypointsByTripId,
+  );
+
   // Get the list of trips of a user
   const userTrips = useQuery(graphqlQueries.getUserTrips, {
     variables: {
@@ -90,8 +95,12 @@ export default function UserProfile() {
     modalsStore.activateModal(MODALS.NONE);
   }
 
+  // Chose a saved trip to display it on the map
   function handleTableRowClick(event) {
-    console.log('event: ', event);
+    console.log('handleTableRowClick -> event: ', event.target.id);
+    getWaypointsByTripId(event.target.id);
+    sessionStateSnapshot.setTripId(event.target.id);
+    modalsStore.activateModal(MODALS.NONE);
   }
 
   async function handleLogout() {

@@ -71,11 +71,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
       movedWayPoint,
     );
 
-    // console.log(
-    //   'updatedMovedWaypoint.locationName: ',
-    //   updatedMovedWaypoint.waypointName,
-    // );
-
     movedWayPoint.waypointName = updatedMovedWaypoint.waypointName;
 
     const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(

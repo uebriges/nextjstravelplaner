@@ -16,7 +16,6 @@ type SessionStoreType = {
   setSession: (
     activeSessionType: string,
     activeSessionToken: string,
-    tripId?: number,
     // needed if 5 mins session token get's invalid -> Fallback will be the 2 hours token
   ) => void;
   setFallbackSession: () => void;
@@ -32,13 +31,12 @@ const sessionStore: SessionStoreType = proxy({
   tripId: undefined,
   fallbackSessionToken: '',
   userId: 0,
-  setSession: (type, token, tripId) => {
+  setSession: (type, token) => {
     console.log('set session;');
     console.log('type: ', type);
     console.log('token: ', token);
     sessionStore.activeSessionType = type;
     sessionStore.activeSessionToken = token;
-    sessionStore.tripId = tripId;
 
     console.log(
       'sessionStore.activeSessionType: ',

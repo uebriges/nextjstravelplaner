@@ -91,8 +91,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     },
   });
 
-  console.log('1');
-
   // Store new waypoint in DB
   const [setNewWaypoint, { dataNewWaypoint }] = useMutation(
     graphqlQueries.setNewWaypoint,
@@ -107,8 +105,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     },
   );
 
-  console.log('2');
-
   // Refs
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
@@ -119,8 +115,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // const [showPopup, togglePopup] = useState(false);
   const [markerSetByClick, setMarkerSetByClick] = useState(false);
   const [markerSetBySearchResult, setMarkerSetBySearchResult] = useState(false);
-
-  console.log('3');
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
@@ -138,19 +132,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     [handleViewportChange],
   );
 
-  console.log('4');
   async function refetchWaypoints() {
     console.log('refetching.....');
     waypoints.refetch();
   }
-  console.log('5');
 
   useEffect(() => {
     console.log('useEffect generate turn by turn');
     generateTurnByTurnRoute();
   }, [waypoints.data]);
-
-  console.log('6');
 
   // Adds new coordinates to the DB
   async function addCoordinatesToRoute() {
@@ -176,8 +166,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       );
     }
 
-    console.log('7');
-
     // Waypoint not yet part of the trip
     if (!alreadyAvailableCoordinatesInDB) {
       console.log('coordinates not yet part of the trip ');
@@ -197,6 +185,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         },
       });
 
+      console.log('new Waypoint data: ', newWaypointData);
       console.log(
         'setting tripId....',
         typeof newWaypointData.data.setNewWaypoint.tripId,
@@ -249,8 +238,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
   }
 
-  console.log('8');
-
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
@@ -290,8 +277,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     }
   }
 
-  console.log('9');
-
   // Translates coordinates into location names
   async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
     // if (waypoint) {
@@ -312,20 +297,14 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     return waypoint;
   }
 
-  console.log('10');
-
   function onSearchResult() {
     setMarkerSetBySearchResult(true);
   }
-
-  console.log('11');
 
   useEffect(() => {
     waypoints.refetch();
     generateTurnByTurnRoute();
   }, []);
-
-  console.log('12');
 
   return (
     <Layout>

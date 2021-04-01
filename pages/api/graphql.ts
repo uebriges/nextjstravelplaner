@@ -15,9 +15,11 @@ import {
   getSessionIdByToken,
   getUserByUserName,
   getUserTrips,
+  getWaypointsByTripId,
   registerUser,
   saveUserTrip,
   setNewWaypoint,
+  startNewTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
   userNameExists,
@@ -44,6 +46,7 @@ const typeDefs = gql`
     waypoints(token: String): [Waypoint]
     getUserTrips(userId: Int): [Trip]
     getSessionIdByToken(token: String): Int
+    getWaypointsByTripId(tripId: Int): [Waypoint]
   }
   type Mutation {
     registerUser(user: UserRegisterInput): User
@@ -59,6 +62,7 @@ const typeDefs = gql`
     updateSessionOfCorrespondingTrip(sessions: UpdateSessionInput): [String]
     deleteSessionByToken(token: String): String
     saveUserTrip(userId: Int, tripId: Int, tripTitle: String): String
+    startNewTrip(token: String): Int
   }
 
   type LoginResult {
@@ -160,6 +164,9 @@ const resolvers = {
       );
       // console.log('extracted type: ', typeof sessionIdArray[0].id);
       return sessionIdArray.length > 0 ? sessionIdArray[0].id : 0;
+    },
+    getWaypointsByTripId(root, args) {
+      return getWaypointsByTripId(args.tripId);
     },
   },
   Mutation: {
@@ -307,6 +314,9 @@ const resolvers = {
       console.log('saved trip in resolver: ', savedTrip);
       return savedTrip;
     },
+    async startNewTrip(root, args) {
+      return startNewTrip(args.token);
+    },
   },
 };
 
@@ -324,17 +334,6 @@ export default new ApolloServer({
       res,
     };
   },
-  // formatResponse: (response, requestContext) => {
-  //   // console.log('response in formatResponse: ', response);
-  //   console.log('');
-  //   // console.log(
-  //   //   'requestContext in formatResponse: ',
-  //   //   requestContext.context.res,
-  //   // );
-
-  //   // requestContext.context.res.set('set-cookie', ['key1=value1', 'key2=value2']);
-  //   return response!;
-  // },
 }).createHandler({
   path: '/api/graphql',
 });

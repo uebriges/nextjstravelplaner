@@ -270,7 +270,7 @@ export async function setNewWaypoint(
       INSERT INTO trip
         (start_date, session_id)
       VALUES
-        (${new Date().toISOString()}, ${sessionId[0].id.toString()})
+        (${new Date().toLocaleDateString()}, ${sessionId[0].id.toString()})
       RETURNING *
   ;`;
 
@@ -458,9 +458,10 @@ export async function getUserByUserName(username: string) {
 
 export async function getUserTrips(userId: number) {
   const tripsOfUser = await sql`
-    SELECT *
+    SELECT DISTINCT id, title, start_date, end_date
     FROM user_trip, trip
     WHERE user_trip.user_id = ${userId}
+    AND title IS NOT NULL;
   `;
 
   console.log('tripsOfUser db: ', tripsOfUser);
@@ -475,7 +476,7 @@ export async function saveUserTrip(
   tripId: number,
   tripTitle: string,
 ) {
-  console.log('userId: ', typeof userId);
+  console.log('userId: ', userId);
   console.log('tripId: ', typeof tripId);
   console.log('tripTitle: ', tripTitle);
   await sql`
@@ -490,6 +491,56 @@ export async function saveUserTrip(
 `;
 
   return 'Saved trip';
+}
+
+export async function startNewTrip(token: string) {
+  // get session id
+
+  console.log('startNewTrip -> token: ', token);
+  const sessionId = await sql`
+    SELECT id
+    FROM session
+    WHERE token = ${token};
+  `;
+
+  console.log('startNewTrip -> session id: ', sessionId);
+  // remove session_id where session_id = sessionId
+  await sql`
+    UPDATE trip
+    SET session_id = ''
+    WHERE session_id = ${sessionId[0].id.toString()}
+  `;
+
+  console.log('startNewTrip -> removed session_id from current trip: ');
+
+  // create a new tripId with sessionId
+  const newTrip = await sql`
+    INSERT INTO trip
+    (session_id, start_date)
+    VALUES (${sessionId[0].id.toString()}, ${new Date().toLocaleDateString()})
+    RETURNING id
+  `;
+
+  console.log('startNewTrip -> new trip: ', camelcaseKeys(newTrip[0]));
+  return camelcaseKeys(newTrip[0].id);
+}
+
+export async function getWaypointsByTripId(tripId: number) {
+  const sessionId = await getSessionIdByToken(token);
+  let route = [];
+  console.log('getUserTrip --> sessionId getcurrentwaypoints: ', tripId);
+  if (tripId) {
+    console.log('Check for trip+waypoints of specific trip id');
+    route = await sql`
+      SELECT * from trip tripTable
+      INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
+      INNER JOIN waypoint waypointTable ON joinTable.waypoint_id=waypointTable.id
+      WHERE tripTable.id = ${tripId}
+      ORDER BY joinTable.order_number;
+    `;
+  }
+  console.log('getUserTrip --> route here');
+  return route.map((currentRoute) => camelcaseKeys(currentRoute));
 }
 
 module.exports = {
@@ -509,4 +560,6 @@ module.exports = {
   deleteSessionByToken,
   getSessionIdByToken,
   saveUserTrip,
+  startNewTrip,
+  getWaypointsByTripId,
 };

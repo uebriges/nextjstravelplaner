@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { Button } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
@@ -20,6 +20,16 @@ export default function MapOptions() {
     variables: {
       token: sessionStateSnapshot.activeSessionToken,
     },
+  });
+
+  const [startNewTrip] = useMutation(graphqlQueries.startNewTrip, {
+    refetchQueries: [
+      {
+        query: graphqlQueries.getCurrentWaypoints,
+        variables: { token: sessionStateSnapshot.activeSessionToken },
+      },
+    ],
+    awaitRefetchQueries: true,
   });
 
   // Save button is active if at least one waypoint is selected
@@ -44,11 +54,27 @@ export default function MapOptions() {
     }
   }
 
+  async function handleStartNewTrip() {
+    console.log(
+      'handleStartNewTrip -> sessionToken: ',
+      sessionStateSnapshot.activeSessionToken,
+    );
+    const newTripId = await startNewTrip({
+      variables: {
+        token: sessionStateSnapshot.activeSessionToken,
+      },
+    });
+
+    sessionStateSnapshot.setTripId(newTripId.data.startNewTrip);
+    console.log('handleStartNewTrip -> newTrip: ', newTripId.data.startNewTrip);
+  }
+
   return (
     <div css={mapOptionsStyle}>
       <Button onClick={handleSave} disabled={disabled}>
         Save
       </Button>
+      <Button onClick={handleStartNewTrip}>Start new trip</Button>
     </div>
   );
 }
