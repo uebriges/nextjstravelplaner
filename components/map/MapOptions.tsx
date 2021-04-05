@@ -10,11 +10,13 @@ import modalsStore, {
   MODALS,
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
+import tripStore from '../../utils/valtio/tripstore';
 
 export default function MapOptions() {
   const [disabled, setDisabled] = useState(true);
   const sessionStateSnapshot = useSnapshot(sessionStore);
   const modalStateSnapshot = useSnapshot(modalsStore);
+  const tripStateSnapshot = useSnapshot(tripStore);
 
   const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: {
@@ -75,6 +77,8 @@ export default function MapOptions() {
         Save
       </Button>
       <Button onClick={handleStartNewTrip}>Start new trip</Button>
+      <span>Current Trip: {sessionStateSnapshot.tripId}</span>
+      <span>Distance: {(tripStateSnapshot.distance / 1000).toFixed(2)} km</span>
     </div>
   );
 }

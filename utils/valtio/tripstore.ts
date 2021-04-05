@@ -13,16 +13,23 @@ type Waypoint = {
 type TripStoreType = {
   waypoints: Waypoint[] | null;
   finalRoute: number[][] | null;
-  addWaypoint: (newWaypoint: Waypoint) => void;
+  distance: number;
+  instructions: string[][];
+  addDistance: (distance: number) => void;
+  addInstructions: (instructions: string[]) => void;
 };
 
 const tripStore: TripStoreType = proxy({
   waypoints: null,
   finalRoute: null,
-  // addWaypoint: (newWaypoint: Waypoint) => {
-  //   tripStore.waypoints.push([]) = type;
-  //   tripStore.activeSessionToken = token;
-  // },
+  distance: 0,
+  instructions: [],
+  addDistance: (distance) => {
+    tripStore.distance = distance;
+  },
+  addInstructions: (instructions) => {
+    tripStore.instructions = instructions;
+  },
 });
 
 export default tripStore;

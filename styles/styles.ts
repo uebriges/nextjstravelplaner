@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 export const routeListStyle = css`
   position: absolute;
   left: 20px;
-  z-index: 10;
+  z-index: 1;
   top: 150px;
   background: white;
 `;
@@ -24,7 +24,13 @@ export const footerStlye = css`
 export const mapOptionsStyle = css`
   position: absolute;
   left: 20px;
-  z-index: 10;
+  z-index: 1;
   top: 100px;
   background: white;
+`;
+
+export const geocoderStyle = css`
+  .mapboxgl-ctrl-geocoder {
+    z-index: 40;
+  }
 `;

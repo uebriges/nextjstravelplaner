@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
-  doesPasswordMatchPasswordHash,
+  doesPasswordMatchPasswordHash
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
@@ -15,14 +15,14 @@ import {
   getSessionIdByToken,
   getUserByUserName,
   getUserTrips,
-  getWaypointsByTripId,
   registerUser,
   saveUserTrip,
   setNewWaypoint,
   startNewTrip,
+  switchToAnotherTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
-  userNameExists,
+  userNameExists
 } from '../../utils/database';
 
 let sql;
@@ -46,7 +46,6 @@ const typeDefs = gql`
     waypoints(token: String): [Waypoint]
     getUserTrips(userId: Int): [Trip]
     getSessionIdByToken(token: String): Int
-    getWaypointsByTripId(tripId: Int): [Waypoint]
   }
   type Mutation {
     registerUser(user: UserRegisterInput): User
@@ -63,6 +62,7 @@ const typeDefs = gql`
     deleteSessionByToken(token: String): String
     saveUserTrip(userId: Int, tripId: Int, tripTitle: String): String
     startNewTrip(token: String): Int
+    switchToAnotherTrip(currentSessionToken: String, newTripId: String): String
   }
 
   type LoginResult {
@@ -164,9 +164,6 @@ const resolvers = {
       );
       // console.log('extracted type: ', typeof sessionIdArray[0].id);
       return sessionIdArray.length > 0 ? sessionIdArray[0].id : 0;
-    },
-    getWaypointsByTripId(root, args) {
-      return getWaypointsByTripId(args.tripId);
     },
   },
   Mutation: {
@@ -316,6 +313,9 @@ const resolvers = {
     },
     async startNewTrip(root, args) {
       return startNewTrip(args.token);
+    },
+    async switchToAnotherTrip(root, args) {
+      return switchToAnotherTrip(args.currentSessionToken, args.newTripId);
     },
   },
 };

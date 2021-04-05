@@ -29,7 +29,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
   // Set waypoint marker as soon as props.waypoints changes
   useEffect(() => {
-    console.log('use effect waypoint markers: ', props.waypoints);
     setCurrentWayPoints(props.waypoints);
   }, [props.waypoints]);
 

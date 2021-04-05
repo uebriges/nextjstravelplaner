@@ -27,9 +27,6 @@ export default function SaveTrip() {
   );
 
   // Get current session id
-  // ---------------------- construction area ------------------
-  //  getSessionIdByToken still loads and therefore ???
-  //
   const sessionId = useQuery(graphqlQueries.getSessionIdByToken, {
     variables: {
       token: sessionStoreSnapshot.activeSessionToken,

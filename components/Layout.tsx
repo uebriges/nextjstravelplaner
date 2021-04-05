@@ -14,6 +14,7 @@ import RouteIcon from './map/RouteIcon';
 import Login from './modals/Login';
 import Register from './modals/Register';
 import SaveTrip from './modals/SaveTrip';
+import TripInstructions from './modals/TripInstructions';
 import UserProfile from './modals/UserProfile';
 
 interface LayoutProps {
@@ -75,6 +76,10 @@ export default function Layout(props: LayoutProps) {
     }
   }
 
+  function handleTripInstructions() {
+    modalStateSnapshot.activateModal(MODALS.TRIPINSTRUCTIONS);
+  }
+
   return (
     <>
       <Head>
@@ -96,6 +101,9 @@ export default function Layout(props: LayoutProps) {
         {modalStateSnapshot.activeModal === MODALS.SAVETRIP ? (
           <SaveTrip />
         ) : null}
+        {modalStateSnapshot.activeModal === MODALS.TRIPINSTRUCTIONS ? (
+          <TripInstructions />
+        ) : null}
         {props.children}
       </main>
       <footer css={footerStlye}>
@@ -106,7 +114,10 @@ export default function Layout(props: LayoutProps) {
           }}
         >
           <BottomNavigationAction icon={<LanguageIcon />} />
-          <BottomNavigationAction icon={<RouteIcon />} />
+          <BottomNavigationAction
+            icon={<RouteIcon />}
+            onClick={handleTripInstructions}
+          />
           <BottomNavigationAction
             icon={<PermIdentityIcon />}
             onClick={handleUserFunctionality}

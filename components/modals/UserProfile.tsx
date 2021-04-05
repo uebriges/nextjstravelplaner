@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Button,
   Dialog,
@@ -70,8 +70,17 @@ export default function UserProfile() {
   });
 
   // Get waypoints of specific trip
-  const [getWaypointsByTripId] = useLazyQuery(
-    graphqlQueries.getWaypointsByTripId,
+  const [switchToAnotherTrip] = useMutation(
+    graphqlQueries.switchToAnotherTrip,
+    {
+      refetchQueries: [
+        {
+          query: graphqlQueries.getCurrentWaypoints,
+          variables: { token: sessionStateSnapshot.activeSessionToken },
+        },
+      ],
+      awaitRefetchQueries: true,
+    },
   );
 
   // Get the list of trips of a user
@@ -97,9 +106,20 @@ export default function UserProfile() {
 
   // Chose a saved trip to display it on the map
   function handleTableRowClick(event) {
+    console.log(
+      'handleTableRowClick -> sessionStore.activeSessionToken: ',
+      sessionStore.activeSessionToken,
+    );
     console.log('handleTableRowClick -> event: ', event.target.id);
-    getWaypointsByTripId(event.target.id);
     sessionStateSnapshot.setTripId(event.target.id);
+    switchToAnotherTrip({
+      variables: {
+        currentSessionToken: sessionStateSnapshot.activeSessionToken,
+        newTripId: event.target.id,
+      },
+    });
+
+    setSuccessMessage('Switched to another trip');
     modalsStore.activateModal(MODALS.NONE);
   }
 
@@ -168,7 +188,6 @@ export default function UserProfile() {
               {userTrips.data && userTrips.data.getUserTrips.length > 0
                 ? userTrips.data.getUserTrips.map(
                     (currentTrip: UserTripType) => {
-                      console.log('current trip: ', currentTrip);
                       return (
                         <TableRow
                           hover

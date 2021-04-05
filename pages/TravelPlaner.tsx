@@ -16,8 +16,10 @@ import MapOptions from '../components/map/MapOptions';
 import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
+import { geocoderStyle } from '../styles/styles';
 import graphqlQueries from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
+import tripStore from '../utils/valtio/tripstore';
 
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
@@ -50,8 +52,15 @@ export type TravelPlanerPropsType = {
   csrfToken: string;
 };
 
+export type RouteStepType = {
+  maneuver: {
+    instruction: string;
+  };
+};
+
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const sessionStateSnapshot = useSnapshot(sessionStore);
+  const tripStateSnapshot = useSnapshot(tripStore);
 
   // set initial session state
   useEffect(() => {
@@ -75,10 +84,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     (newViewport) => setViewport(newViewport),
     [],
   );
-
-  console.log('rerender');
-  console.log('store session: ', sessionStateSnapshot.activeSessionToken);
-  console.log('props session: ', props.sessionToken);
 
   // GraphQL queries
   // Get current waypoints
@@ -138,9 +143,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   }
 
   useEffect(() => {
-    console.log('useEffect generate turn by turn');
     generateTurnByTurnRoute();
-  }, [waypoints.data]);
+  }, [waypoints.data, sessionStateSnapshot.tripId]);
 
   // Adds new coordinates to the DB
   async function addCoordinatesToRoute() {
@@ -242,6 +246,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   async function generateTurnByTurnRoute() {
     // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
     let newWaypointsArray = [];
+
+    // Order waypoints and store in newWaypointsArray
     if (waypoints.data && waypoints.data.waypoints !== null) {
       newWaypointsArray = Array.from(waypoints.data.waypoints);
       // console.log('waypoints new generateTurnByTurn: ', newWaypointsArray);
@@ -252,8 +258,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       });
     }
 
-    // console.log('waypoints new in order: ', newWaypointsArray);
-
+    // Generate the directions API call string
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
     if (newWaypointsArray.length > 1) {
       newWaypointsArray.map(
@@ -262,13 +267,26 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           apiCallString +=
             index < array.length - 1
               ? '%3B'
-              : `?alternatives=true&geometries=geojson&steps=true&access_token=${props.mapboxToken}`;
+              : `?alternatives=true&geometries=geojson&steps=true&banner_instructions=true&voice_instructions=true&access_token=${props.mapboxToken}`;
         },
       );
-      console.log('apiCallString: ', apiCallString);
+
+      // Call the API to retrieve the route information
       const routeJSON = await fetch(apiCallString);
       const response = await routeJSON.json();
-      // Cookies.set('finalRoute', response.routes[0]?.geometry.coordinates);
+
+      const legs = [];
+      legs.push(...response.routes[0]?.legs);
+      console.log('routes...: ', response.routes);
+      const instructions = legs.map((leg) => {
+        const legInstruction = leg.steps.map((step: RouteStepType) => {
+          return step.maneuver.instruction;
+        });
+        return legInstruction;
+      });
+      console.log('Instructions: ', instructions);
+      tripStateSnapshot.addDistance(response.routes[0]?.distance);
+      tripStateSnapshot.addInstructions(instructions);
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
       // console.log('else waypoints: ', waypoints.data?.waypoints);
@@ -315,7 +333,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       <div style={{ height: '100vh' }}>
         <div
           ref={geoCoderContainerRef}
-          style={{ position: 'absolute', top: 20, left: 20, zIndex: 1 }}
+          style={{ position: 'absolute', top: 20, left: 20, zIndex: 2 }}
         />
 
         <MapOptions />
@@ -368,10 +386,11 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             </>
           ) : null}
           <Geocoder
+            css={geocoderStyle}
             mapRef={mapRef}
             onViewportChange={handleGeocoderViewportChange}
             mapboxApiAccessToken={props.mapboxToken}
-            position="top-left"
+            // position="top-left"
             // collapsed={true}
             marker={false}
             containerRef={geoCoderContainerRef}

@@ -32,9 +32,6 @@ const sessionStore: SessionStoreType = proxy({
   fallbackSessionToken: '',
   userId: 0,
   setSession: (type, token) => {
-    console.log('set session;');
-    console.log('type: ', type);
-    console.log('token: ', token);
     sessionStore.activeSessionType = type;
     sessionStore.activeSessionToken = token;
 

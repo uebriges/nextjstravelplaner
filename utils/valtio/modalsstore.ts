@@ -6,6 +6,7 @@ export const MODALS = {
   REGISTER: 'register',
   USERPROFILE: 'userprofile',
   SAVETRIP: 'savetrip',
+  TRIPINSTRUCTIONS: 'tripinstructions',
 };
 
 export const INITIALACTION = {
