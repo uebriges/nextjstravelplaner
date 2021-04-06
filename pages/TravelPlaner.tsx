@@ -96,18 +96,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   });
 
   // Store new waypoint in DB
-  const [setNewWaypoint, { dataNewWaypoint }] = useMutation(
-    graphqlQueries.setNewWaypoint,
-    {
-      refetchQueries: [
-        {
-          query: graphqlQueries.getCurrentWaypoints,
-          variables: { token: props.sessionToken },
-        },
-      ],
-      awaitRefetchQueries: true,
-    },
-  );
+  const [setNewWaypoint] = useMutation(graphqlQueries.setNewWaypoint, {
+    refetchQueries: [
+      {
+        query: graphqlQueries.getCurrentWaypoints,
+        variables: { token: props.sessionToken },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   // Refs
   const mapRef = useRef(null);
@@ -138,7 +135,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   async function refetchWaypoints() {
     console.log('refetching.....');
-    waypoints.refetch();
+    return await waypoints.refetch();
   }
 
   useEffect(() => {
@@ -177,7 +174,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         longitude: currentLongitude,
         latitude: currentLatitude,
         waypointName: '',
-        orderNumber: 0,
       });
       console.log('newwaypoint revers: ', newWaypoint);
       let newWaypointData = await setNewWaypoint({
@@ -198,16 +194,19 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         Number(newWaypointData.data.setNewWaypoint.tripId),
       );
 
-      refetchWaypoints();
+      const newListOfWaypoints = await refetchWaypoints();
       console.log('new data: ', waypoints);
 
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
-      if (waypoints.data?.waypoints && waypoints.data?.waypoints.length > 1) {
+      if (
+        newListOfWaypoints.data.waypoints &&
+        newListOfWaypoints.data.waypoints.length > 1
+      ) {
         console.log('viewport adaptation waypoints.data: ', waypoints.data);
-        const allLongitudes = waypoints.data.waypoints.map(
+        const allLongitudes = newListOfWaypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.longitude,
         );
-        const allLatitudes = waypoints.data.waypoints.map(
+        const allLatitudes = newListOfWaypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.latitude,
         );
         console.log('allLat: ', allLatitudes);
