@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation } from '@apollo/client';
 import { BottomNavigation, BottomNavigationAction } from '@material-ui/core';
-import LanguageIcon from '@material-ui/icons/Language';
+import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import Head from 'next/head';
@@ -10,7 +10,6 @@ import { footerStlye } from '../styles/styles';
 import graphqlQueries from '../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
-import RouteIcon from './map/RouteIcon';
 import Login from './modals/Login';
 import Register from './modals/Register';
 import SaveTrip from './modals/SaveTrip';
@@ -114,9 +113,9 @@ export default function Layout(props: LayoutProps) {
             background: 'rgba(229, 231, 235, 0.7)',
           }}
         >
-          <BottomNavigationAction icon={<LanguageIcon />} />
+          {/* <BottomNavigationAction icon={<LanguageIcon />} /> */}
           <BottomNavigationAction
-            icon={<RouteIcon />}
+            icon={<FormatAlignLeftIcon />}
             onClick={handleTripInstructions}
           />
           <BottomNavigationAction
