@@ -2,10 +2,7 @@
 import { css } from '@emotion/react';
 
 export const routeListStyle = css`
-  position: absolute;
-  left: 20px;
   z-index: 1;
-  top: 150px;
   background: white;
 `;
 
@@ -22,6 +19,7 @@ export const footerStlye = css`
 `;
 
 export const mapOptionsStyle = css`
+  width: 400px;
   position: absolute;
   left: 20px;
   z-index: 1;
@@ -32,5 +30,19 @@ export const mapOptionsStyle = css`
 export const geocoderStyle = css`
   .mapboxgl-ctrl-geocoder {
     z-index: 40;
+  }
+`;
+
+export const mapOptionButtonsStyles = css`
+  display: flex;
+  justify-content: space-around;
+`;
+
+export const mapOptionsSpansStyles = css`
+  display: flex;
+  justify-content: space-around;
+
+  span {
+    padding: 6px 8px;
   }
 `;

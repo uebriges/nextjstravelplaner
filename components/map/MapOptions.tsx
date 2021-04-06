@@ -1,9 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
 import { Button } from '@material-ui/core';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import SaveIcon from '@material-ui/icons/Save';
 import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
-import { mapOptionsStyle } from '../../styles/styles';
+import {
+  mapOptionButtonsStyles,
+  mapOptionsSpansStyles,
+} from '../../styles/styles';
 import graphqlQueries from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
@@ -72,13 +77,25 @@ export default function MapOptions() {
   }
 
   return (
-    <div css={mapOptionsStyle}>
-      <Button onClick={handleSave} disabled={disabled}>
-        Save
-      </Button>
-      <Button onClick={handleStartNewTrip}>Start new trip</Button>
-      <span>Current Trip: {sessionStateSnapshot.tripId}</span>
-      <span>Distance: {(tripStateSnapshot.distance / 1000).toFixed(2)} km</span>
+    <div>
+      <div css={mapOptionButtonsStyles}>
+        <Button
+          onClick={handleSave}
+          disabled={disabled}
+          startIcon={<SaveIcon />}
+        >
+          Save
+        </Button>
+        <Button onClick={handleStartNewTrip} startIcon={<AutorenewIcon />}>
+          Start new trip
+        </Button>
+      </div>
+      <div css={mapOptionsSpansStyles}>
+        <span>Current Trip: {sessionStateSnapshot.tripId}</span>
+        <span>
+          Distance: {(tripStateSnapshot.distance / 1000).toFixed(2)} km
+        </span>
+      </div>
     </div>
   );
 }

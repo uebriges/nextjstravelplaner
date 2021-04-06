@@ -16,11 +16,10 @@ import MapOptions from '../components/map/MapOptions';
 import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
-import { geocoderStyle } from '../styles/styles';
+import { geocoderStyle, mapOptionsStyle } from '../styles/styles';
 import graphqlQueries from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import tripStore from '../utils/valtio/tripstore';
-
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
 
 type LocationInDBType = {
@@ -178,6 +177,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         longitude: currentLongitude,
         latitude: currentLatitude,
         waypointName: '',
+        orderNumber: 0,
       });
       console.log('newwaypoint revers: ', newWaypoint);
       let newWaypointData = await setNewWaypoint({
@@ -335,12 +335,14 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 2 }}
         />
-
-        <MapOptions />
-        <WaypointsList
-          generateTurnByTurnRoute={generateTurnByTurnRoute}
-          sessionToken={sessionStateSnapshot.activeSessionToken}
-        />
+        <div css={mapOptionsStyle}>
+          <MapOptions />
+          <hr />
+          <WaypointsList
+            generateTurnByTurnRoute={generateTurnByTurnRoute}
+            sessionToken={sessionStateSnapshot.activeSessionToken}
+          />
+        </div>
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}

@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
-  doesPasswordMatchPasswordHash
+  doesPasswordMatchPasswordHash,
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
@@ -22,7 +22,7 @@ import {
   switchToAnotherTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
-  userNameExists
+  userNameExists,
 } from '../../utils/database';
 
 let sql;
