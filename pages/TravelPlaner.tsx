@@ -50,6 +50,8 @@ export type TravelPlanerPropsType = {
   sessionToken: string;
   csrfToken: string;
   isLoggedIn: boolean;
+  currentTripId: number;
+  currentUserId: number;
 };
 
 export type RouteStepType = {
@@ -76,6 +78,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
   }, [props.isLoggedIn]);
+
+  useEffect(() => {
+    sessionStateSnapshot.setTripId(props.currentTripId);
+  }, [props.currentTripId]);
+
+  useEffect(() => {
+    sessionStateSnapshot.setUserId(props.currentUserId);
+  }, [props.currentUserId]);
+  
 
   const [viewport, setViewport] = useState({
     width: '100vw',
@@ -419,6 +430,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     createSessionTwoHours,
     deleteAllExpiredSessions,
     isCurrentTokenLoggedIn,
+    getCurrentTripIdByToken,
+    getUserIdBytoken,
   } = await import('../utils/database');
   const { serializeSecureCookieServerSide } = await import('../utils/cookies');
   const { createCsrfToken } = await import('../utils/auth');
@@ -447,8 +460,14 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   const csrfToken = createCsrfToken(token);
 
+  // Is user already logged in?
   const loggedIn = await isCurrentTokenLoggedIn(token);
-  console.log('LoggedIn server: ', loggedIn);
+
+  // Is there currently a trip the user is working on
+  const currentTripId = await getCurrentTripIdByToken(token);
+
+  // Which user is logged in?
+  const currentUserId = await getUserIdBytoken(token);
 
   return {
     props: {
@@ -457,6 +476,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
       sessionToken: token || null,
       csrfToken: csrfToken || null,
       isLoggedIn: loggedIn || null,
+      currentTripId: currentTripId || null,
+      currentUserId: currentUserId || null,
     },
   };
 }

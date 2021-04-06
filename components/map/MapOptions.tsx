@@ -23,6 +23,7 @@ export default function MapOptions() {
   const modalStateSnapshot = useSnapshot(modalsStore);
   const tripStateSnapshot = useSnapshot(tripStore);
 
+  // GraphQL
   const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
     variables: {
       token: sessionStateSnapshot.activeSessionToken,
@@ -39,12 +40,32 @@ export default function MapOptions() {
     awaitRefetchQueries: true,
   });
 
+  const userTrips = useQuery(graphqlQueries.getUserTrips, {
+    variables: {
+      userId: sessionStateSnapshot.userId,
+    },
+  });
+
   // Save button is active if at least one waypoint is selected
   useEffect(() => {
-    waypoints.data && waypoints.data.waypoints.length > 0
+    console.log('useeffect tripId: ', typeof sessionStateSnapshot.tripId);
+    const indexOfTrip = userTrips.data?.getUserTrips?.findIndex(
+      (currentTrip) => {
+        console.log('currentTrip ID: ', currentTrip.id);
+        return currentTrip.id === sessionStateSnapshot.tripId;
+      },
+    );
+    console.log('indexOfTrip: ', indexOfTrip < 0);
+    console.log('userTrips: ', userTrips);
+    console.log(
+      'waypoints.data.waypoints.length: ',
+      waypoints.data?.waypoints?.length > 0,
+    );
+    console.log('waypoints.data: ', waypoints.data);
+    waypoints.data && waypoints.data.waypoints.length > 0 && indexOfTrip < 0
       ? setDisabled(false)
       : setDisabled(true);
-  }, [waypoints]);
+  }, [waypoints, userTrips]);
 
   // Save trip
   function handleSave() {

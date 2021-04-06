@@ -112,7 +112,7 @@ export default function UserProfile() {
       sessionStore.activeSessionToken,
     );
     console.log('handleTableRowClick -> event: ', event.target.id);
-    sessionStateSnapshot.setTripId(event.target.id);
+    sessionStateSnapshot.setTripId(Number(event.target.id));
     switchToAnotherTrip({
       variables: {
         currentSessionToken: sessionStateSnapshot.activeSessionToken,
@@ -159,6 +159,7 @@ export default function UserProfile() {
       SESSIONS.ANONYMOUS,
       newToken.data.updateSessionOfCorrespondingTrip[0],
     );
+    sessionStateSnapshot.setUserId(0);
     console.log(
       'set new session type: ',
       sessionStateSnapshot.activeSessionType,

@@ -34,7 +34,19 @@ export default function SaveTrip() {
   });
 
   console.log('--> Save trip active session Id: ', sessionId);
-  const [saveUserTrip] = useMutation(graphqlQueries.saveUserTrip);
+
+  // Refetch of getUserTrips is needed to deactivate the save button immediately
+  const [saveUserTrip] = useMutation(graphqlQueries.saveUserTrip, {
+    refetchQueries: [
+      {
+        query: graphqlQueries.getUserTrips,
+        variables: {
+          userId: sessionStoreSnapshot.userId,
+        },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   console.log('--> Save trip saveUserTrip function: ', saveUserTrip);
 

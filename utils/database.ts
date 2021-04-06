@@ -556,6 +556,21 @@ export async function switchToAnotherTrip(
   return 'switched to tripId: ' + newTripId;
 }
 
+export async function getCurrentTripIdByToken(token: string) {
+  const tokenId = await getSessionIdByToken(token);
+  console.log('getCurrentTripIdByToken -> tokenId: ', tokenId);
+
+  const tripId = await sql`
+    SELECT id
+    FROM trip
+    WHERE session_id = ${tokenId[0].id.toString()}
+  `;
+
+  console.log('getCurrentTripIdByToken -> tripId: ', tripId);
+
+  return camelcaseKeys(tripId)[0].id;
+}
+
 export async function isCurrentTokenLoggedIn(token: string) {
   let userId = await sql`
     SELECT user_id
@@ -570,6 +585,21 @@ export async function isCurrentTokenLoggedIn(token: string) {
   console.log('isCurrentTokenLoggedIn: ', isLoggedIn);
 
   return isLoggedIn;
+}
+
+export async function getUserIdBytoken(token: string) {
+  console.log('getUserIdBytoken -> token: ', token);
+  const userId = await sql`
+    SELECT user_id
+    FROM session
+    WHERE token = ${token}
+  `;
+
+  console.log(
+    'camelcaseKeys(userId)[0].userId: ',
+    camelcaseKeys(userId)[0].userId,
+  );
+  return camelcaseKeys(userId)[0].userId;
 }
 
 module.exports = {
@@ -592,4 +622,6 @@ module.exports = {
   startNewTrip,
   switchToAnotherTrip,
   isCurrentTokenLoggedIn,
+  getCurrentTripIdByToken,
+  getUserIdBytoken,
 };
