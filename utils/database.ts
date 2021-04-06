@@ -556,6 +556,22 @@ export async function switchToAnotherTrip(
   return 'switched to tripId: ' + newTripId;
 }
 
+export async function isCurrentTokenLoggedIn(token: string) {
+  let userId = await sql`
+    SELECT user_id
+    FROM session
+    WHERE token= ${token};
+  `;
+
+  const result = userId.map((currentUserId) => camelcaseKeys(currentUserId));
+  console.log('result: ', result);
+  const isLoggedIn = result.length < 1 || !result[0].userId ? false : true;
+
+  console.log('isCurrentTokenLoggedIn: ', isLoggedIn);
+
+  return isLoggedIn;
+}
+
 module.exports = {
   deleteAllExpiredSessions,
   createSessionFiveMinutes,
@@ -575,4 +591,5 @@ module.exports = {
   saveUserTrip,
   startNewTrip,
   switchToAnotherTrip,
+  isCurrentTokenLoggedIn,
 };

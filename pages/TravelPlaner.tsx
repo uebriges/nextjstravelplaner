@@ -49,6 +49,7 @@ export type TravelPlanerPropsType = {
   mapboxToken: string;
   sessionToken: string;
   csrfToken: string;
+  isLoggedIn: boolean;
 };
 
 export type RouteStepType = {
@@ -68,6 +69,13 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
   }, [props.sessionToken, sessionStateSnapshot]);
+
+  useEffect(() => {
+    if (props.isLoggedIn) {
+      sessionStateSnapshot.setSession(SESSIONS.LOGGEDIN, props.sessionToken);
+      sessionStateSnapshot.setCSRFToken(props.csrfToken);
+    }
+  }, [props.isLoggedIn]);
 
   const [viewport, setViewport] = useState({
     width: '100vw',
@@ -407,9 +415,11 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 export default TravelPlaner;
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const { createSessionTwoHours, deleteAllExpiredSessions } = await import(
-    '../utils/database'
-  );
+  const {
+    createSessionTwoHours,
+    deleteAllExpiredSessions,
+    isCurrentTokenLoggedIn,
+  } = await import('../utils/database');
   const { serializeSecureCookieServerSide } = await import('../utils/cookies');
   const { createCsrfToken } = await import('../utils/auth');
 
@@ -437,12 +447,16 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   const csrfToken = createCsrfToken(token);
 
+  const loggedIn = await isCurrentTokenLoggedIn(token);
+  console.log('LoggedIn server: ', loggedIn);
+
   return {
     props: {
       mapboxToken: process.env.MAPBOX_API_TOKEN || null,
       routeInCookies: ctx.req.cookies.route || null,
       sessionToken: token || null,
       csrfToken: csrfToken || null,
+      isLoggedIn: loggedIn || null,
     },
   };
 }

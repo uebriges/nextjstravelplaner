@@ -276,7 +276,6 @@ const resolvers = {
     },
     async updateSessionOfCorrespondingTrip(root, args, context) {
       console.log('args: ', args);
-      console.log('update update: ', args);
       const newSessionToken = await updateSessionOfCorrespondingTrip(
         args.sessions.currentToken,
         args.sessions.action,

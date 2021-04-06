@@ -100,6 +100,7 @@ export default function UserProfile() {
     graphqlQueries.updateSessionOfCorrespondingTrip,
   );
 
+  // Cancel closes the modal
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
   }
@@ -124,6 +125,7 @@ export default function UserProfile() {
   }
 
   async function handleLogout() {
+    console.log('--> handle Logout');
     modalsStore.activateModal(MODALS.NONE);
 
     // Update session token for trip -> new session token
@@ -156,6 +158,10 @@ export default function UserProfile() {
     sessionStateSnapshot.setSession(
       SESSIONS.ANONYMOUS,
       newToken.data.updateSessionOfCorrespondingTrip[0],
+    );
+    console.log(
+      'set new session type: ',
+      sessionStateSnapshot.activeSessionType,
     );
   }
 

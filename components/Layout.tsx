@@ -35,6 +35,7 @@ export default function Layout(props: LayoutProps) {
     // If user is already logged in
     if (sessionStoreSnapshot.activeSessionType === SESSIONS.LOGGEDIN) {
       modalStateSnapshot.activateModal(MODALS.USERPROFILE);
+      return;
     }
 
     console.log('handleUserFunctionality');

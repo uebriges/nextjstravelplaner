@@ -65,6 +65,7 @@ export default function Login(props) {
     console.log('logged in: ', loggedIn);
     // Update session token in sessionStore + update csrf
     if (loggedIn.data.loginUser) {
+      console.log('returned user');
       sessionStateSnapshot.setSession(
         SESSIONS.LOGGEDIN,
         loggedIn.data.loginUser.tokens.token,
@@ -117,7 +118,7 @@ export default function Login(props) {
           margin="dense"
           id="password"
           label="Password"
-          type="text"
+          type="password"
           fullWidth
           onChange={(e) => setUserPassword(e.target.value)}
         />
