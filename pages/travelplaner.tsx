@@ -484,7 +484,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   return {
     props: {
-      mapboxToken: process.env.MAPBOX_API_TOKEN || null,
+      mapboxToken: process.env.MAPBOXAPITOKEN || null,
       routeInCookies: ctx.req.cookies.route || null,
       sessionToken: token || null,
       csrfToken: csrfToken || null,
