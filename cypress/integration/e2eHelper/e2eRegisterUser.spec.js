@@ -1,7 +1,7 @@
 export default function RegisterUserTest() {
   describe('Register a new user', () => {
     it('Register a new user', () => {
-      cy.visit('/travelplaner');
+      cy.visit('/travelplaner', { responseTimeout: 31000 });
       cy.get('[data-cy="UserProfileBtn"]').click();
       cy.get('[data-cy="OpenRegisterBtn"]').click();
       cy.get('#userName').type('cypresstestuser');
