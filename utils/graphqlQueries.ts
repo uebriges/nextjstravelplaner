@@ -1,14 +1,5 @@
 import { gql } from '@apollo/client';
 
-export const userQuery = gql`
-  query {
-    user(userName: "asdf") {
-      id
-      userName
-    }
-  }
-`;
-
 export const registerUser = gql`
   mutation($user: UserRegisterInput) {
     registerUser(user: $user) {
@@ -139,7 +130,6 @@ export const switchToAnotherTrip = gql`
 `;
 
 module.exports = {
-  userQuery,
   getCurrentWaypoints,
   setNewWaypoint,
   updateWaypoints,
