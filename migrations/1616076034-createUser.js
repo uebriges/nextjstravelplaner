@@ -8,6 +8,8 @@ exports.up = async (sql) => {
 		email text,
 		home_coordinates varchar(50),
 		currently_traveling boolean,
+		user_name varchar(50),
+		password_hash varchar(100),
 		PRIMARY KEY(id));`;
 };
 

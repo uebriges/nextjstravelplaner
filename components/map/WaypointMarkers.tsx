@@ -1,8 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import Cookies from 'js-cookie';
+import { useMutation } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
+import { useSnapshot } from 'valtio';
 import { CoordinatesType } from '../../pages/travelplaner';
+import graphqlQueries from '../../utils/graphqlQueries';
+import sessionStore from '../../utils/valtio/sessionstore';
 import MarkerIcon from './MarkerIcon';
 
 type WaypointMarkerPropsType = {
@@ -24,19 +27,31 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     CoordinatesType[] | undefined
   >();
 
-  // Set waypoint marker at first render
+  // Set waypoint marker as soon as props.waypoints changes
   useEffect(() => {
-    console.log('props.waypoints useeffect: ', props.waypoints);
     setCurrentWayPoints(props.waypoints);
   }, [props.waypoints]);
 
-  console.log('props.waypoints: ', props.waypoints);
+  // Retrieves current token
+  const sessionStateSnapshot = useSnapshot(sessionStore);
+
+  // Update waypoints in DB
+  const [updateWaypoints] = useMutation(graphqlQueries.updateWaypoints, {
+    refetchQueries: [
+      {
+        query: graphqlQueries.getCurrentWaypoints,
+        variables: { token: sessionStateSnapshot.activeSessionToken },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
+
   const waypoints = props.waypoints;
-  console.log('currentWayPoints: ', currentWayPoints);
 
   // Event handler: End of dragging
   const handleOnDragEnd = async (event, id) => {
     console.log('handleOnDragEnd');
+    console.log('current waypoints: ', [...currentWayPoints]);
     if (!currentWayPoints) {
       return;
     }
@@ -44,21 +59,18 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
       ...currentWayPoints.find((waypoint) => waypoint.id === id),
     };
 
-    movedWayPoint.longitude = event.lngLat[0];
-    movedWayPoint.latitude = event.lngLat[1];
+    console.log('moved waypoint: ', movedWayPoint);
 
-    console.log('movedWayPoint: ', movedWayPoint);
-    // if (!movedWayPoint.id) return;
+    movedWayPoint.longitude = event.lngLat[0].toString();
+    movedWayPoint.latitude = event.lngLat[1].toString();
+
+    console.log('movedWayPoint afterwards: ', movedWayPoint);
+    if (!movedWayPoint.id) return;
     const updatedMovedWaypoint = await props.reversGeocodeWaypoint(
       movedWayPoint,
     );
 
-    console.log(
-      'updatedMovedWaypoint.locationName: ',
-      updatedMovedWaypoint.locationName,
-    );
-
-    movedWayPoint.locationName = updatedMovedWaypoint.locationName;
+    movedWayPoint.waypointName = updatedMovedWaypoint.waypointName;
 
     const updatedWayPoints: CoordinatesType[] = currentWayPoints.map(
       (waypoint) => {
@@ -69,9 +81,20 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
       },
     );
 
-    setCurrentWayPoints(updatedWayPoints);
-    Cookies.set('waypoints', JSON.stringify(updatedWayPoints));
+    console.log('before updating waypoints: ', updatedWayPoints);
+
+    // setCurrentWayPoints(updatedWayPoints);
+    // Cookies.set('waypoints', JSON.stringify(currentWayPoints));
+    await updateWaypoints({
+      variables: {
+        waypoints: updatedWayPoints,
+      },
+    });
+    console.log('waypoints updated');
     props.generateTurnByTurnRoute();
+    console.log('generated turn by turn');
+    setCurrentWayPoints(updatedWayPoints);
+    console.log('state waypoints updated');
   };
 
   const handleOnDrag = useCallback((event) => {
@@ -87,12 +110,14 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
             return (
               <Marker
                 key={id} // waypoint.longitude + waypoint.latitude
-                latitude={waypoint.latitude}
-                longitude={waypoint.longitude}
+                latitude={Number(waypoint.latitude)}
+                longitude={Number(waypoint.longitude)}
                 offsetLeft={-20}
                 offsetTop={-10}
                 draggable
-                onDragEnd={(event) => handleOnDragEnd(event, waypoint.id)}
+                onDragEnd={(event) => {
+                  handleOnDragEnd(event, waypoint.id);
+                }}
                 onDrag={handleOnDrag}
               >
                 <MarkerIcon />

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { useMutation, useQuery } from '@apollo/client';
 import {
   IconButton,
   List,
@@ -9,8 +10,7 @@ import {
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
-import Cookies from 'js-cookie';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DragDropContext,
   Draggable,
@@ -20,22 +20,65 @@ import {
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
-
-function getCurrentWaypoints() {
-  return Cookies.getJSON('waypoints');
-}
+import graphqlQueries from '../../utils/graphqlQueries';
 
 type WaypointsListType = {
   generateTurnByTurnRoute: () => void;
+  sessionToken: string;
 };
 
 export default function WaypointsList(props: WaypointsListType) {
-  const [waypoints, setWaypoints] = useState(getCurrentWaypoints());
+  // Retrieve current waypoints from DB
+  const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
+    variables: { token: props.sessionToken },
+  });
+
+  // Delete waypoint from DB
+  const [deleteWaypoint, dataDeletedWaypoints] = useMutation(
+    graphqlQueries.deleteWaypoint,
+  );
+
+  // Update waypoints in DB
+  const [updateWaypoints, dataUpdatedWaypoints] = useMutation(
+    graphqlQueries.updateWaypoints,
+    {
+      refetchQueries: [
+        {
+          query: graphqlQueries.getCurrentWaypoints,
+          variables: { token: props.sessionToken },
+        },
+      ],
+      awaitRefetchQueries: true,
+    },
+  );
+
+  // Store the moved waypoint and it's updated long/lat and waypoint name
+  const [waypoints, setWaypoints] = useState(
+    waypointsFromDB.data ? waypointsFromDB.data.waypoints : null,
+  );
+
+  useEffect(() => {
+    console.log('waypointsFromDB.data: ', waypointsFromDB.data);
+    if (waypointsFromDB.data && waypointsFromDB.data.waypoints !== null) {
+      const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
+      waypointsArray.sort((a, b) => {
+        return a.orderNumber - b.orderNumber;
+      });
+      setWaypoints(waypointsArray);
+      props.generateTurnByTurnRoute();
+    }
+  }, [waypointsFromDB.data]);
+
+  function refetchWaypoints() {
+    console.log('refetching...');
+    waypointsFromDB.refetch();
+  }
+
   resetServerContext();
 
-  function onDragEnd(result: DropResult) {
+  async function onDragEnd(result: DropResult) {
     const { destination, source } = result;
-    const pointsTemp = Array.from(getCurrentWaypoints());
+    const pointsTemp = [...waypointsFromDB.data.waypoints];
 
     if (!destination) {
       return;
@@ -47,17 +90,31 @@ export default function WaypointsList(props: WaypointsListType) {
     ) {
       return;
     }
-
     const pointToBeMoved = pointsTemp.splice(source.index, 1);
     pointsTemp.splice(destination.index, 0, pointToBeMoved[0]);
 
-    Cookies.set('waypoints', pointsTemp);
-    props.generateTurnByTurnRoute();
+    // Update the order numbers
+    const newlyOrderedPoints = pointsTemp.map((point, index) => {
+      point = { ...point, orderNumber: index + 1 };
+      return point;
+    });
+
+    await updateWaypoints({
+      variables: {
+        waypoints: newlyOrderedPoints,
+      },
+    });
+
+    waypointsFromDB.refetch();
+
+    console.log('updatedWaypoints in drag end: ', waypointsFromDB.data); // wrong values
+    console.log('state waypoints: ', waypoints); // wrong value
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="1">
+        {/* provided is served by Droppable */}
         {(provided) => {
           return (
             <div css={routeListStyle}>
@@ -66,9 +123,10 @@ export default function WaypointsList(props: WaypointsListType) {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {getCurrentWaypoints()
-                  ? getCurrentWaypoints().map(
+                {waypoints
+                  ? waypoints.map(
                       (waypoint: CoordinatesType, index: number) => {
+                        // console.log('render waypoint: ', waypoint);
                         return (
                           <Draggable
                             key={
@@ -94,7 +152,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                     <MenuIcon />
                                   </ListItemIcon>
                                   <ListItemText
-                                    primary={waypoint.locationName}
+                                    primary={waypoint.waypointName}
                                   />
                                   <ListItemSecondaryAction>
                                     <IconButton
@@ -105,12 +163,19 @@ export default function WaypointsList(props: WaypointsListType) {
                                       }
                                       edge="end"
                                       aria-label="delete"
-                                      onClick={() => {
-                                        const route = getCurrentWaypoints();
+                                      onClick={async () => {
+                                        const route = Array.from(
+                                          waypointsFromDB.data.waypoints,
+                                        );
                                         route.splice(index, 1);
-                                        Cookies.set('waypoints', route);
+                                        await deleteWaypoint({
+                                          variables: {
+                                            waypointId: waypoint.id,
+                                          },
+                                        });
                                         setWaypoints(route);
                                         props.generateTurnByTurnRoute();
+                                        waypointsFromDB.refetch();
                                       }}
                                     >
                                       <CloseIcon />
