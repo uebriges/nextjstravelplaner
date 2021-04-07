@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
 import { useSnapshot } from 'valtio';
-import { CoordinatesType } from '../../pages/travelplaner';
+import { CoordinatesType } from '../../pages/TravelPlaner1';
 import graphqlQueries from '../../utils/graphqlQueries';
 import sessionStore from '../../utils/valtio/sessionstore';
 import MarkerIcon from './MarkerIcon';

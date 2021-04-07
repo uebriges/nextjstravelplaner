@@ -6,7 +6,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText,
+  ListItemText
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -16,9 +16,9 @@ import {
   Draggable,
   Droppable,
   DropResult,
-  resetServerContext,
+  resetServerContext
 } from 'react-beautiful-dnd';
-import { CoordinatesType } from '../../pages/travelplaner';
+import { CoordinatesType } from '../../pages/TravelPlaner1';
 import { routeListStyle } from '../../styles/styles';
 import graphqlQueries from '../../utils/graphqlQueries';
 
