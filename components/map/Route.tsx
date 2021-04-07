@@ -3,6 +3,7 @@ import { CoordinatesType } from '../pages/travelplaner';
 
 type RoutePropsType = {
   points: CoordinatesType[] | undefined;
+  id: string;
 };
 
 type DrawRoutePropsType = {

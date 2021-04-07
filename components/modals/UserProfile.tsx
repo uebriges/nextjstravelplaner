@@ -197,6 +197,7 @@ export default function UserProfile() {
                     (currentTrip: UserTripType) => {
                       return (
                         <TableRow
+                          data-cy={'trip' + currentTrip.id.toString()}
                           hover
                           role="checkbox"
                           tabIndex={-1}

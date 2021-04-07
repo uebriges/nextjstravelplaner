@@ -101,13 +101,18 @@ export default function MapOptions() {
     <div>
       <div css={mapOptionButtonsStyles}>
         <Button
+          data-cy="SaveTripBtn"
           onClick={handleSave}
           disabled={disabled}
           startIcon={<SaveIcon />}
         >
           Save
         </Button>
-        <Button onClick={handleStartNewTrip} startIcon={<AutorenewIcon />}>
+        <Button
+          data-cy="StartNewTripBtn"
+          onClick={handleStartNewTrip}
+          startIcon={<AutorenewIcon />}
+        >
           Start new trip
         </Button>
       </div>

@@ -86,7 +86,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   useEffect(() => {
     sessionStateSnapshot.setUserId(props.currentUserId);
   }, [props.currentUserId]);
-  
 
   const [viewport, setViewport] = useState({
     width: '100vw',
@@ -375,7 +374,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           markerSetBySearchResult={markerSetBySearchResult}
           setMarkerSetBySearchResult={setMarkerSetBySearchResult}
         >
-          <Route points={currentRoute} />
+          <Route id="TravelplanerMapId" points={currentRoute} />
           <WaypointMarkers
             waypoints={waypoints.data?.waypoints}
             reversGeocodeWaypoint={reversGeocodeWaypoint}
@@ -441,7 +440,21 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   let token;
 
   // if new session needed = 2 hours token
-  if (ctx.req.cookies.session === 'undefined' || !ctx.req.cookies.session) {
+  console.log('Getserversideprops travelplaner -> ', ctx.req.cookies);
+  console.log(
+    'Getserversideprops travelplaner -> ',
+    Object.keys(ctx.req.cookies).length,
+  );
+  console.log(
+    'Getserversideprops travelplaner -> ',
+    ctx.req.cookies.constructor === Object,
+  );
+  if (
+    ctx.req.cookies.session === 'undefined' ||
+    !ctx.req.cookies.session ||
+    (Object.keys(ctx.req.cookies).length === 0 &&
+      ctx.req.cookies.constructor === Object)
+  ) {
     console.log('no session available yet');
     // Set 2 hours token -> Anonymous
     token = (await createSessionTwoHours()).token;

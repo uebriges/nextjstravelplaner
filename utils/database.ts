@@ -557,6 +557,7 @@ export async function switchToAnotherTrip(
 }
 
 export async function getCurrentTripIdByToken(token: string) {
+  console.log('getCurrentTripIdByToken -> token: ', token);
   const tokenId = await getSessionIdByToken(token);
   console.log('getCurrentTripIdByToken -> tokenId: ', tokenId);
 

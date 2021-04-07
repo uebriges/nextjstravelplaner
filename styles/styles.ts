@@ -30,6 +30,20 @@ export const mapOptionsStyle = css`
 export const geocoderStyle = css`
   .mapboxgl-ctrl-geocoder {
     z-index: 40;
+    background-color: rgb(61 120 162);
+    color: #f3f2f2;
+  }
+
+  .suggestions-wrapper,
+  .mapboxgl-ctrl-geocoder--input,
+  .mapboxgl-ctrl-geocoder--suggestion,
+  .suggestions,
+  .active,
+  .mapboxgl-ctrl-geocoder--suggestion-title,
+  .mapboxgl-ctrl-geocoder--suggestion-address,
+  .mapboxgl-ctrl {
+    background-color: rgb(61 120 162);
+    color: #f3f2f2;
   }
 `;
 

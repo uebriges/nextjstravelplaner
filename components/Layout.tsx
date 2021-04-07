@@ -119,6 +119,7 @@ export default function Layout(props: LayoutProps) {
             onClick={handleTripInstructions}
           />
           <BottomNavigationAction
+            data-cy="UserProfileBtn"
             icon={<PermIdentityIcon />}
             onClick={handleUserFunctionality}
           />

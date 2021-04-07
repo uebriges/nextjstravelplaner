@@ -100,7 +100,7 @@ export default function SaveTrip() {
         <Button onClick={handleCancel} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSave} color="primary">
+        <Button data-cy="SaveTripToDBBtn" onClick={handleSave} color="primary">
           Save
         </Button>
       </DialogActions>

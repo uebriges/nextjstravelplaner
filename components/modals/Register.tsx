@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import graphqlQueries from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
+import sessionStore from '../../utils/valtio/sessionstore';
 
 export default function Register(props) {
   const [userName, setUserName] = useState('');
@@ -21,6 +22,10 @@ export default function Register(props) {
   const [userPassword, setUserPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const modalStoreSnapshot = useSnapshot(modalsStore);
+  const sessionStateSnapshot = useSnapshot(sessionStore);
+
+  // GraphQL
   const [registerUser, registeredUser] = useMutation(
     graphqlQueries.registerUser,
     {
@@ -29,7 +34,15 @@ export default function Register(props) {
       },
     },
   );
-  const modalStoreSnapshot = useSnapshot(modalsStore);
+
+  const [
+    loginUserDB,
+    { error: loginError, loading: loginLoading },
+  ] = useMutation(graphqlQueries.loginUser, {
+    onCompleted({ loggedIn }) {
+      return loggedIn;
+    },
+  });
 
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
@@ -58,6 +71,32 @@ export default function Register(props) {
     setErrorMessage(null);
     setSuccessMessage('User created');
     setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
+
+    // Automatically login after successfull registration
+    // const loggedIn = await loginUserDB({
+    //   variables: {
+    //     user: {
+    //       username: userName,
+    //       password: userPassword,
+    //       sessionToken: sessionStateSnapshot.activeSessionToken,
+    //       csrfToken: sessionStateSnapshot.csrfToken,
+    //     },
+    //   },
+    // });
+    // console.log('logged in: ', loggedIn);
+
+    // // Update session token in sessionStore + update csrf
+    // if (loggedIn.data.loginUser) {
+    //   console.log('returned user');
+    //   sessionStateSnapshot.setSession(
+    //     SESSIONS.LOGGEDIN,
+    //     loggedIn.data.loginUser.tokens.token,
+    //   );
+    //   sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
+    //   sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
+    //   console.log('modalStateSnapshot: ', modalStoreSnapshot);
+    //   modalStoreSnapshot.activateModal(MODALS.NONE);
+    // }
   }
 
   return (
@@ -71,6 +110,7 @@ export default function Register(props) {
       </DialogTitle>
       <DialogContent>
         <TextField
+          data-cy="RegistrationTextInputUserName"
           autoFocus
           margin="dense"
           id="userName"
@@ -80,40 +120,40 @@ export default function Register(props) {
           onChange={(e) => setUserName(e.target.value)}
         />
         <TextField
-          autoFocus
           margin="dense"
           id="firstName"
           label="First name"
           type="text"
           fullWidth
           onChange={(e) => setUserFirstName(e.target.value)}
+          data-cy="RegistrationTextInputUserFirstName"
         />
         <TextField
-          autoFocus
           margin="dense"
           id="lastName"
           label="Last name"
           type="text"
           fullWidth
           onChange={(e) => setUserLastName(e.target.value)}
+          data-cy="RegistrationTextInputUserLastName"
         />
         <TextField
-          autoFocus
           margin="dense"
           id="email"
           label="E-Mail"
           type="text"
           fullWidth
           onChange={(e) => setUserEmail(e.target.value)}
+          data-cy="RegistrationTextInputUserEmail"
         />
         <TextField
-          autoFocus
           margin="dense"
           id="password"
           label="Password"
           type="password"
           fullWidth
           onChange={(e) => setUserPassword(e.target.value)}
+          data-cy="RegistrationTextInputUserPassword"
         />
         {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
         {successMessage ? (
@@ -121,7 +161,7 @@ export default function Register(props) {
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleRegister} color="primary">
+        <Button onClick={handleRegister} color="primary" data-cy="RegisterBtn">
           Register
         </Button>
         <Button onClick={handleCancel} color="primary">

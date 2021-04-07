@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
+  TextField
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import { useSnapshot } from 'valtio';
 import graphqlQueries from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
-  MODALS,
+  MODALS
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
@@ -131,10 +131,14 @@ export default function Login(props) {
         <Button onClick={handleCancel} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleLogin} color="primary">
+        <Button onClick={handleLogin} color="primary" data-cy="LoginBtn">
           Login
         </Button>
-        <Button onClick={handleRegister} color="primary">
+        <Button
+          onClick={handleRegister}
+          color="primary"
+          data-cy="OpenRegisterBtn"
+        >
           Register
         </Button>
       </DialogActions>
