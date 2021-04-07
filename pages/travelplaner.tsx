@@ -16,7 +16,7 @@ import MapOptions from '../components/map/MapOptions';
 import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
-import { geocoderStyle, mapOptionsStyle } from '../styles/styles';
+import { geocoderStyle, mapOptionsStyle, mapStyle } from '../styles/styles';
 import graphqlQueries from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import tripStore from '../utils/valtio/tripstore';
@@ -347,7 +347,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         <title>Find your way</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div style={{ height: '100vh' }}>
+      <div css={mapStyle} style={{ height: '100vh' }}>
         <div
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 2 }}

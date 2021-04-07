@@ -27,6 +27,16 @@ export const mapOptionsStyle = css`
   background: white;
 `;
 
+export const mapStyle = css`
+  div.overlays {
+    z-index: 100;
+  }
+
+  .mapboxgl-popup-content {
+    z-index: 150;
+  }
+`;
+
 export const geocoderStyle = css`
   .mapboxgl-ctrl-geocoder {
     z-index: 40;
