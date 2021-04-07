@@ -22,7 +22,7 @@ export const mapOptionsStyle = css`
   width: 400px;
   position: absolute;
   left: 20px;
-  z-index: 1;
+  z-index: 170;
   top: 100px;
   background: white;
 `;
