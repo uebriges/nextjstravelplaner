@@ -421,7 +421,8 @@ export async function registerUser(user: UserDBType) {
       )
     VALUES (
       ${user.username}, ${user.firstName}, ${user.lastName}, ${user.email}, ${user.password}
-    );
+    )
+    RETURNING *;
   `;
 
   return newUser.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
