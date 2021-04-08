@@ -30,7 +30,7 @@ export default function Register(props) {
     graphqlQueries.registerUser,
     {
       onCompleted({ registerUser }) {
-        console.log('Registered user: ', registeredUser);
+        return registeredUser;
       },
     },
   );
