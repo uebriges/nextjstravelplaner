@@ -24,7 +24,6 @@ import {
   updateWaypoints,
   userNameExists,
 } from '../../utils/database';
-
 let sql;
 
 if (process.env.NODE_ENV === 'production') {
@@ -171,7 +170,11 @@ const resolvers = {
       const userData = args.user;
 
       // User exists already
-      if (await userNameExists(userData.userName)) {
+      const userExists = await userNameExists(userData.username);
+      console.log('userExists returned: ', userExists);
+
+      if (userExists) {
+        console.log('exists already');
         return { id: 0 };
       }
 
@@ -189,6 +192,7 @@ const resolvers = {
         password: passwordHash,
       });
 
+      console.log('new User: ', newUser);
       return newUser;
     },
     async loginUser(root, args, context) {

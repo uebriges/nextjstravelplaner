@@ -431,24 +431,28 @@ export async function registerUser(user: UserDBType) {
 // Check if user name exists
 export async function userNameExists(username: string) {
   const users = await sql`
-    SELECT *
-    FROM users
-    WHERE users_name = ${username};
+SELECT *
+FROM users
+WHERE users_name = ${username};
   `;
 
-  return users.length !== 0;
+  console.log('users in userNameExists: ', users);
+  console.log('users in userNameExists: ', users.length);
+
+  return users.length > 0;
 }
 
 // Retrieve user by user name
 export async function getUserByUserName(username: string) {
-  console.log('in getuser call');
+  console.log('in getuser call: ', username);
   const user = await sql`
-    SELECT *
-    FROM users
-    WHERE users_name = ${username};
+SELECT *
+FROM users
+WHERE users_name = ${username};
   `;
 
   console.log('tried to get user', user);
+  console.log('tried to get user', user.length);
 
   if (user.length !== 0) {
     return user.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
