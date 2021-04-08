@@ -7,7 +7,7 @@ import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import Head from 'next/head';
 import { useSnapshot } from 'valtio';
 import { footerStlye } from '../styles/styles';
-import graphqlQueries from '../utils/graphqlQueries';
+import { updateSessionOfCorrespondingTrip } from '../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import Login from './modals/Login';
@@ -23,12 +23,12 @@ interface LayoutProps {
 export default function Layout(props: LayoutProps) {
   const sessionStoreSnapshot = useSnapshot(sessionStore, { sync: true });
   const modalStateSnapshot = useSnapshot(modalsStore);
-  const [updateSessionOfCorrespondingTrip] = useMutation(
-    graphqlQueries.updateSessionOfCorrespondingTrip,
+  const [updateSessionOfCorrespondingTripFunction] = useMutation(
+    updateSessionOfCorrespondingTrip,
   );
 
   // Handle click on user symbol
-  async function handleUserFunctionality(e) {
+  async function handleUserFunctionality() {
     console.log('session type: ', sessionStoreSnapshot.activeSessionType);
     console.log('modal type: ', modalsStore.activeModal);
     // If user is already logged in
@@ -46,7 +46,7 @@ export default function Layout(props: LayoutProps) {
       modalStateSnapshot.activateModal(MODALS.LOGIN);
 
       // Change session id of trip to 5 mins session token
-      const newTokenAndCSRF = await updateSessionOfCorrespondingTrip({
+      const newTokenAndCSRF = await updateSessionOfCorrespondingTripFunction({
         variables: {
           sessions: { currentToken: sessionStoreSnapshot.activeSessionToken },
         },

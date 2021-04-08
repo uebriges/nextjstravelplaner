@@ -7,7 +7,7 @@ export const routeListStyle = css`
 `;
 
 export const customPopupStyle = css`
-  z-index: 150;
+  z-index: 1;
 `;
 
 export const footerStlye = css`
@@ -15,31 +15,31 @@ export const footerStlye = css`
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 170;
+  z-index: 1;
 `;
 
 export const mapOptionsStyle = css`
   width: 400px;
   position: absolute;
   left: 20px;
-  z-index: 170;
+  z-index: 10;
   top: 100px;
   background: white;
 `;
 
 export const mapStyle = css`
   div.overlays {
-    z-index: 100;
+    z-index: 1;
   }
 
   .mapboxgl-popup-content {
-    z-index: 150;
+    z-index: 1;
   }
 `;
 
 export const geocoderStyle = css`
   .mapboxgl-ctrl-geocoder {
-    z-index: 150;
+    z-index: 1;
     background-color: rgb(61 120 162);
     color: #f3f2f2;
   }

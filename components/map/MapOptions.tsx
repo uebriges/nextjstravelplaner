@@ -9,13 +9,24 @@ import {
   mapOptionButtonsStyles,
   mapOptionsSpansStyles,
 } from '../../styles/styles';
-import graphqlQueries from '../../utils/graphqlQueries';
+import {
+  getCurrentWaypoints,
+  getUserTrips,
+  startNewTrip,
+} from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
   MODALS,
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 import tripStore from '../../utils/valtio/tripstore';
+
+type CurrentTripType = {
+  id: number;
+  title: string;
+  startDate: string;
+  endDate: string;
+};
 
 export default function MapOptions() {
   const [disabled, setDisabled] = useState(true);
@@ -24,23 +35,23 @@ export default function MapOptions() {
   const tripStateSnapshot = useSnapshot(tripStore);
 
   // GraphQL
-  const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
+  const waypoints = useQuery(getCurrentWaypoints, {
     variables: {
       token: sessionStateSnapshot.activeSessionToken,
     },
   });
 
-  const [startNewTrip] = useMutation(graphqlQueries.startNewTrip, {
+  const [startNewTripFunction] = useMutation(startNewTrip, {
     refetchQueries: [
       {
-        query: graphqlQueries.getCurrentWaypoints,
+        query: getCurrentWaypoints,
         variables: { token: sessionStateSnapshot.activeSessionToken },
       },
     ],
     awaitRefetchQueries: true,
   });
 
-  const userTrips = useQuery(graphqlQueries.getUserTrips, {
+  const userTrips = useQuery(getUserTrips, {
     variables: {
       userId: sessionStateSnapshot.userId,
     },
@@ -50,7 +61,7 @@ export default function MapOptions() {
   useEffect(() => {
     console.log('useeffect tripId: ', typeof sessionStateSnapshot.tripId);
     const indexOfTrip = userTrips.data?.getUserTrips?.findIndex(
-      (currentTrip) => {
+      (currentTrip: CurrentTripType) => {
         console.log('currentTrip ID: ', currentTrip.id);
         return currentTrip.id === sessionStateSnapshot.tripId;
       },
@@ -87,7 +98,7 @@ export default function MapOptions() {
       'handleStartNewTrip -> sessionToken: ',
       sessionStateSnapshot.activeSessionToken,
     );
-    const newTripId = await startNewTrip({
+    const newTripId = await startNewTripFunction({
       variables: {
         token: sessionStateSnapshot.activeSessionToken,
       },

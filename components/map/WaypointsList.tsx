@@ -6,7 +6,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText
+  ListItemText,
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -16,11 +16,15 @@ import {
   Draggable,
   Droppable,
   DropResult,
-  resetServerContext
+  resetServerContext,
 } from 'react-beautiful-dnd';
-import { CoordinatesType } from '../../pages/TravelPlaner1';
+import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
-import graphqlQueries from '../../utils/graphqlQueries';
+import {
+  deleteWaypoint,
+  getCurrentWaypoints,
+  updateWaypoints,
+} from '../../utils/graphqlQueries';
 
 type WaypointsListType = {
   generateTurnByTurnRoute: () => void;
@@ -29,22 +33,22 @@ type WaypointsListType = {
 
 export default function WaypointsList(props: WaypointsListType) {
   // Retrieve current waypoints from DB
-  const waypointsFromDB = useQuery(graphqlQueries.getCurrentWaypoints, {
+  const waypointsFromDB = useQuery(getCurrentWaypoints, {
     variables: { token: props.sessionToken },
   });
 
   // Delete waypoint from DB
-  const [deleteWaypoint, dataDeletedWaypoints] = useMutation(
-    graphqlQueries.deleteWaypoint,
+  const [deleteWaypointFunction, dataDeletedWaypoints] = useMutation(
+    deleteWaypoint,
   );
 
   // Update waypoints in DB
-  const [updateWaypoints, dataUpdatedWaypoints] = useMutation(
-    graphqlQueries.updateWaypoints,
+  const [updateWaypointsFunction, dataUpdatedWaypoints] = useMutation(
+    updateWaypoints,
     {
       refetchQueries: [
         {
-          query: graphqlQueries.getCurrentWaypoints,
+          query: getCurrentWaypoints,
           variables: { token: props.sessionToken },
         },
       ],
@@ -62,7 +66,7 @@ export default function WaypointsList(props: WaypointsListType) {
     if (waypointsFromDB.data && waypointsFromDB.data.waypoints !== null) {
       const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
       waypointsArray.sort((a, b) => {
-        return a.orderNumber - b.orderNumber;
+        return (a.orderNumber as number) - (b.orderNumber as number);
       });
       setWaypoints(waypointsArray);
       props.generateTurnByTurnRoute();
@@ -99,7 +103,7 @@ export default function WaypointsList(props: WaypointsListType) {
       return point;
     });
 
-    await updateWaypoints({
+    await updateWaypointsFunction({
       variables: {
         waypoints: newlyOrderedPoints,
       },
@@ -168,7 +172,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                           waypointsFromDB.data.waypoints,
                                         );
                                         route.splice(index, 1);
-                                        await deleteWaypoint({
+                                        await deleteWaypointFunction({
                                           variables: {
                                             waypointId: waypoint.id,
                                           },

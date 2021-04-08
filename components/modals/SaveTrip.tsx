@@ -7,17 +7,18 @@ import {
   DialogTitle,
   TextField,
 } from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
 import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
-import graphqlQueries from '../../utils/graphqlQueries';
+import {
+  getSessionIdByToken,
+  getUserTrips,
+  saveUserTrip,
+} from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore from '../../utils/valtio/sessionstore';
 
 export default function SaveTrip() {
   const [tripTitle, setTripTitle] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const modalStoreSnapshot = useSnapshot(modalsStore);
   const sessionStoreSnapshot = useSnapshot(sessionStore);
 
@@ -27,7 +28,7 @@ export default function SaveTrip() {
   );
 
   // Get current session id
-  const sessionId = useQuery(graphqlQueries.getSessionIdByToken, {
+  const sessionId = useQuery(getSessionIdByToken, {
     variables: {
       token: sessionStoreSnapshot.activeSessionToken,
     },
@@ -36,10 +37,10 @@ export default function SaveTrip() {
   console.log('--> Save trip active session Id: ', sessionId);
 
   // Refetch of getUserTrips is needed to deactivate the save button immediately
-  const [saveUserTrip] = useMutation(graphqlQueries.saveUserTrip, {
+  const [saveUserTripFunction] = useMutation(saveUserTrip, {
     refetchQueries: [
       {
-        query: graphqlQueries.getUserTrips,
+        query: getUserTrips,
         variables: {
           userId: sessionStoreSnapshot.userId,
         },
@@ -64,7 +65,7 @@ export default function SaveTrip() {
     console.log('trip id: ', sessionStoreSnapshot.tripId);
     if (sessionId.data.getSessionIdByToken) {
       console.log('in if');
-      saveUserTrip({
+      saveUserTripFunction({
         variables: {
           userId: sessionStoreSnapshot.userId,
           tripId: sessionStoreSnapshot.tripId,
@@ -94,7 +95,6 @@ export default function SaveTrip() {
           fullWidth
           onChange={(e) => setTripTitle(e.target.value)}
         />
-        {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="primary">

@@ -15,7 +15,12 @@ import {
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
-import graphqlQueries from '../../utils/graphqlQueries';
+import {
+  getCurrentWaypoints,
+  getUserTrips,
+  switchToAnotherTrip,
+  updateSessionOfCorrespondingTrip,
+} from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
@@ -53,51 +58,43 @@ const columnHeaders: Column[] = [
   },
 ];
 
-const tripsTableRows = ['Id', 'Title', 'Start Date', 'End Date'];
-
 export default function UserProfile() {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const modalStoreSnapshot = useSnapshot(modalsStore);
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
   // GraphQL Queries
   // Get current waypoints
-  const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
+  const waypoints = useQuery(getCurrentWaypoints, {
     variables: {
       token: sessionStateSnapshot.activeSessionToken,
     },
   });
 
   // Get waypoints of specific trip
-  const [switchToAnotherTrip] = useMutation(
-    graphqlQueries.switchToAnotherTrip,
-    {
-      refetchQueries: [
-        {
-          query: graphqlQueries.getCurrentWaypoints,
-          variables: { token: sessionStateSnapshot.activeSessionToken },
-        },
-      ],
-      awaitRefetchQueries: true,
-    },
-  );
+  const [switchToAnotherTripFunction] = useMutation(switchToAnotherTrip, {
+    refetchQueries: [
+      {
+        query: getCurrentWaypoints,
+        variables: { token: sessionStateSnapshot.activeSessionToken },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   // Get the list of trips of a user
-  const userTrips = useQuery(graphqlQueries.getUserTrips, {
+  const userTrips = useQuery(getUserTrips, {
     variables: {
       userId: sessionStateSnapshot.userId,
     },
   });
 
   // Delete session by token
-  const [deleteSessionByToken] = useMutation(
-    graphqlQueries.deleteSessionByToken,
-  );
+  const [deleteSessionByToken] = useMutation(deleteSessionByToken);
 
   // Update session of current trip to new session token
-  const [updateSessionOfCorrespondingTrip] = useMutation(
-    graphqlQueries.updateSessionOfCorrespondingTrip,
+  const [updateSessionOfCorrespondingTripFunction] = useMutation(
+    updateSessionOfCorrespondingTrip,
   );
 
   // Cancel closes the modal
@@ -113,7 +110,7 @@ export default function UserProfile() {
     );
     console.log('handleTableRowClick -> event: ', event.target.id);
     sessionStateSnapshot.setTripId(Number(event.target.id));
-    switchToAnotherTrip({
+    switchToAnotherTripFunction({
       variables: {
         currentSessionToken: sessionStateSnapshot.activeSessionToken,
         newTripId: event.target.id,
@@ -129,7 +126,7 @@ export default function UserProfile() {
     modalsStore.activateModal(MODALS.NONE);
 
     // Update session token for trip -> new session token
-    const newToken = await updateSessionOfCorrespondingTrip({
+    const newToken = await updateSessionOfCorrespondingTripFunction({
       variables: {
         sessions: {
           currentToken: sessionStore.activeSessionToken,

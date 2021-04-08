@@ -128,19 +128,3 @@ export const switchToAnotherTrip = gql`
     )
   }
 `;
-
-module.exports = {
-  getCurrentWaypoints,
-  setNewWaypoint,
-  updateWaypoints,
-  deleteWaypoint,
-  registerUser,
-  loginUser,
-  updateSessionOfCorrespondingTrip,
-  getUserTrips,
-  deleteSessionByToken,
-  getSessionIdByToken,
-  saveUserTrip,
-  startNewTrip,
-  switchToAnotherTrip,
-};

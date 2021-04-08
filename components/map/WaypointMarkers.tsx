@@ -3,8 +3,11 @@ import { useMutation } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
 import { useSnapshot } from 'valtio';
-import { CoordinatesType } from '../../pages/TravelPlaner1';
-import graphqlQueries from '../../utils/graphqlQueries';
+import { CoordinatesType } from '../../pages/travelplaner';
+import {
+  getCurrentWaypoints,
+  updateWaypoints,
+} from '../../utils/graphqlQueries';
 import sessionStore from '../../utils/valtio/sessionstore';
 import MarkerIcon from './MarkerIcon';
 
@@ -36,10 +39,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
   // Update waypoints in DB
-  const [updateWaypoints] = useMutation(graphqlQueries.updateWaypoints, {
+  const [updateWaypointsFunction] = useMutation(updateWaypoints, {
     refetchQueries: [
       {
-        query: graphqlQueries.getCurrentWaypoints,
+        query: getCurrentWaypoints,
         variables: { token: sessionStateSnapshot.activeSessionToken },
       },
     ],
@@ -49,7 +52,7 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   const waypoints = props.waypoints;
 
   // Event handler: End of dragging
-  const handleOnDragEnd = async (event, id) => {
+  const handleOnDragEnd = async (event, id: number) => {
     console.log('handleOnDragEnd');
     console.log('current waypoints: ', [...currentWayPoints]);
     if (!currentWayPoints) {
@@ -85,7 +88,7 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
 
     // setCurrentWayPoints(updatedWayPoints);
     // Cookies.set('waypoints', JSON.stringify(currentWayPoints));
-    await updateWaypoints({
+    await updateWaypointsFunction({
       variables: {
         waypoints: updatedWayPoints,
       },

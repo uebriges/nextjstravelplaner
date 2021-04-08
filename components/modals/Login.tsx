@@ -5,15 +5,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
+  TextField,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
-import graphqlQueries from '../../utils/graphqlQueries';
+import { loginUser } from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
-  MODALS
+  MODALS,
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
@@ -28,7 +28,7 @@ export default function Login(props) {
   const [
     loginUserDB,
     { error: loginError, loading: loginLoading },
-  ] = useMutation(graphqlQueries.loginUser, {
+  ] = useMutation(loginUser, {
     onCompleted({ loggedIn }) {
       return loggedIn;
     },

@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,7 +16,7 @@ import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
 import { geocoderStyle, mapOptionsStyle, mapStyle } from '../styles/styles';
-import graphqlQueries from '../utils/graphqlQueries';
+import { getCurrentWaypoints, setNewWaypoint } from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import tripStore from '../utils/valtio/tripstore';
 // Ways to set Mapbox token: https://uber.github.io/react-map-gl/#/Documentation/getting-started/about-mapbox-tokens
@@ -33,7 +32,7 @@ export type CoordinatesType = {
   longitude: number;
   latitude: number;
   waypointName: string;
-  orderNumber: number;
+  orderNumber?: number;
 };
 
 export type ViewportType = {
@@ -88,8 +87,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   }, [props.currentUserId]);
 
   const [viewport, setViewport] = useState({
-    width: '100vw',
-    height: '100vh',
+    width: 100,
+    height: 100,
     latitude: 48.204845,
     longitude: 16.368368,
     zoom: 12,
@@ -104,7 +103,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // GraphQL queries
   // Get current waypoints
-  const waypoints = useQuery(graphqlQueries.getCurrentWaypoints, {
+  const waypoints = useQuery(getCurrentWaypoints, {
     variables: {
       token:
         sessionStateSnapshot.activeSessionToken !== ''
@@ -114,10 +113,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   });
 
   // Store new waypoint in DB
-  const [setNewWaypoint] = useMutation(graphqlQueries.setNewWaypoint, {
+  const [setNewWaypointFunction] = useMutation(setNewWaypoint, {
     refetchQueries: [
       {
-        query: graphqlQueries.getCurrentWaypoints,
+        query: getCurrentWaypoints,
         variables: { token: props.sessionToken },
       },
     ],
@@ -194,7 +193,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         waypointName: '',
       });
       console.log('newwaypoint revers: ', newWaypoint);
-      let newWaypointData = await setNewWaypoint({
+      let newWaypointData = await setNewWaypointFunction({
         variables: {
           token: sessionStateSnapshot.activeSessionToken,
           longitude: currentLongitude.toString(),
@@ -262,16 +261,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
     // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
-    let newWaypointsArray = [];
+    let newWaypointsArray: CoordinatesType[] = [];
 
     // Order waypoints and store in newWaypointsArray
     if (waypoints.data && waypoints.data.waypoints !== null) {
       newWaypointsArray = Array.from(waypoints.data.waypoints);
-      // console.log('waypoints new generateTurnByTurn: ', newWaypointsArray);
       newWaypointsArray.sort((a, b) => {
         // console.log('a: ', a);
         // console.log('b: ', b);
-        return a.orderNumber - b.orderNumber;
+        return (a.orderNumber as number) - (b.orderNumber as number);
       });
     }
 
@@ -279,7 +277,11 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     let apiCallString = 'https://api.mapbox.com/directions/v5/mapbox/driving/';
     if (newWaypointsArray.length > 1) {
       newWaypointsArray.map(
-        (waypoint: CoordinatesType, index: number, array: []) => {
+        (
+          waypoint: CoordinatesType,
+          index: number,
+          array: CoordinatesType[],
+        ) => {
           apiCallString += waypoint.longitude + '%2C' + waypoint.latitude;
           apiCallString +=
             index < array.length - 1
@@ -478,7 +480,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   // Is there currently a trip the user is working on
   const currentTripId = await getCurrentTripIdByToken(token);
-
 
   // Which user is logged in?
   const currentUserId = await getUserIdBytoken(token);

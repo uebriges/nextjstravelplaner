@@ -10,47 +10,35 @@ import {
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
-import graphqlQueries from '../../utils/graphqlQueries';
+import { registerUser } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore from '../../utils/valtio/sessionstore';
 
-export default function Register(props) {
+export default function Register() {
   const [userName, setUserName] = useState('');
   const [userFirstName, setUserFirstName] = useState('');
   const [userLastName, setUserLastName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>('');
   const modalStoreSnapshot = useSnapshot(modalsStore);
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
   // GraphQL
-  const [registerUser, registeredUser] = useMutation(
-    graphqlQueries.registerUser,
-    {
-      onCompleted(data) {
-        console.log('Registration: ', data);
-        // throw new Error(JSON.stringify(data));
-        if (data.registerUser.id === 0) {
-          setErrorMessage('User name already exists');
-          setSuccessMessage(null);
-          return;
-        }
+  const [registerUserFunction, registeredUser] = useMutation(registerUser, {
+    onCompleted(data) {
+      console.log('Registration: ', data);
+      // throw new Error(JSON.stringify(data));
+      if (data.registerUser.id === 0) {
+        setErrorMessage('User name already exists');
+        setSuccessMessage(null);
+        return;
+      }
 
-        setErrorMessage(null);
-        setSuccessMessage('User created');
-        setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
-      },
-    },
-  );
-
-  const [
-    loginUserDB,
-    { error: loginError, loading: loginLoading },
-  ] = useMutation(graphqlQueries.loginUser, {
-    onCompleted({ loggedIn }) {
-      return loggedIn;
+      setErrorMessage(null);
+      setSuccessMessage('User created');
+      setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
     },
   });
 
@@ -60,7 +48,7 @@ export default function Register(props) {
 
   async function handleRegister() {
     console.log('register');
-    registerUser({
+    registerUserFunction({
       variables: {
         user: {
           username: userName,
@@ -71,32 +59,6 @@ export default function Register(props) {
         },
       },
     });
-
-    // Automatically login after successfull registration
-    // const loggedIn = await loginUserDB({
-    //   variables: {
-    //     user: {
-    //       username: userName,
-    //       password: userPassword,
-    //       sessionToken: sessionStateSnapshot.activeSessionToken,
-    //       csrfToken: sessionStateSnapshot.csrfToken,
-    //     },
-    //   },
-    // });
-    // console.log('logged in: ', loggedIn);
-
-    // // Update session token in sessionStore + update csrf
-    // if (loggedIn.data.loginUser) {
-    //   console.log('returned user');
-    //   sessionStateSnapshot.setSession(
-    //     SESSIONS.LOGGEDIN,
-    //     loggedIn.data.loginUser.tokens.token,
-    //   );
-    //   sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
-    //   sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
-    //   console.log('modalStateSnapshot: ', modalStoreSnapshot);
-    //   modalStoreSnapshot.activateModal(MODALS.NONE);
-    // }
   }
 
   return (
