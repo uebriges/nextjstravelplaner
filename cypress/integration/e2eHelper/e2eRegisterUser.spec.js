@@ -2,7 +2,7 @@ export default function RegisterUserTest() {
   describe('Register a new user', () => {
     beforeEach(() => {
       cy.viewport(1920, 1080);
-      cy.visit('/travelplaner');
+      cy.visit('/');
     });
 
     it('Register a new user', () => {
