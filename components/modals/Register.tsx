@@ -30,7 +30,17 @@ export default function Register(props) {
     graphqlQueries.registerUser,
     {
       onCompleted({ registerUser }) {
-        return registeredUser;
+        console.log('Registration: ', registerUser);
+
+        if (registerUser.id === 0) {
+          setErrorMessage('User name already exists');
+          setSuccessMessage(null);
+          return;
+        }
+
+        setErrorMessage(null);
+        setSuccessMessage('User created');
+        setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
       },
     },
   );
@@ -50,7 +60,7 @@ export default function Register(props) {
 
   async function handleRegister() {
     console.log('register');
-    const newUser = await registerUser({
+    registerUser({
       variables: {
         user: {
           username: userName,
@@ -61,18 +71,6 @@ export default function Register(props) {
         },
       },
     });
-
-    console.log('Registration: ', newUser);
-
-    if (newUser.data.registerUser.id === 0) {
-      setErrorMessage('User name already exists');
-      setSuccessMessage(null);
-      return;
-    }
-
-    setErrorMessage(null);
-    setSuccessMessage('User created');
-    setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
 
     // Automatically login after successfull registration
     // const loggedIn = await loginUserDB({
