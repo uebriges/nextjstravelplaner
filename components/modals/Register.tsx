@@ -29,10 +29,10 @@ export default function Register(props) {
   const [registerUser, registeredUser] = useMutation(
     graphqlQueries.registerUser,
     {
-      onCompleted({ registerUser }) {
-        console.log('Registration: ', registerUser);
+      onCompleted(data) {
+        console.log('Registration: ', data);
 
-        if (registerUser.id === 0) {
+        if (data.registerUser.id === 0) {
           setErrorMessage('User name already exists');
           setSuccessMessage(null);
           return;
