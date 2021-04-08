@@ -31,7 +31,7 @@ export default function Register(props) {
     {
       onCompleted(data) {
         console.log('Registration: ', data);
-
+        throw new Error(JSON.stringify(data));
         if (data.registerUser.id === 0) {
           setErrorMessage('User name already exists');
           setSuccessMessage(null);
