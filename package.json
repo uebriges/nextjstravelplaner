@@ -69,5 +69,6 @@
   },
   "cacheDirectories": [
     ".next/cache"
-  ]
+  ],
+  { "engines" : { "node" : ">=0.12" } }
 }
