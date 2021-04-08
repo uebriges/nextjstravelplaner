@@ -7,7 +7,7 @@ export const routeListStyle = css`
 `;
 
 export const customPopupStyle = css`
-  z-index: 30;
+  z-index: 150;
 `;
 
 export const footerStlye = css`
@@ -39,7 +39,7 @@ export const mapStyle = css`
 
 export const geocoderStyle = css`
   .mapboxgl-ctrl-geocoder {
-    z-index: 40;
+    z-index: 150;
     background-color: rgb(61 120 162);
     color: #f3f2f2;
   }
