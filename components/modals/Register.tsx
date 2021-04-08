@@ -30,7 +30,7 @@ export default function Register(props) {
     graphqlQueries.registerUser,
     {
       onCompleted({ registerUser }) {
-        return registeredUser;
+        console.log('Registered user: ', registeredUser);
       },
     },
   );
@@ -61,6 +61,8 @@ export default function Register(props) {
         },
       },
     });
+
+    console.log('Registration: ', newUser);
 
     if (newUser.data.registerUser.id === 0) {
       setErrorMessage('User name already exists');

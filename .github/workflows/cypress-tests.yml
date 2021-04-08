@@ -31,3 +31,9 @@ jobs:
           PGUSERNAME: ${{ secrets.PGUSERNAME }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           CSRF_TOKEN_SECRET: ${{ secrets.CSRF_TOKEN_SECRET }}
+      - name: Artifacts
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
