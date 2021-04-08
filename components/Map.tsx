@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import React, { useState } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
-import { ViewportType } from '../pages/TravelPlaner1';
+import { ViewportType } from '../pages/travelplaner';
 import CustomPopup from './map/CustomPopup';
 
 type MapProps = {
