@@ -131,7 +131,7 @@ const typeDefs = gql`
   }
 
   type User {
-    id: Int
+    id: Int!
     firstName: String
     lastName: String
     email: String
@@ -193,7 +193,8 @@ const resolvers = {
       });
 
       console.log('new User: ', newUser[0]);
-      return newUser[0];
+      // return newUser[0];
+      return { id: newUser[0].id, userName: newUser[0].usersName };
     },
     async loginUser(root, args, context) {
       const { user } = args;
