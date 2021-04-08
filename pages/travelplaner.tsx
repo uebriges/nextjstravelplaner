@@ -479,6 +479,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   // Is there currently a trip the user is working on
   const currentTripId = await getCurrentTripIdByToken(token);
 
+
   // Which user is logged in?
   const currentUserId = await getUserIdBytoken(token);
 

@@ -565,16 +565,19 @@ export async function getCurrentTripIdByToken(token: string) {
   console.log('getCurrentTripIdByToken -> token: ', token);
   const tokenId = await getSessionIdByToken(token);
   console.log('getCurrentTripIdByToken -> tokenId: ', tokenId);
+  let tripId;
 
-  const tripId = await sql`
+  if (tokenId.length > 0) {
+    tripId = await sql`
     SELECT id
     FROM trip
     WHERE session_id = ${tokenId[0].id.toString()}
   `;
+  }
 
   console.log('getCurrentTripIdByToken -> tripId: ', tripId);
 
-  return camelcaseKeys(tripId)[0].id;
+  return !tripId ? null : camelcaseKeys(tripId)[0].id;
 }
 
 export async function isCurrentTokenLoggedIn(token: string) {
