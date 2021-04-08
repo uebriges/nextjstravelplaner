@@ -167,7 +167,6 @@ const resolvers = {
   },
   Mutation: {
     async registerUser(root, args) {
-      return { id: 0 };
       const userData = args.user;
 
       // User exists already

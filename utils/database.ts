@@ -410,6 +410,7 @@ type UserDBType = {
 };
 
 export async function registerUser(user: UserDBType) {
+  console.log('Register user');
   const newUser = await sql`
     INSERT INTO
       users (
@@ -425,6 +426,7 @@ export async function registerUser(user: UserDBType) {
     RETURNING *;
   `;
 
+  console.log('Register user -> newUser', newUser);
   return newUser.map((currentUser: UserDBType) => camelcaseKeys(currentUser));
 }
 
@@ -610,27 +612,3 @@ export async function getUserIdBytoken(token: string) {
   );
   return camelcaseKeys(userId)[0].userId;
 }
-
-module.exports = {
-  deleteAllExpiredSessions,
-  createSessionFiveMinutes,
-  createSessionTwoHours,
-  createSessionTwentyFourHours,
-  updateSessionOfCorrespondingTrip,
-  getCurrentWaypoints,
-  setNewWaypoint,
-  deleteWaypoint,
-  updateWaypoints,
-  registerUser,
-  userNameExists,
-  getUserByUserName,
-  getUserTrips,
-  deleteSessionByToken,
-  getSessionIdByToken,
-  saveUserTrip,
-  startNewTrip,
-  switchToAnotherTrip,
-  isCurrentTokenLoggedIn,
-  getCurrentTripIdByToken,
-  getUserIdBytoken,
-};
