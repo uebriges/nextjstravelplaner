@@ -16,6 +16,7 @@ import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
+  deleteSessionByToken,
   getCurrentWaypoints,
   getUserTrips,
   switchToAnotherTrip,
@@ -34,14 +35,14 @@ export type UserTripType = {
   userId: number;
 };
 
-interface Column {
-  id: number;
+interface ColumnType {
+  id: string;
   label: string;
   minWidth?: number;
   align?: 'right';
 }
 
-const columnHeaders: Column[] = [
+const columnHeaders: ColumnType[] = [
   { id: 'id', label: 'Id', minWidth: 100 },
   { id: 'title', label: 'Title', minWidth: 300 },
   {
@@ -90,7 +91,7 @@ export default function UserProfile() {
   });
 
   // Delete session by token
-  const [deleteSessionByToken] = useMutation(deleteSessionByToken);
+  const [deleteSessionByTokenFunction] = useMutation(deleteSessionByToken);
 
   // Update session of current trip to new session token
   const [updateSessionOfCorrespondingTripFunction] = useMutation(
@@ -145,7 +146,7 @@ export default function UserProfile() {
       sessionStateSnapshot.activeSessionToken,
     );
     // Delete former session -> db
-    await deleteSessionByToken({
+    await deleteSessionByTokenFunction({
       variables: {
         token: sessionStateSnapshot.activeSessionToken,
       },

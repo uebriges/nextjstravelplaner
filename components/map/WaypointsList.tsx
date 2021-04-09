@@ -38,23 +38,18 @@ export default function WaypointsList(props: WaypointsListType) {
   });
 
   // Delete waypoint from DB
-  const [deleteWaypointFunction, dataDeletedWaypoints] = useMutation(
-    deleteWaypoint,
-  );
+  const [deleteWaypointFunction] = useMutation(deleteWaypoint);
 
   // Update waypoints in DB
-  const [updateWaypointsFunction, dataUpdatedWaypoints] = useMutation(
-    updateWaypoints,
-    {
-      refetchQueries: [
-        {
-          query: getCurrentWaypoints,
-          variables: { token: props.sessionToken },
-        },
-      ],
-      awaitRefetchQueries: true,
-    },
-  );
+  const [updateWaypointsFunction] = useMutation(updateWaypoints, {
+    refetchQueries: [
+      {
+        query: getCurrentWaypoints,
+        variables: { token: props.sessionToken },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   // Store the moved waypoint and it's updated long/lat and waypoint name
   const [waypoints, setWaypoints] = useState(
@@ -64,7 +59,10 @@ export default function WaypointsList(props: WaypointsListType) {
   useEffect(() => {
     console.log('waypointsFromDB.data: ', waypointsFromDB.data);
     if (waypointsFromDB.data && waypointsFromDB.data.waypoints !== null) {
-      const waypointsArray = Array.from(waypointsFromDB.data.waypoints);
+      const waypointsArray: CoordinatesType[] | undefined = Array.from(
+        waypointsFromDB.data.waypoints,
+      );
+      console.log('waypointsArray: ', waypointsArray);
       waypointsArray.sort((a, b) => {
         return (a.orderNumber as number) - (b.orderNumber as number);
       });
@@ -73,10 +71,10 @@ export default function WaypointsList(props: WaypointsListType) {
     }
   }, [waypointsFromDB.data]);
 
-  function refetchWaypoints() {
-    console.log('refetching...');
-    waypointsFromDB.refetch();
-  }
+  // function refetchWaypoints() {
+  //   console.log('refetching...');
+  //   waypointsFromDB.refetch();
+  // }
 
   resetServerContext();
 
@@ -137,7 +135,7 @@ export default function WaypointsList(props: WaypointsListType) {
                               'Draggable' +
                               waypoint.latitude +
                               waypoint.longitude +
-                              index
+                              waypoint.id
                             }
                             draggableId={
                               'Id' + waypoint.latitude + waypoint.longitude

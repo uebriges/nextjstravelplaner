@@ -5,14 +5,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
+  TextField
 } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
   getSessionIdByToken,
   getUserTrips,
-  saveUserTrip,
+  saveUserTrip
 } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore from '../../utils/valtio/sessionstore';
@@ -51,10 +51,6 @@ export default function SaveTrip() {
 
   console.log('--> Save trip saveUserTrip function: ', saveUserTrip);
 
-  useEffect(() => {
-    console.log('session Id use effect: ', sessionId);
-  }, [sessionId.data]);
-
   function handleCancel() {
     modalStoreSnapshot.activateModal(MODALS.NONE);
   }
@@ -87,7 +83,6 @@ export default function SaveTrip() {
       </DialogTitle>
       <DialogContent>
         <TextField
-          autoFocus
           margin="dense"
           id="tripName"
           label="Trip title"

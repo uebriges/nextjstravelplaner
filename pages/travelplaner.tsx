@@ -167,10 +167,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   // Adds new coordinates to the DB
   async function addCoordinatesToRoute() {
     console.log('addCoordinatesToRoute');
-    // Cookies variables
-    let cookiesContent = [];
-    let alreadyAvailableCoordinatesInCookies;
-    let updatedWaypoints;
 
     // DB/Graphql variables
     let alreadyAvailableCoordinatesInDB;
@@ -198,7 +194,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         waypointName: '',
       });
       console.log('newwaypoint revers: ', newWaypoint);
-      let newWaypointData = await setNewWaypointFunction({
+      const newWaypointData = await setNewWaypointFunction({
         variables: {
           token: sessionStateSnapshot.activeSessionToken,
           longitude: currentLongitude.toString(),

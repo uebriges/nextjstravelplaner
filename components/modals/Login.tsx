@@ -17,7 +17,7 @@ import modalsStore, {
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
-export default function Login(props) {
+export default function Login() {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,10 +25,7 @@ export default function Login(props) {
   const sessionStateSnapshot = useSnapshot(sessionStore);
   const modalStateSnapshot = useSnapshot(modalsStore);
 
-  const [
-    loginUserDB,
-    { error: loginError, loading: loginLoading },
-  ] = useMutation(loginUser, {
+  const [loginUserDB] = useMutation(loginUser, {
     onCompleted({ loggedIn }) {
       return loggedIn;
     },
@@ -41,7 +38,7 @@ export default function Login(props) {
     modalsStore.activateModal(MODALS.NONE);
   }
 
-  async function handleLogin(event) {
+  async function handleLogin(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     if (userName === '' || userPassword === '') {
       setError('User name or password missing.');
@@ -106,7 +103,6 @@ export default function Login(props) {
       <DialogTitle id="form dialog title for login">Login</DialogTitle>
       <DialogContent>
         <TextField
-          autoFocus
           margin="dense"
           id="userName"
           label="User name"

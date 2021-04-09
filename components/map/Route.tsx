@@ -1,9 +1,7 @@
 import { CanvasOverlay } from 'react-map-gl';
-import { CoordinatesType } from '../pages/travelplaner';
 
 type RoutePropsType = {
-  points: CoordinatesType[] | undefined;
-  id: string;
+  points: number[][] | undefined;
 };
 
 type DrawRoutePropsType = {
@@ -29,8 +27,8 @@ export default function Route(props: RoutePropsType) {
         ctx.strokeStyle = color;
         ctx.beginPath();
 
-        let pixel;
-        points.forEach((currentPoint, index) => {
+        let pixel: number[];
+        points.forEach((currentPoint) => {
           pixel = project([Number(currentPoint[0]), Number(currentPoint[1])]);
           ctx.lineTo(pixel[0], pixel[1]);
         });

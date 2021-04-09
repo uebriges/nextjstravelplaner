@@ -45,7 +45,7 @@ export default function TripInstructions() {
                   ) {
                     return <Divider />;
                   }
-                  return <ListItem key={index}>{instruction}</ListItem>;
+                  return <ListItem key={instruction}>{instruction}</ListItem>;
                 },
               );
               return subInstructions;

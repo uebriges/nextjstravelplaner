@@ -12,7 +12,6 @@ import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { registerUser } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
-import sessionStore from '../../utils/valtio/sessionstore';
 
 export default function Register() {
   const [userName, setUserName] = useState('');
@@ -23,10 +22,9 @@ export default function Register() {
   const [errorMessage, setErrorMessage] = useState<string | null>('');
   const [successMessage, setSuccessMessage] = useState<string | null>('');
   const modalStoreSnapshot = useSnapshot(modalsStore);
-  const sessionStateSnapshot = useSnapshot(sessionStore);
 
   // GraphQL
-  const [registerUserFunction, registeredUser] = useMutation(registerUser, {
+  const [registerUserFunction] = useMutation(registerUser, {
     onCompleted(data) {
       console.log('Registration: ', data);
       // throw new Error(JSON.stringify(data));
@@ -73,7 +71,6 @@ export default function Register() {
       <DialogContent>
         <TextField
           data-cy="RegistrationTextInputUserName"
-          autoFocus
           margin="dense"
           id="userName"
           label="User name"
