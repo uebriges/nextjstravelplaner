@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import { Button } from '@material-ui/core';
-import { useState } from 'react';
 import { Popup } from 'react-map-gl';
 import { customPopupStyle } from '../../styles/styles';
 
@@ -11,8 +10,6 @@ type CustomPopupPropsType = {
 };
 
 export default function CustomPopup(props: CustomPopupPropsType) {
-  const [showPopup, togglePopup] = useState(true); // -> has to be lifted and set to true every time a click on the map happens.
-
   return (
     <div>
       <Popup
@@ -23,9 +20,6 @@ export default function CustomPopup(props: CustomPopupPropsType) {
         closeOnClick={true}
         anchor="top"
         css={customPopupStyle}
-        onClose={() => {
-          togglePopup(false);
-        }}
       >
         <div>
           <Button

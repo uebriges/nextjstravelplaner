@@ -10,7 +10,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
+  TableRow
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -20,7 +20,7 @@ import {
   getCurrentWaypoints,
   getUserTrips,
   switchToAnotherTrip,
-  updateSessionOfCorrespondingTrip,
+  updateSessionOfCorrespondingTrip
 } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
@@ -65,13 +65,6 @@ export default function UserProfile() {
   const sessionStateSnapshot = useSnapshot(sessionStore);
 
   // GraphQL Queries
-  // Get current waypoints
-  const waypoints = useQuery(getCurrentWaypoints, {
-    variables: {
-      token: sessionStateSnapshot.activeSessionToken,
-    },
-  });
-
   // Get waypoints of specific trip
   const [switchToAnotherTripFunction] = useMutation(switchToAnotherTrip, {
     refetchQueries: [
@@ -104,17 +97,26 @@ export default function UserProfile() {
   }
 
   // Chose a saved trip to display it on the map
-  function handleTableRowClick(event) {
+  function handleTableRowClick(
+    event: React.MouseEvent<HTMLTableDataCellElement> &
+      React.MouseEvent<HTMLTableHeaderCellElement>,
+  ) {
+    console.log('event: ', event);
     console.log(
       'handleTableRowClick -> sessionStore.activeSessionToken: ',
       sessionStore.activeSessionToken,
     );
-    console.log('handleTableRowClick -> event: ', event.target.id);
-    sessionStateSnapshot.setTripId(Number(event.target.id));
+    console.log(
+      'handleTableRowClick -> event: ',
+      (event.target as HTMLTableDataCellElement).id,
+    );
+    sessionStateSnapshot.setTripId(
+      Number((event.target as HTMLTableDataCellElement).id),
+    );
     switchToAnotherTripFunction({
       variables: {
         currentSessionToken: sessionStateSnapshot.activeSessionToken,
-        newTripId: event.target.id,
+        newTripId: (event.target as HTMLTableDataCellElement).id,
       },
     });
 

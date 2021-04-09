@@ -72,7 +72,7 @@ export default function Layout(props: LayoutProps) {
 
       console.log('sessionStoreSnapshot: ', sessionStoreSnapshot);
 
-      //If 5 mins are over, fallback to 2 hours session token -> change session_id of trip again
+      // If 5 mins are over, fallback to 2 hours session token -> change session_id of trip again
     }
   }
 
