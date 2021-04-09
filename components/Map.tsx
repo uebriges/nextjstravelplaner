@@ -6,13 +6,13 @@ import { ViewportType } from '../pages/travelplaner';
 import CustomPopup from './map/CustomPopup';
 
 type MapProps = {
-  setMarkerSetByClick: () => void;
-  setMarkerSetBySearchResult: () => void;
+  setMarkerSetByClick: (value: boolean) => void;
+  setMarkerSetBySearchResult: (value: boolean) => void;
   setViewport: (viewport: ViewportType) => void;
   handleViewportChange: (newViewport: ViewportType) => void;
   addCoordinatesToRoute: () => void;
-  setCurrentLatitude: (latitude: Number) => void;
-  setCurrentLongitude: (longitude: Number) => void;
+  setCurrentLatitude: (latitude: number) => void;
+  setCurrentLongitude: (longitude: number) => void;
   viewport: ViewportType;
   mapboxToken: string;
   mapRef: any;

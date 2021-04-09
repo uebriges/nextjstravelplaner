@@ -13,7 +13,9 @@ import MarkerIcon from './MarkerIcon';
 
 type WaypointMarkerPropsType = {
   waypoints: CoordinatesType[] | undefined;
-  reversGeocodeWaypoint: (waypoint: CoordinatesType) => CoordinatesType;
+  reversGeocodeWaypoint: (
+    waypoint: CoordinatesType,
+  ) => Promise<CoordinatesType>;
   generateTurnByTurnRoute: () => void;
 };
 
@@ -49,12 +51,9 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     awaitRefetchQueries: true,
   });
 
-  const waypoints = props.waypoints;
-
   // Event handler: End of dragging
   const handleOnDragEnd = async (event, id: number) => {
     console.log('handleOnDragEnd');
-    console.log('current waypoints: ', [...currentWayPoints]);
     if (!currentWayPoints) {
       return;
     }
@@ -109,10 +108,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   return (
     <div>
       {currentWayPoints
-        ? currentWayPoints.map((waypoint, id) => {
+        ? currentWayPoints.map((waypoint) => {
             return (
               <Marker
-                key={id} // waypoint.longitude + waypoint.latitude
+                key={waypoint.id} // waypoint.longitude + waypoint.latitude
                 latitude={Number(waypoint.latitude)}
                 longitude={Number(waypoint.longitude)}
                 offsetLeft={-20}

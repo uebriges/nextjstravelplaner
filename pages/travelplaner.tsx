@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -70,7 +71,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       sessionStateSnapshot.setSession(SESSIONS.ANONYMOUS, props.sessionToken);
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
-  }, [props.sessionToken, sessionStateSnapshot]);
+  }, [props.sessionToken, sessionStateSnapshot, props.csrfToken]);
 
   useEffect(() => {
     if (props.isLoggedIn) {
