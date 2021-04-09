@@ -129,9 +129,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   const mapRef = useRef(null);
   const geoCoderContainerRef = useRef(null);
 
-  const [currentRoute, setCurrentRoute] = useState<
-    CoordinatesType[] | undefined
-  >();
+  const [currentRoute, setCurrentRoute] = useState<number[][] | undefined>();
   // const [showPopup, togglePopup] = useState(false);
   const [markerSetByClick, setMarkerSetByClick] = useState<boolean>(false);
   const [
@@ -307,10 +305,20 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       console.log('Instructions: ', instructions);
       tripStateSnapshot.addDistance(response.routes[0]?.distance);
       tripStateSnapshot.addInstructions(instructions);
+      console.log(
+        'response.routes[0]?.geometry.coordinates: ',
+        response.routes[0]?.geometry.coordinates,
+      );
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
-      // console.log('else waypoints: ', waypoints.data?.waypoints);
-      setCurrentRoute(waypoints.data?.waypoints);
+      console.log('else waypoints: ', waypoints.data?.waypoints);
+      // setCurrentRoute(waypoints.data?.waypoints);
+      setCurrentRoute([
+        [
+          Number(waypoints.data?.waypoints.longitude),
+          Number(waypoints.data?.waypoints.latitude),
+        ],
+      ]);
       // Cookies.set('finalRoute', waypoints.data?.waypoints);
     }
   }
@@ -377,7 +385,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           markerSetBySearchResult={markerSetBySearchResult}
           setMarkerSetBySearchResult={setMarkerSetBySearchResult}
         >
-          <Route id="TravelplanerMapId" points={currentRoute} />
+          <Route points={currentRoute} />
           <WaypointMarkers
             waypoints={waypoints.data?.waypoints}
             reversGeocodeWaypoint={reversGeocodeWaypoint}
@@ -417,7 +425,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             marker={false}
             containerRef={geoCoderContainerRef}
             onResult={onSearchResult}
-            //render -> Renders HTML into result -> use for add and mark as favorite
+            // render -> Renders HTML into result -> use for add and mark as favorite
           />
         </Map>
       </div>

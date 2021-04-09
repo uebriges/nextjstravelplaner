@@ -32,7 +32,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
   const childrenWithProps = React.Children.map(
     props.children,
     (child: React.ReactElement) => {
-      // console.log('child: ', child);
+      console.log('child: ', child);
       if (child) {
         return React.cloneElement(child, {
           handleViewportChange: props.handleViewportChange,
@@ -43,7 +43,7 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
     },
   );
 
-  function handleOnclick(event) {
+  function handleOnclick(event: PointerEvent) {
     // Needed to position the marker + popup after clicking on the map
     setCurrentMarkerPosition(event.lngLat);
 

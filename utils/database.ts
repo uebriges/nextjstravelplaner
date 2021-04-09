@@ -1,14 +1,18 @@
 import camelcaseKeys from 'camelcase-keys';
+import postgres from 'postgres';
 import { UserTripType } from '../components/modals/UserProfile';
 import generateSession from './session';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
-const postgres = require('postgres');
 
 setPostgresDefaultsOnHeroku();
 
 require('dotenv-safe').config();
 
-let sql;
+declare global {
+  const postgresSql: postgres.Sql<{}>;
+}
+
+let sql: postgres.Sql<{}>;
 
 if (process.env.NODE_ENV === 'production') {
   // Heroku needs SSL connections but
@@ -16,10 +20,10 @@ if (process.env.NODE_ENV === 'production') {
   // https://devcenter.heroku.com/changelog-items/852
   sql = postgres({ ssl: { rejectUnauthorized: false } });
 } else {
-  if (!globalThis.__postgresSqlClient) {
-    globalThis.__postgresSqlClient = postgres();
+  if (!globalThis.postgresSql) {
+    globalThis.postgresSql = postgres();
   }
-  sql = globalThis.__postgresSqlClient;
+  sql = globalThis.postgresSql;
 }
 
 // const sql =

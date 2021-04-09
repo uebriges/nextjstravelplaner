@@ -1,4 +1,9 @@
-import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server-micro';
+import {
+  ApolloServer,
+  gql,
+  IResolvers,
+  makeExecutableSchema,
+} from 'apollo-server-micro';
 import argon2 from 'argon2';
 import {
   createCsrfToken,
@@ -128,7 +133,7 @@ const typeDefs = gql`
   }
 `;
 
-const resolvers = {
+const resolvers: IResolvers = {
   Query: {
     user(root, { userName }) {
       return { userName };

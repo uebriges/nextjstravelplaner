@@ -16,7 +16,7 @@ type TripStoreType = {
   distance: number;
   instructions: string[][];
   addDistance: (distance: number) => void;
-  addInstructions: (instructions: string[]) => void;
+  addInstructions: (instructions: string[][]) => void;
 };
 
 const tripStore: TripStoreType = proxy({

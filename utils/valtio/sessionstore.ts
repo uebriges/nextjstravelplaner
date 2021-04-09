@@ -1,5 +1,6 @@
 import { proxy } from 'valtio';
 
+/* eslint-disable-next-line */
 export const SESSIONS = {
   ANONYMOUS: 'anonymous', // Not logged in, not started the login/register process
   DURINGLOGINORREGISTER: 'duringloginorregister', // Started the login/register process

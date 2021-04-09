@@ -1,5 +1,6 @@
 import { proxy } from 'valtio';
 
+/* eslint-disable-next-line */
 export const MODALS = {
   NONE: 'none',
   LOGIN: 'login',
@@ -9,6 +10,7 @@ export const MODALS = {
   TRIPINSTRUCTIONS: 'tripinstructions',
 };
 
+/* eslint-disable-next-line */
 export const INITIALACTION = {
   SAVETRIP: 'savetrip',
 };
