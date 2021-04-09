@@ -53,7 +53,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   });
 
   // Event handler: End of dragging
-  const handleOnDragEnd = async (event: CallbackEvent, id: number) => {
+  const handleOnDragEnd = async (
+    event: CallbackEvent,
+    id: number | undefined,
+  ) => {
     console.log('handleOnDragEnd');
     if (!currentWayPoints) {
       return;
@@ -63,9 +66,10 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     };
 
     console.log('moved waypoint: ', movedWayPoint);
+    console.log('moved waypoint: ', event.lngLat);
 
-    movedWayPoint.longitude = event.lngLat[0].toString();
-    movedWayPoint.latitude = event.lngLat[1].toString();
+    movedWayPoint.longitude = event.lngLat[0];
+    movedWayPoint.latitude = event.lngLat[1];
 
     console.log('movedWayPoint afterwards: ', movedWayPoint);
     if (!movedWayPoint.id) return;

@@ -93,8 +93,8 @@ const typeDefs = gql`
     meansOfTransport: String
     visaInformation: String
     favorite: Boolean
-    longitude: String
-    latitude: String
+    longitude: Float
+    latitude: Float
     waypointName: String
     orderNumber: Int
   }
@@ -115,8 +115,8 @@ const typeDefs = gql`
     meansOfTransport: String
     visaInformation: String
     favorite: Boolean
-    longitude: String
-    latitude: String
+    longitude: Float
+    latitude: Float
     waypointName: String
     orderNumber: Int
   }
