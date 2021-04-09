@@ -192,13 +192,6 @@ export default function WaypointsList(props: WaypointsListType) {
                     )
                   : null}
               </List>
-              {/* <Button
-                variant="contained"
-                color="primary"
-                startIcon={<SaveIcon />}
-              >
-                Save
-              </Button> */}
             </div>
           );
         }}

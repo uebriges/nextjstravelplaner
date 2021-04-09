@@ -29,10 +29,10 @@ type LocationInDBType = {
 };
 
 export type CoordinatesType = {
-  id: number;
-  longitude: number;
-  latitude: number;
-  waypointName: string;
+  id?: number;
+  longitude?: number;
+  latitude?: number;
+  waypointName?: string;
   orderNumber?: number;
 };
 
@@ -78,15 +78,20 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       sessionStateSnapshot.setSession(SESSIONS.LOGGEDIN, props.sessionToken);
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
-  }, [props.isLoggedIn]);
+  }, [
+    props.isLoggedIn,
+    props.csrfToken,
+    props.sessionToken,
+    sessionStateSnapshot,
+  ]);
 
   useEffect(() => {
     sessionStateSnapshot.setTripId(props.currentTripId);
-  }, [props.currentTripId]);
+  }, [props.currentTripId, sessionStateSnapshot]);
 
   useEffect(() => {
     sessionStateSnapshot.setUserId(props.currentUserId);
-  }, [props.currentUserId]);
+  }, [props.currentUserId, sessionStateSnapshot]);
 
   const [viewport, setViewport] = useState({
     width: 100,
@@ -414,7 +419,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
                 addCoordinatesToRoute={addCoordinatesToRoute}
               />
             </>
-          ) : null}
+          ) : (
+            // eslint-disable-next-line react/jsx-no-useless-fragment
+            <></>
+          )}
           <Geocoder
             css={geocoderStyle}
             mapRef={mapRef}

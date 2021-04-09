@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import Image from 'next/image';
 import React, { useState } from 'react';
-import ReactMapGL, { Marker } from 'react-map-gl';
+import ReactMapGL, { MapEvent, Marker } from 'react-map-gl';
 import { ViewportType } from '../pages/travelplaner';
 import CustomPopup from './map/CustomPopup';
 
@@ -18,9 +18,10 @@ type MapProps = {
   mapRef: any;
   markerSetByClick: boolean;
   markerSetBySearchResult: boolean;
+  children: React.ReactElement[];
 };
 
-export default function Map(props: React.PropsWithChildren<MapProps>) {
+export default function Map(props: MapProps) {
   const [currentMarkerPosition, setCurrentMarkerPosition] = useState([
     props.viewport.longitude,
     props.viewport.latitude,
@@ -29,21 +30,18 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
 
   console.log('props.children: ', props.children);
 
-  const childrenWithProps = React.Children.map(
-    props.children,
-    (child: React.ReactElement) => {
-      console.log('child: ', child);
-      if (child) {
-        return React.cloneElement(child, {
-          handleViewportChange: props.handleViewportChange,
-          mapRef: props.mapRef,
-          mapboxToken: props.mapboxToken,
-        });
-      }
-    },
-  );
+  const childrenWithProps = React.Children.map(props.children, (child) => {
+    console.log('child: ', child);
+    // if (child) {
+    return React.cloneElement(child, {
+      handleViewportChange: props.handleViewportChange,
+      mapRef: props.mapRef,
+      mapboxToken: props.mapboxToken,
+    });
+    // }
+  });
 
-  function handleOnclick(event: PointerEvent) {
+  function handleOnclick(event: MapEvent) {
     // Needed to position the marker + popup after clicking on the map
     setCurrentMarkerPosition(event.lngLat);
 

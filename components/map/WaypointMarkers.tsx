@@ -2,6 +2,7 @@
 import { useMutation } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
+import { CallbackEvent } from 'react-map-gl/src/components/draggable-control';
 import { useSnapshot } from 'valtio';
 import { CoordinatesType } from '../../pages/travelplaner';
 import {
@@ -19,13 +20,13 @@ type WaypointMarkerPropsType = {
   generateTurnByTurnRoute: () => void;
 };
 
-type DrawMarkerPropsType = {
-  ctx: CanvasRenderingContext2D;
-  width: number;
-  height: number;
-  project: (lnglat: number[]) => [];
-  unproject: (lnglat: number[]) => [];
-};
+// type DrawMarkerPropsType = {
+//   ctx: CanvasRenderingContext2D;
+//   width: number;
+//   height: number;
+//   project: (lnglat: number[]) => [];
+//   unproject: (lnglat: number[]) => [];
+// };
 
 export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   const [currentWayPoints, setCurrentWayPoints] = useState<
@@ -52,7 +53,7 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
   });
 
   // Event handler: End of dragging
-  const handleOnDragEnd = async (event, id: number) => {
+  const handleOnDragEnd = async (event: CallbackEvent, id: number) => {
     console.log('handleOnDragEnd');
     if (!currentWayPoints) {
       return;
