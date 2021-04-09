@@ -27,15 +27,21 @@ export default function Map(props: React.PropsWithChildren<MapProps>) {
   ]);
   const [marker, setMarker] = useState(false);
 
-  const childrenWithProps = React.Children.map(props.children, (child) => {
-    if (child) {
-      return React.cloneElement(child, {
-        handleViewportChange: props.handleViewportChange,
-        mapRef: props.mapRef,
-        mapboxToken: props.mapboxToken,
-      });
-    }
-  });
+  console.log('props.children: ', props.children);
+
+  const childrenWithProps = React.Children.map(
+    props.children,
+    (child: React.ReactElement) => {
+      // console.log('child: ', child);
+      if (child) {
+        return React.cloneElement(child, {
+          handleViewportChange: props.handleViewportChange,
+          mapRef: props.mapRef,
+          mapboxToken: props.mapboxToken,
+        });
+      }
+    },
+  );
 
   function handleOnclick(event) {
     // Needed to position the marker + popup after clicking on the map

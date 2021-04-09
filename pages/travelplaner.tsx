@@ -36,11 +36,12 @@ export type CoordinatesType = {
 };
 
 export type ViewportType = {
-  width: string;
-  height: string;
+  width: number;
+  height: number;
   latitude: number;
   longitude: number;
   zoom: number;
+  transitionDuration: number;
 };
 
 export type TravelPlanerPropsType = {
@@ -131,8 +132,11 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     CoordinatesType[] | undefined
   >();
   // const [showPopup, togglePopup] = useState(false);
-  const [markerSetByClick, setMarkerSetByClick] = useState(false);
-  const [markerSetBySearchResult, setMarkerSetBySearchResult] = useState(false);
+  const [markerSetByClick, setMarkerSetByClick] = useState<boolean>(false);
+  const [
+    markerSetBySearchResult,
+    setMarkerSetBySearchResult,
+  ] = useState<boolean>(false);
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(

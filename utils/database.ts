@@ -1,26 +1,33 @@
 import camelcaseKeys from 'camelcase-keys';
-import postgres from 'postgres';
 import { UserTripType } from '../components/modals/UserProfile';
 import generateSession from './session';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
+const postgres = require('postgres');
 
 setPostgresDefaultsOnHeroku();
 
 require('dotenv-safe').config();
 
-let sql;
+// let sql;
 
-if (process.env.NODE_ENV === 'production') {
-  // Heroku needs SSL connections but
-  // has an "unauthorized" certificate
-  // https://devcenter.heroku.com/changelog-items/852
-  sql = postgres({ ssl: { rejectUnauthorized: false } });
-} else {
-  if (!globalThis.__postgresSqlClient) {
-    globalThis.__postgresSqlClient = postgres();
-  }
-  sql = globalThis.__postgresSqlClient;
-}
+// if (process.env.NODE_ENV === 'production') {
+//   // Heroku needs SSL connections but
+//   // has an "unauthorized" certificate
+//   // https://devcenter.heroku.com/changelog-items/852
+//   sql = postgres({ ssl: { rejectUnauthorized: false } });
+// } else {
+//   if (!globalThis.__postgresSqlClient) {
+//     globalThis.__postgresSqlClient = postgres();
+//   }
+//   sql = globalThis.__postgresSqlClient;
+// }
+
+const sql =
+  process.env.NODE_ENV === 'production'
+    ? postgres({ ssl: { rejectUnauthorized: false } })
+    : postgres({
+        idle_timeout: 5,
+      });
 
 // ------------------------------------------------------ Session ---------------------------------------------------------------------
 
@@ -205,6 +212,23 @@ export async function updateSessionOfCorrespondingTrip(
 
 // -------------------------------------------------------------------- Trip planning --------------------------------------------------------
 
+type RouteType = {
+  id: number;
+  title: string;
+  start_date: Date;
+  end_date: Date;
+  notes: string;
+  session_id: string;
+  trip_id: number;
+  waypoint_id: number;
+  means_of_transport: string;
+  visa_information: string;
+  order_number: number;
+  waypoint_name: string;
+  longitude: string;
+  latitude: string;
+};
+
 export async function getCurrentWaypoints(token: String) {
   const sessionId = await getSessionIdByToken(token);
   let route = [];
@@ -219,13 +243,13 @@ export async function getCurrentWaypoints(token: String) {
       ORDER BY joinTable.order_number;
     `;
 
-    // console.log('route: ', route);
+    console.log('route: ', route);
   }
   console.log('route here');
-  return route.map((currentRoute) => camelcaseKeys(currentRoute));
+  return route.map((currentRoute: RouteType) => camelcaseKeys(currentRoute));
 }
 
-export type waypointDBType = {
+export type WaypointDBType = {
   id: number;
   trip_id: number;
   notes: string;
@@ -314,7 +338,7 @@ export async function setNewWaypoint(
 
     console.log('new waypoint: ', newWaypoint);
 
-    newWaypoint = newWaypoint.map((currentWaypoint: waypointDBType) => {
+    newWaypoint = newWaypoint.map((currentWaypoint: WaypointDBType) => {
       console.log('camel case: ', camelcaseKeys(currentWaypoint));
       return camelcaseKeys(currentWaypoint);
     });
@@ -329,7 +353,7 @@ export async function setNewWaypoint(
 export async function deleteWaypoint(waypointId: number) {
   console.log('DB deleted waypoint');
 
-  const deletedWaypointFromTripWaypoint = await sql`
+  await sql`
   DELETE FROM trip_waypoint
   WHERE waypoint_id = ${waypointId}
   RETURNING *;
@@ -348,13 +372,14 @@ export async function deleteWaypoint(waypointId: number) {
 }
 
 // Used for moving waypoints or changing the order of waypoints
-export async function updateWaypoints(waypoints: waypointDBType[]) {
+export async function updateWaypoints(waypoints: WaypointDBType[]) {
   // 1. Update coordinates and waypoint name of moved waypoint
   let sqlQuery =
     'UPDATE waypoint as w SET longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name FROM (values  ';
   waypoints.map((waypoint, index, array) => {
     sqlQuery += ` (${waypoint.id}, ${waypoint.longitude}, ${waypoint.latitude}, '${waypoint.waypointName}')`;
     sqlQuery += index === array.length - 1 ? '' : ',';
+    return waypoint;
   });
   sqlQuery +=
     ' ) AS w2(id, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;';
@@ -367,14 +392,15 @@ export async function updateWaypoints(waypoints: waypointDBType[]) {
   waypoints.map((waypoint, index, array) => {
     sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber})`;
     sqlQuery += index === array.length - 1 ? '' : ',';
+    return waypoint;
   });
   sqlQuery +=
     ' ) AS tw2(id, order_number) WHERE tw2.id = tw.waypoint_id RETURNING *;';
 
-  const updatedWayointOrder = await sql.unsafe(sqlQuery);
+  await sql.unsafe(sqlQuery);
 
   // It is enough to return the first result, because changes are already made in the tables.
-  return updatedWayointPosition.map((updatedWaypoint: waypointDBType) => {
+  return updatedWayointPosition.map((updatedWaypoint: WaypointDBType) => {
     return camelcaseKeys(updatedWaypoint);
   });
 }
@@ -582,14 +608,20 @@ export async function getCurrentTripIdByToken(token: string) {
   return !tripId ? null : camelcaseKeys(tripId)[0].id;
 }
 
+type UserIdType = {
+  userId: number;
+};
+
 export async function isCurrentTokenLoggedIn(token: string) {
-  let userId = await sql`
+  const userId = await sql`
     SELECT user_id
     FROM session
     WHERE token= ${token};
   `;
 
-  const result = userId.map((currentUserId) => camelcaseKeys(currentUserId));
+  const result = userId.map((currentUserId: UserIdType) =>
+    camelcaseKeys(currentUserId),
+  );
   console.log('result: ', result);
   const isLoggedIn = result.length < 1 || !result[0].userId ? false : true;
 
