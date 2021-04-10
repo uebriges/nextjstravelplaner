@@ -323,6 +323,8 @@ export const config = {
 
 export default new ApolloServer({
   schema,
+  introspection: true,
+  playground: true,
   context: ({ req, res }) => {
     return {
       cookies: req.cookies,
