@@ -71,19 +71,14 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
       sessionStateSnapshot.setSession(SESSIONS.ANONYMOUS, props.sessionToken);
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
-  }, [props.sessionToken, sessionStateSnapshot, props.csrfToken]);
+  }, [props.sessionToken, sessionStateSnapshot]);
 
   useEffect(() => {
     if (props.isLoggedIn) {
       sessionStateSnapshot.setSession(SESSIONS.LOGGEDIN, props.sessionToken);
       sessionStateSnapshot.setCSRFToken(props.csrfToken);
     }
-  }, [
-    props.isLoggedIn,
-    props.csrfToken,
-    props.sessionToken,
-    sessionStateSnapshot,
-  ]);
+  }, [props.isLoggedIn]);
 
   useEffect(() => {
     sessionStateSnapshot.setTripId(props.currentTripId);
