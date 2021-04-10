@@ -31,7 +31,7 @@ import {
 
 const typeDefs = gql`
   type Query {
-    trip: [Trip]
+    ## trip: [Trip]
     user(userName: String): User
     waypoints(token: String): [Waypoint]
     getUserTrips(userId: Int): [Trip]
