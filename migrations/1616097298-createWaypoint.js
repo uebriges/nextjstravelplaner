@@ -5,7 +5,6 @@ exports.up = async (sql) => {
 		waypoint_name varchar(100),
 		longitude varchar(50),
 		latitude varchar(50),
-		UNIQUE (longitude, latitude),
 		PRIMARY KEY(id)
 		)
 		;`;
