@@ -109,7 +109,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
                 onDragEnd={(event) => {
                   handleOnDragEnd(event, waypoint.id);
                 }}
-                onDrag={handleOnDrag}
               >
                 <MarkerIcon />
               </Marker>
