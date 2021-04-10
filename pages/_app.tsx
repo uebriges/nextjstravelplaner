@@ -22,11 +22,21 @@ const defaultOptions: DefaultOptions = {
   },
 };
 
-const client = new ApolloClient({
-  uri: 'http://localhost:3000/api/graphql',
-  cache: new InMemoryCache({ addTypename: false }),
-  defaultOptions,
-});
+let client: any;
+
+if (process.env.NODE_ENV === 'production') {
+  client = new ApolloClient({
+    uri: 'https://travelplaner.herokuapp.com/api/graphql',
+    cache: new InMemoryCache({ addTypename: false }),
+    defaultOptions,
+  });
+} else if (process.env.NODE_ENV === 'development') {
+  client = new ApolloClient({
+    uri: 'http://localhost:3000/api/graphql',
+    cache: new InMemoryCache({ addTypename: false }),
+    defaultOptions,
+  });
+}
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
