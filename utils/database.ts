@@ -8,8 +8,14 @@ setPostgresDefaultsOnHeroku();
 
 require('dotenv-safe').config();
 
+// declare global {
+//   interface Window {
+//     postgresSql: postgres.Sql<{}>;
+//   }
+// }
+
 declare global {
-  const postgresSql: postgres.Sql<{}>;
+  var postgresSql: any;
 }
 
 let sql: postgres.Sql<{}>;

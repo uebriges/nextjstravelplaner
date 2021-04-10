@@ -145,7 +145,14 @@ export default function WaypointsList(props: WaypointsListType) {
                             {(providedDraggable) => {
                               return (
                                 <ListItem
-                                  key={waypoint.longitude + waypoint.latitude}
+                                  key={
+                                    waypoint.longitude
+                                      ? waypoints.longitude
+                                      : 0 +
+                                        (waypoint.latitude
+                                          ? waypoint.latitude
+                                          : 0)
+                                  }
                                   {...providedDraggable.draggableProps}
                                   {...providedDraggable.dragHandleProps}
                                   ref={providedDraggable.innerRef}
