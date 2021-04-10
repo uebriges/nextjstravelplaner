@@ -44,11 +44,6 @@ export default function Login() {
       setError('User name or password missing.');
       return;
     }
-    console.log('csrf before login: ', sessionStateSnapshot.csrfToken);
-    console.log(
-      'session token before login: ',
-      sessionStateSnapshot.activeSessionToken,
-    );
     const loggedIn = await loginUserDB({
       variables: {
         user: {
@@ -59,10 +54,8 @@ export default function Login() {
         },
       },
     });
-    console.log('logged in: ', loggedIn);
     // Update session token in sessionStore + update csrf
     if (loggedIn.data.loginUser) {
-      console.log('returned user');
       sessionStateSnapshot.setSession(
         SESSIONS.LOGGEDIN,
         loggedIn.data.loginUser.tokens.token,
@@ -72,20 +65,16 @@ export default function Login() {
 
       setSuccessMessage('Log in succeeded');
       // setTimeout(() => {
-      console.log('modalStateSnapshot: ', modalStateSnapshot);
       if (modalStateSnapshot.initialAction === INITIALACTION.SAVETRIP) {
-        console.log('initial action save trip');
         // modalStateSnapshot.activateModal(MODALS.NONE);
         modalStateSnapshot.activateModal(MODALS.SAVETRIP);
       } else {
-        console.log('not inital action save trip');
         modalStateSnapshot.activateModal(MODALS.NONE);
       }
       // }, 1000);
     } else {
       setError('User name or password wrong');
     }
-    // console.log('sessionStoreSnapshot: ', sessionStateSnapshot);
   }
 
   function handleRegister() {

@@ -35,17 +35,11 @@ const sessionStore: SessionStoreType = proxy({
   setSession: (type, token) => {
     sessionStore.activeSessionType = type;
     sessionStore.activeSessionToken = token;
-
-    console.log(
-      'sessionStore.activeSessionType: ',
-      sessionStore.activeSessionType,
-    );
   },
   setCSRFToken: (token) => {
     sessionStore.csrfToken = token;
   },
   setFallbackSession: () => {
-    console.log('set fallback');
     sessionStore.fallbackSessionToken = sessionStore.activeSessionToken;
   },
   setUserId: (userId) => {

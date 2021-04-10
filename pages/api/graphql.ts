@@ -2,13 +2,13 @@ import {
   ApolloServer,
   gql,
   IResolvers,
-  makeExecutableSchema,
+  makeExecutableSchema
 } from 'apollo-server-micro';
 import argon2 from 'argon2';
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
-  doesPasswordMatchPasswordHash,
+  doesPasswordMatchPasswordHash
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
@@ -26,7 +26,7 @@ import {
   switchToAnotherTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
-  userNameExists,
+  userNameExists
 } from '../../utils/database';
 
 const typeDefs = gql`
@@ -139,20 +139,13 @@ const resolvers: IResolvers = {
       return { userName };
     },
     waypoints(root, args) {
-      console.log('args.token: ', args.token);
       return getCurrentWaypoints(args.token);
     },
     getUserTrips(root, { userId }) {
       return getUserTrips(userId);
     },
     async getSessionIdByToken(root, args) {
-      console.log('grapql arg: ', args);
       const sessionIdArray = await getSessionIdByToken(args.token);
-      console.log(
-        'grapql getSessionIdByToken sessionIdArray: ',
-        sessionIdArray,
-      );
-      // console.log('extracted type: ', typeof sessionIdArray[0].id);
       return sessionIdArray.length > 0 ? sessionIdArray[0].id : 0;
     },
   },
@@ -162,14 +155,11 @@ const resolvers: IResolvers = {
 
       // User exists already
       const userExists = await userNameExists(userData.username);
-      console.log('userExists returned: ', userExists);
 
       if (userExists) {
-        console.log('exists already');
         return { id: 0 };
       }
 
-      console.log('userData.password: ', userData.password);
       // User doesn't exist
       const passwordHash = await argon2.hash(userData.password);
       const newUser = await registerUser({
@@ -182,15 +172,11 @@ const resolvers: IResolvers = {
         currentlyTraveling: false,
         password: passwordHash,
       });
-
-      console.log('new User: ', newUser[0]);
-      // return newUser[0];
       return { id: newUser[0].id, userName: newUser[0].usersName };
     },
     async loginUser(root, args, context) {
       const { user } = args;
 
-      console.log('user in graphql: ', user);
       // Check CSRF token
       if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
         throw new Error('CSRF Token does not match');
@@ -198,8 +184,6 @@ const resolvers: IResolvers = {
 
       // Search for user in DB
       const userWithPasswordHash = await getUserByUserName(user.username);
-
-      console.log('user with passwordhas: ', userWithPasswordHash);
 
       // Error out if the username does not exist
       if (userWithPasswordHash[0].id === 0) {
@@ -218,11 +202,8 @@ const resolvers: IResolvers = {
         throw new Error('Username or password does not match');
       }
 
-      console.log('user.id: ', foundUser.id);
-      // // At this point, we are  successfully authenticated
+      // At this point, we are  successfully authenticated
       const session = await createSessionTwentyFourHours(foundUser.id);
-
-      console.log('session1: ', session);
 
       await updateSessionOfCorrespondingTrip(
         user.sessionToken, // current token
@@ -230,17 +211,12 @@ const resolvers: IResolvers = {
         session[0].token, // new token
       );
 
-      console.log('session2: ', session);
-
       const sessionCookie = serializeSecureCookieServerSide(
         'session',
         session[0].token,
       );
 
-      console.log('session cookie: ', sessionCookie);
-
       context.res.setHeader('Set-Cookie', sessionCookie);
-
       const newCsrfToken = createCsrfToken(session[0].token);
 
       return {
@@ -249,36 +225,26 @@ const resolvers: IResolvers = {
       };
     },
     async setNewWaypoint(root, args) {
-      console.log('set new waypoint resolver');
       const newWaypoint = await setNewWaypoint(
         args.token,
         args.longitude,
         args.latitude,
         args.waypointName,
       );
-
-      console.log('newWaypoint resolver: ', newWaypoint);
-
       return newWaypoint;
     },
     updateWaypoints(root, args) {
-      // console.log('updateWaypoints gql: ', updateWaypoints);
-      // console.log('updated waypoints asdf:');
-      // const resvoledResult = updateWaypoints(args.waypoints);
       return updateWaypoints(args.waypoints);
     },
     deleteWaypoint(root, args) {
       return deleteWaypoint(args.waypointId);
     },
     async updateSessionOfCorrespondingTrip(root, args, context) {
-      console.log('args: ', args);
       const newSessionToken = await updateSessionOfCorrespondingTrip(
         args.sessions.currentToken,
         args.sessions.action,
         args.sessions.newToken,
       );
-
-      console.log('new Session token: ', newSessionToken);
 
       const newSessionCookie = serializeSecureCookieServerSide(
         'session',
@@ -296,14 +262,11 @@ const resolvers: IResolvers = {
       return deletedSession;
     },
     async saveUserTrip(root, args) {
-      console.log('resolver save trip');
-      console.log('resolver args', args);
       const savedTrip = await saveUserTrip(
         args.userId,
         args.tripId,
         args.tripTitle,
       );
-      console.log('saved trip in resolver: ', savedTrip);
       return savedTrip;
     },
     async startNewTrip(root, args) {

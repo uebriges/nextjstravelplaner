@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation } from '@apollo/client';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Marker } from 'react-map-gl';
 import { CallbackEvent } from 'react-map-gl/src/components/draggable-control';
 import { useSnapshot } from 'valtio';
@@ -57,7 +57,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
     event: CallbackEvent,
     id: number | undefined,
   ) => {
-    console.log('handleOnDragEnd');
     if (!currentWayPoints) {
       return;
     }
@@ -65,13 +64,9 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
       ...currentWayPoints.find((waypoint) => waypoint.id === id),
     };
 
-    console.log('moved waypoint: ', movedWayPoint);
-    console.log('moved waypoint: ', event.lngLat);
-
     movedWayPoint.longitude = event.lngLat[0];
     movedWayPoint.latitude = event.lngLat[1];
 
-    console.log('movedWayPoint afterwards: ', movedWayPoint);
     if (!movedWayPoint.id) return;
     const updatedMovedWaypoint = await props.reversGeocodeWaypoint(
       movedWayPoint,
@@ -88,8 +83,6 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
       },
     );
 
-    console.log('before updating waypoints: ', updatedWayPoints);
-
     // setCurrentWayPoints(updatedWayPoints);
     // Cookies.set('waypoints', JSON.stringify(currentWayPoints));
     await updateWaypointsFunction({
@@ -97,18 +90,9 @@ export default function WaypointMarkers(props: WaypointMarkerPropsType) {
         waypoints: updatedWayPoints,
       },
     });
-    console.log('waypoints updated');
     props.generateTurnByTurnRoute();
-    console.log('generated turn by turn');
     setCurrentWayPoints(updatedWayPoints);
-    console.log('state waypoints updated');
   };
-
-  const handleOnDrag = useCallback((event) => {
-    // console.log('handleOnDrag');
-    // console.log('event.lngLat: ', event.lngLat);
-    // console.log('dragging...');
-  }, []);
 
   return (
     <div>

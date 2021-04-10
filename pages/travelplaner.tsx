@@ -159,7 +159,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   );
 
   async function refetchWaypoints() {
-    console.log('refetching.....');
     return await waypoints.refetch();
   }
 
@@ -169,13 +168,10 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Adds new coordinates to the DB
   async function addCoordinatesToRoute() {
-    console.log('addCoordinatesToRoute');
-
     // DB/Graphql variables
     let alreadyAvailableCoordinatesInDB;
 
     // Waypoint with exact same current logitude/latitude already part of the trip?
-    console.log('data in addcoord: ', waypoints.data);
     if (waypoints.data && waypoints.data.waypoints.length > 0) {
       alreadyAvailableCoordinatesInDB = waypoints.data.waypoints.find(
         (waypoint: LocationInDBType) => {
@@ -189,14 +185,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
     // Waypoint not yet part of the trip
     if (!alreadyAvailableCoordinatesInDB) {
-      console.log('coordinates not yet part of the trip ');
       const newWaypoint = await reversGeocodeWaypoint({
         id: 0, // could be any number, because waypoint id is defined by the DB
         longitude: currentLongitude,
         latitude: currentLatitude,
         waypointName: '',
       });
-      console.log('newwaypoint revers: ', newWaypoint);
       const newWaypointData = await setNewWaypointFunction({
         variables: {
           token: sessionStateSnapshot.activeSessionToken,
@@ -206,31 +200,23 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         },
       });
 
-      console.log('new Waypoint data: ', newWaypointData);
-      console.log(
-        'setting tripId....',
-        typeof newWaypointData.data.setNewWaypoint.tripId,
-      );
       sessionStateSnapshot.setTripId(
         Number(newWaypointData.data.setNewWaypoint.tripId),
       );
 
       const newListOfWaypoints = await refetchWaypoints();
-      console.log('new data: ', waypoints);
 
       // Update viewport to show all markers on the map (most of the time it will be zooming out)
       if (
         newListOfWaypoints.data.waypoints &&
         newListOfWaypoints.data.waypoints.length > 1
       ) {
-        console.log('viewport adaptation waypoints.data: ', waypoints.data);
         const allLongitudes = newListOfWaypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.longitude,
         );
         const allLatitudes = newListOfWaypoints.data.waypoints.map(
           (waypoint: CoordinatesType) => waypoint.latitude,
         );
-        console.log('allLat: ', allLatitudes);
 
         const maxLong = Math.max(...allLongitudes);
         const maxLat = Math.max(...allLatitudes);
@@ -264,15 +250,12 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Generate turn by turn route
   async function generateTurnByTurnRoute() {
-    // console.log('data in generateTurnByTurnRoute: ', waypoints.data);
     let newWaypointsArray: CoordinatesType[] = [];
 
     // Order waypoints and store in newWaypointsArray
     if (waypoints.data && waypoints.data.waypoints !== null) {
       newWaypointsArray = Array.from(waypoints.data.waypoints);
       newWaypointsArray.sort((a, b) => {
-        // console.log('a: ', a);
-        // console.log('b: ', b);
         return (a.orderNumber as number) - (b.orderNumber as number);
       });
     }
@@ -300,23 +283,16 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
       const legs = [];
       legs.push(...response.routes[0]?.legs);
-      console.log('routes...: ', response.routes);
       const instructions = legs.map((leg) => {
         const legInstruction = leg.steps.map((step: RouteStepType) => {
           return step.maneuver.instruction;
         });
         return legInstruction;
       });
-      console.log('Instructions: ', instructions);
       tripStateSnapshot.addDistance(response.routes[0]?.distance);
       tripStateSnapshot.addInstructions(instructions);
-      console.log(
-        'response.routes[0]?.geometry.coordinates: ',
-        response.routes[0]?.geometry.coordinates,
-      );
       setCurrentRoute(response.routes[0]?.geometry.coordinates);
     } else {
-      console.log('else waypoints: ', waypoints.data?.waypoints);
       // setCurrentRoute(waypoints.data?.waypoints);
       setCurrentRoute([
         [
@@ -330,7 +306,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Translates coordinates into location names
   async function reversGeocodeWaypoint(waypoint: CoordinatesType) {
-    // if (waypoint) {
     let apiCallString;
     apiCallString = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
     apiCallString +=
@@ -342,9 +317,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     const response = await fetch(apiCallString);
     const geoCodeJSON = await response.json();
     waypoint.waypointName = geoCodeJSON.features[0].place_name;
-    // }
-    console.log('waypoint:', waypoint);
-
     return waypoint;
   }
 
@@ -459,22 +431,12 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   let token;
 
   // if new session needed = 2 hours token
-  console.log('Getserversideprops travelplaner -> ', ctx.req.cookies);
-  console.log(
-    'Getserversideprops travelplaner -> ',
-    Object.keys(ctx.req.cookies).length,
-  );
-  console.log(
-    'Getserversideprops travelplaner -> ',
-    ctx.req.cookies.constructor === Object,
-  );
   if (
     ctx.req.cookies.session === 'undefined' ||
     !ctx.req.cookies.session ||
     (Object.keys(ctx.req.cookies).length === 0 &&
       ctx.req.cookies.constructor === Object)
   ) {
-    console.log('no session available yet');
     // Set 2 hours token -> Anonymous
     token = (await createSessionTwoHours()).token;
 
@@ -487,7 +449,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     ctx.res.setHeader('Set-Cookie', sessionCookie);
   } else {
     token = ctx.req.cookies.session;
-    console.log(' session available ');
   }
 
   const csrfToken = createCsrfToken(token);

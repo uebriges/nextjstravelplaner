@@ -101,15 +101,6 @@ export default function UserProfile() {
     event: React.MouseEvent<HTMLTableDataCellElement> &
       React.MouseEvent<HTMLTableHeaderCellElement>,
   ) {
-    console.log('event: ', event);
-    console.log(
-      'handleTableRowClick -> sessionStore.activeSessionToken: ',
-      sessionStore.activeSessionToken,
-    );
-    console.log(
-      'handleTableRowClick -> event: ',
-      (event.target as HTMLTableDataCellElement).id,
-    );
     sessionStateSnapshot.setTripId(
       Number((event.target as HTMLTableDataCellElement).id),
     );
@@ -125,7 +116,6 @@ export default function UserProfile() {
   }
 
   async function handleLogout() {
-    console.log('--> handle Logout');
     modalsStore.activateModal(MODALS.NONE);
 
     // Update session token for trip -> new session token
@@ -138,15 +128,6 @@ export default function UserProfile() {
       },
     });
 
-    console.log(
-      'newToken: ',
-      newToken.data.updateSessionOfCorrespondingTrip[0],
-    );
-
-    console.log(
-      'sessionStateSnapshot.activeSessionToken: ',
-      sessionStateSnapshot.activeSessionToken,
-    );
     // Delete former session -> db
     await deleteSessionByTokenFunction({
       variables: {
@@ -160,10 +141,6 @@ export default function UserProfile() {
       newToken.data.updateSessionOfCorrespondingTrip[0],
     );
     sessionStateSnapshot.setUserId(0);
-    console.log(
-      'set new session type: ',
-      sessionStateSnapshot.activeSessionType,
-    );
   }
 
   return (

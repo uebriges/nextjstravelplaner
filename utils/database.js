@@ -9,7 +9,6 @@ require('dotenv-safe').config();
 
 let sql;
 
-
 if (process.env.NODE_ENV === 'production') {
   // Heroku needs SSL connections but
   // has an "unauthorized" certificate
@@ -116,20 +115,11 @@ export async function deleteSessionByToken(token) {
 }
 
 export async function getSessionIdByToken(token) {
-  console.log('getSessionIdByToken: ');
-  console.log('token: ', token);
-
   const sessionId = await sql`
       SELECT id
       FROM session
       WHERE token = ${token};
     `;
-
-  console.log('sessionId length: ', camelcaseKeys(sessionId).length);
-  console.log('sessionId : ', sessionId.length);
-  // console.log('sessionId only: ', camelcaseKeys(sessionId)[0]);
-  // console.log('sessionId: ', camelcaseKeys(sessionId.slice(-2)[0].id));
-
   return camelcaseKeys(sessionId.slice(-2));
 }
 
@@ -138,30 +128,22 @@ export async function updateSessionOfCorrespondingTrip(
   action,
   newToken,
 ) {
-  console.log('updateSessionOfCorrespondingTrip');
-  console.log('currentToken: ', currentToken);
-
   let newTokenObject;
   let newTokenId;
   // If new token is needed, because there is no fallback token in sessionStore
   if (!newToken) {
-    console.log('no new token');
     // Logout: New token -> 2 hours valid
     // Any other action: 5 mins (e.g. start login process)
     if (action === 'logout') {
-      console.log('action logout');
       newTokenObject = await createSessionTwoHours();
-      console.log('new token object: ', newTokenObject);
       newToken = newTokenObject.token;
       newTokenId = newTokenObject.id;
     } else {
-      console.log('other action');
       newTokenObject = await createSessionFiveMinutes();
       newToken = newTokenObject[0].token;
       newTokenId = newTokenObject[0].id;
     }
   } else {
-    console.log('new token given ');
     newTokenId = (
       await sql`
     SELECT id
@@ -170,9 +152,6 @@ export async function updateSessionOfCorrespondingTrip(
   `
     )[0].id;
   }
-
-  console.log('new token: ', newToken);
-  console.log('new token object: ', newTokenObject);
 
   // Lookup the id of currentToken
   const currentTokenObject = await sql`
@@ -185,18 +164,11 @@ export async function updateSessionOfCorrespondingTrip(
   if (currentTokenObject.length > 0) {
     const currentTokenId = currentTokenObject[0].id;
 
-    console.log('new token id: ', newTokenId);
-    console.log('current token: ', currentTokenId);
-    // currentTokenId = currentTokenId[0].id;
-    // replace current token id of trip with new token
-
     await sql`
       UPDATE trip
       SET session_id = ${newTokenId}
       WHERE session_id = ${currentTokenId.toString()};
     `;
-
-    // replace token of current trip with new token
   }
 
   return newToken;
@@ -207,9 +179,7 @@ export async function updateSessionOfCorrespondingTrip(
 export async function getCurrentWaypoints(token) {
   const sessionId = await getSessionIdByToken(token);
   let route = [];
-  console.log('sessionId getcurrentwaypoints: ', sessionId);
   if (sessionId.length > 0) {
-    console.log('Check for trip+waypoints of specific session id');
     route = await sql`
       SELECT * from trip tripTable
       INNER JOIN trip_waypoint joinTable ON tripTable.id = joinTable.trip_id
@@ -217,10 +187,7 @@ export async function getCurrentWaypoints(token) {
       WHERE tripTable.session_id = ${sessionId[0].id.toString()}
       ORDER BY joinTable.order_number;
     `;
-
-    console.log('route: ', route);
   }
-  console.log('route here');
   return route.map((currentRoute) => camelcaseKeys(currentRoute));
 }
 
@@ -232,7 +199,6 @@ async function getLastOrderNumber(tripId) {
   WHERE trip_id = ${tripId};
   `;
 
-  console.log('lasterOrderNumber: ', lastOrderNumber[0].max);
   lastOrderNumber = lastOrderNumber[0].max;
   lastOrderNumber = !lastOrderNumber
     ? (lastOrderNumber = 1)
@@ -243,8 +209,6 @@ async function getLastOrderNumber(tripId) {
 
 // Set a new waypoint to the map
 export async function setNewWaypoint(token, longitude, latitude, waypointName) {
-  console.log('setNewWaypoint');
-
   // Get the session id of the current session
   const sessionId = await getSessionIdByToken(token);
 
@@ -256,14 +220,8 @@ export async function setNewWaypoint(token, longitude, latitude, waypointName) {
     WHERE session_id = ${sessionId[0].id.toString()}
   ;`;
 
-    console.log('is array: ', Array.isArray(tripId));
-    console.log('tripId before: ', tripId.length);
-    // tripId = tripId.slice(-2);
-    console.log('tripId AFTER: ', tripId);
-
     // If no trip created yet, create a new one
     if (tripId.length < 1) {
-      console.log('no trip id');
       tripId = await sql`
       INSERT INTO trip
         (start_date, session_id)
@@ -271,11 +229,8 @@ export async function setNewWaypoint(token, longitude, latitude, waypointName) {
         (${new Date().toLocaleDateString()}, ${sessionId[0].id.toString()})
       RETURNING *
   ;`;
-
-      console.log('newTrip: ', tripId);
     }
 
-    console.log('tripId new: ', tripId);
     tripId = tripId[0].id;
 
     // Add new waypoint (trip_id and coordinates are unique base on
@@ -283,7 +238,6 @@ export async function setNewWaypoint(token, longitude, latitude, waypointName) {
 
     const orderNumber = await getLastOrderNumber(tripId);
 
-    console.log('orderNumber: ', orderNumber);
     let newWaypoint;
 
     try {
@@ -295,7 +249,6 @@ export async function setNewWaypoint(token, longitude, latitude, waypointName) {
       RETURNING *;
     `;
 
-      console.log('newwaypoint: ', newWaypoint[0]);
       newWaypoint = newWaypoint[0];
       const newTripWaypoint = await sql`
         INSERT INTO trip_waypoint
@@ -306,27 +259,19 @@ export async function setNewWaypoint(token, longitude, latitude, waypointName) {
       `;
       newWaypoint = newTripWaypoint;
     } catch (event) {
-      console.log('event: ', event);
       newWaypoint = [];
     }
 
-    console.log('new waypoint: ', newWaypoint);
-
     newWaypoint = newWaypoint.map((currentWaypoint) => {
-      console.log('camel case: ', camelcaseKeys(currentWaypoint));
       return camelcaseKeys(currentWaypoint);
     });
 
-    console.log('tripId extracted: ', tripId);
     // handle case if no new waypoint was set because already available!
-    console.log('newpoint last: ', newWaypoint);
     return newWaypoint[0];
   }
 }
 
 export async function deleteWaypoint(waypointId) {
-  console.log('DB deleted waypoint');
-
   await sql`
   DELETE FROM trip_waypoint
   WHERE waypoint_id = ${waypointId}
@@ -339,8 +284,6 @@ export async function deleteWaypoint(waypointId) {
     RETURNING *;
     ;
   `;
-
-  console.log('deletedWaypoint: ', deletedWaypointFromWaypoint[0]);
 
   return deletedWaypointFromWaypoint[0];
 }
@@ -382,7 +325,6 @@ export async function updateWaypoints(waypoints) {
 // -------------------------------------------------------------------- User related ----------------------------------------------------------------
 
 export async function registerUser(user) {
-  console.log('Register user');
   const newUser = await sql`
     INSERT INTO
       users (
@@ -398,7 +340,6 @@ export async function registerUser(user) {
     RETURNING *;
   `;
 
-  console.log('Register user -> newUser', newUser);
   return newUser.map((currentUser) => camelcaseKeys(currentUser));
 }
 
@@ -410,23 +351,16 @@ FROM users
 WHERE users_name = ${username};
   `;
 
-  console.log('users in userNameExists: ', users);
-  console.log('users in userNameExists: ', users.length);
-
   return users.length > 0;
 }
 
 // Retrieve user by user name
 export async function getUserByUserName(username) {
-  console.log('in getuser call: ', username);
   const user = await sql`
 SELECT *
 FROM users
 WHERE users_name = ${username};
   `;
-
-  console.log('tried to get user', user);
-  console.log('tried to get user', user.length);
 
   if (user.length !== 0) {
     return user.map((currentUser) => camelcaseKeys(currentUser));
@@ -443,15 +377,10 @@ export async function getUserTrips(userId) {
     AND title IS NOT NULL;
   `;
 
-  console.log('tripsOfUser db: ', tripsOfUser);
-
   return tripsOfUser.map((currentTrip) => camelcaseKeys(currentTrip));
 }
 
 export async function saveUserTrip(userId, tripId, tripTitle) {
-  console.log('userId: ', userId);
-  console.log('tripId: ', typeof tripId);
-  console.log('tripTitle: ', tripTitle);
   await sql`
     INSERT INTO user_trip
     VALUES (${tripId},${userId}) ON CONFLICT (trip_id, user_id) DO NOTHING;
@@ -469,22 +398,18 @@ export async function saveUserTrip(userId, tripId, tripTitle) {
 export async function startNewTrip(token) {
   // get session id
 
-  console.log('startNewTrip -> token: ', token);
   const sessionId = await sql`
     SELECT id
     FROM session
     WHERE token = ${token};
   `;
 
-  console.log('startNewTrip -> session id: ', sessionId);
   // remove session_id where session_id = sessionId
   await sql`
     UPDATE trip
     SET session_id = ''
     WHERE session_id = ${sessionId[0].id.toString()}
   `;
-
-  console.log('startNewTrip -> removed session_id from current trip: ');
 
   // create a new tripId with sessionId
   const newTrip = await sql`
@@ -494,14 +419,10 @@ export async function startNewTrip(token) {
     RETURNING id
   `;
 
-  console.log('startNewTrip -> new trip: ', camelcaseKeys(newTrip[0]));
   return camelcaseKeys(newTrip[0].id);
 }
 
 export async function switchToAnotherTrip(currentSessionToken, newTripId) {
-  console.log('getWaypointsByTripId -> trip id: ', newTripId);
-  console.log('getWaypointsByTripId -> session token: ', currentSessionToken);
-
   // get session id
   const sessionId = await sql`
     SELECT id
@@ -509,7 +430,6 @@ export async function switchToAnotherTrip(currentSessionToken, newTripId) {
     WHERE token = ${currentSessionToken};
   `;
 
-  console.log('getWaypointsByTripId -> session id: ', sessionId);
   // remove session_id where session_id = sessionId
   await sql`
     UPDATE trip
@@ -517,7 +437,6 @@ export async function switchToAnotherTrip(currentSessionToken, newTripId) {
     WHERE session_id = ${sessionId[0].id.toString()}
   `;
 
-  console.log('getWaypointsByTripId -> remove session id from current trip');
   await sql`
     UPDATE trip
     SET session_id = ${sessionId[0].id.toString()}
@@ -527,9 +446,7 @@ export async function switchToAnotherTrip(currentSessionToken, newTripId) {
 }
 
 export async function getCurrentTripIdByToken(token) {
-  console.log('getCurrentTripIdByToken -> token: ', token);
   const tokenId = await getSessionIdByToken(token);
-  console.log('getCurrentTripIdByToken -> tokenId: ', tokenId);
   let tripId;
 
   if (tokenId.length > 0) {
@@ -539,8 +456,6 @@ export async function getCurrentTripIdByToken(token) {
     WHERE session_id = ${tokenId[0].id.toString()}
   `;
   }
-
-  console.log('getCurrentTripIdByToken -> tripId: ', tripId);
 
   return !tripId ? null : camelcaseKeys(tripId)[0].id;
 }
@@ -553,25 +468,17 @@ export async function isCurrentTokenLoggedIn(token) {
   `;
 
   const result = userId.map((currentUserId) => camelcaseKeys(currentUserId));
-  console.log('result: ', result);
   const isLoggedIn = result.length < 1 || !result[0].userId ? false : true;
-
-  console.log('isCurrentTokenLoggedIn: ', isLoggedIn);
 
   return isLoggedIn;
 }
 
 export async function getUserIdBytoken(token) {
-  console.log('getUserIdBytoken -> token: ', token);
   const userId = await sql`
     SELECT user_id
     FROM session
     WHERE token = ${token}
   `;
 
-  console.log(
-    'camelcaseKeys(userId)[0].userId: ',
-    camelcaseKeys(userId)[0].userId,
-  );
   return camelcaseKeys(userId)[0].userId;
 }

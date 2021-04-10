@@ -12,7 +12,6 @@ type DrawRoutePropsType = {
 };
 
 export default function Route(props: RoutePropsType) {
-  console.log('props.points: ', props.points);
   function drawRoute({ ctx, width, height, project }: DrawRoutePropsType) {
     const points = props.points ? props.points : [];
     if (points.length > 1) {

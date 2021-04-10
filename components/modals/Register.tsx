@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
+  TextField
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -26,7 +26,6 @@ export default function Register() {
   // GraphQL
   const [registerUserFunction] = useMutation(registerUser, {
     onCompleted(data) {
-      console.log('Registration: ', data);
       // throw new Error(JSON.stringify(data));
       if (data.registerUser.id === 0) {
         setErrorMessage('User name already exists');
@@ -45,7 +44,6 @@ export default function Register() {
   }
 
   async function handleRegister() {
-    console.log('register');
     registerUserFunction({
       variables: {
         user: {

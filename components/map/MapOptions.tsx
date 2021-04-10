@@ -7,16 +7,16 @@ import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
   mapOptionButtonsStyles,
-  mapOptionsSpansStyles,
+  mapOptionsSpansStyles
 } from '../../styles/styles';
 import {
   getCurrentWaypoints,
   getUserTrips,
-  startNewTrip,
+  startNewTrip
 } from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
-  MODALS,
+  MODALS
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 import tripStore from '../../utils/valtio/tripstore';
@@ -59,20 +59,11 @@ export default function MapOptions() {
 
   // Save button is active if at least one waypoint is selected
   useEffect(() => {
-    console.log('useeffect tripId: ', typeof sessionStateSnapshot.tripId);
     const indexOfTrip = userTrips.data?.getUserTrips?.findIndex(
       (currentTrip: CurrentTripType) => {
-        console.log('currentTrip ID: ', currentTrip.id);
         return currentTrip.id === sessionStateSnapshot.tripId;
       },
     );
-    console.log('indexOfTrip: ', indexOfTrip < 0);
-    console.log('userTrips: ', userTrips);
-    console.log(
-      'waypoints.data.waypoints.length: ',
-      waypoints.data?.waypoints?.length > 0,
-    );
-    console.log('waypoints.data: ', waypoints.data);
     waypoints.data && waypoints.data.waypoints.length > 0 && indexOfTrip < 0
       ? setDisabled(false)
       : setDisabled(true);
@@ -80,24 +71,15 @@ export default function MapOptions() {
 
   // Save trip
   function handleSave() {
-    console.log(
-      'handle save sessionStateSnapshot.activeSessionType',
-      sessionStateSnapshot.activeSessionType,
-    );
     if (sessionStateSnapshot.activeSessionType !== SESSIONS.LOGGEDIN) {
       modalStateSnapshot.setInitialAction(INITIALACTION.SAVETRIP);
       modalStateSnapshot.activateModal(MODALS.LOGIN);
     } else {
-      console.log('handle save if logged in');
       modalStateSnapshot.activateModal(MODALS.SAVETRIP);
     }
   }
 
   async function handleStartNewTrip() {
-    console.log(
-      'handleStartNewTrip -> sessionToken: ',
-      sessionStateSnapshot.activeSessionToken,
-    );
     const newTripId = await startNewTripFunction({
       variables: {
         token: sessionStateSnapshot.activeSessionToken,
@@ -105,7 +87,6 @@ export default function MapOptions() {
     });
 
     sessionStateSnapshot.setTripId(newTripId.data.startNewTrip);
-    console.log('handleStartNewTrip -> newTrip: ', newTripId.data.startNewTrip);
   }
 
   return (

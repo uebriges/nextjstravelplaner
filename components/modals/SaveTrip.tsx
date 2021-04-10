@@ -22,19 +22,12 @@ export default function SaveTrip() {
   const modalStoreSnapshot = useSnapshot(modalsStore);
   const sessionStoreSnapshot = useSnapshot(sessionStore);
 
-  console.log(
-    '--> Save trip active session token: ',
-    sessionStoreSnapshot.activeSessionToken,
-  );
-
   // Get current session id
   const sessionId = useQuery(getSessionIdByToken, {
     variables: {
       token: sessionStoreSnapshot.activeSessionToken,
     },
   });
-
-  console.log('--> Save trip active session Id: ', sessionId);
 
   // Refetch of getUserTrips is needed to deactivate the save button immediately
   const [saveUserTripFunction] = useMutation(saveUserTrip, {
@@ -49,18 +42,12 @@ export default function SaveTrip() {
     awaitRefetchQueries: true,
   });
 
-  console.log('--> Save trip saveUserTrip function: ', saveUserTrip);
-
   function handleCancel() {
     modalStoreSnapshot.activateModal(MODALS.NONE);
   }
 
   function handleSave() {
-    console.log('Session id current: ', sessionId.data.getSessionIdByToken);
-    console.log('trip title: ', tripTitle);
-    console.log('trip id: ', sessionStoreSnapshot.tripId);
     if (sessionId.data.getSessionIdByToken) {
-      console.log('in if');
       saveUserTripFunction({
         variables: {
           userId: sessionStoreSnapshot.userId,

@@ -6,7 +6,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText,
+  ListItemText
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -16,14 +16,14 @@ import {
   Draggable,
   Droppable,
   DropResult,
-  resetServerContext,
+  resetServerContext
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../../pages/travelplaner';
 import { routeListStyle } from '../../styles/styles';
 import {
   deleteWaypoint,
   getCurrentWaypoints,
-  updateWaypoints,
+  updateWaypoints
 } from '../../utils/graphqlQueries';
 
 type WaypointsListType = {
@@ -57,12 +57,10 @@ export default function WaypointsList(props: WaypointsListType) {
   );
 
   useEffect(() => {
-    console.log('waypointsFromDB.data: ', waypointsFromDB.data);
     if (waypointsFromDB.data && waypointsFromDB.data.waypoints !== null) {
       const waypointsArray: CoordinatesType[] | undefined = Array.from(
         waypointsFromDB.data.waypoints,
       );
-      console.log('waypointsArray: ', waypointsArray);
       waypointsArray.sort((a, b) => {
         return (a.orderNumber as number) - (b.orderNumber as number);
       });
@@ -70,11 +68,6 @@ export default function WaypointsList(props: WaypointsListType) {
       props.generateTurnByTurnRoute();
     }
   }, [waypointsFromDB.data]);
-
-  // function refetchWaypoints() {
-  //   console.log('refetching...');
-  //   waypointsFromDB.refetch();
-  // }
 
   resetServerContext();
 
@@ -108,9 +101,6 @@ export default function WaypointsList(props: WaypointsListType) {
     });
 
     waypointsFromDB.refetch();
-
-    console.log('updatedWaypoints in drag end: ', waypointsFromDB.data); // wrong values
-    console.log('state waypoints: ', waypoints); // wrong value
   }
 
   return (
@@ -128,7 +118,6 @@ export default function WaypointsList(props: WaypointsListType) {
                 {waypoints
                   ? waypoints.map(
                       (waypoint: CoordinatesType, index: number) => {
-                        // console.log('render waypoint: ', waypoint);
                         return (
                           <Draggable
                             key={

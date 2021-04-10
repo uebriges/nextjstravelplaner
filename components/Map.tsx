@@ -28,17 +28,12 @@ export default function Map(props: MapProps) {
   ]);
   const [marker, setMarker] = useState(false);
 
-  console.log('props.children: ', props.children);
-
   const childrenWithProps = React.Children.map(props.children, (child) => {
-    console.log('child: ', child);
-    // if (child) {
     return React.cloneElement(child, {
       handleViewportChange: props.handleViewportChange,
       mapRef: props.mapRef,
       mapboxToken: props.mapboxToken,
     });
-    // }
   });
 
   function handleOnclick(event: MapEvent) {

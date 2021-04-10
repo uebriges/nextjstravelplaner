@@ -29,20 +29,14 @@ export default function Layout(props: LayoutProps) {
 
   // Handle click on user symbol
   async function handleUserFunctionality() {
-    console.log('session type: ', sessionStoreSnapshot.activeSessionType);
-    console.log('modal type: ', modalsStore.activeModal);
     // If user is already logged in
     if (sessionStoreSnapshot.activeSessionType === SESSIONS.LOGGEDIN) {
       modalStateSnapshot.activateModal(MODALS.USERPROFILE);
       return;
     }
 
-    console.log('handleUserFunctionality');
-    console.log('sessionStoreSnapshot before: ', sessionStoreSnapshot);
-
     // If session type is not LOGGEDIN
     if (sessionStoreSnapshot.activeSessionType !== SESSIONS.LOGGEDIN) {
-      console.log('token not yet 5 mins');
       modalStateSnapshot.activateModal(MODALS.LOGIN);
 
       // Change session id of trip to 5 mins session token
@@ -51,14 +45,6 @@ export default function Layout(props: LayoutProps) {
           sessions: { currentToken: sessionStoreSnapshot.activeSessionToken },
         },
       });
-
-      console.log('newTokenAndCSRF: ', newTokenAndCSRF);
-
-      console.log('csrf: ', sessionStoreSnapshot.csrfToken);
-      console.log(
-        'csrf should be afterwards: ',
-        newTokenAndCSRF.data.updateSessionOfCorrespondingTrip[1],
-      );
 
       // Store fallback + update session token in sessionStore + update csrf
       sessionStoreSnapshot.setFallbackSession();
@@ -69,10 +55,6 @@ export default function Layout(props: LayoutProps) {
       sessionStoreSnapshot.setCSRFToken(
         newTokenAndCSRF.data.updateSessionOfCorrespondingTrip[1],
       );
-
-      console.log('sessionStoreSnapshot: ', sessionStoreSnapshot);
-
-      // If 5 mins are over, fallback to 2 hours session token -> change session_id of trip again
     }
   }
 
