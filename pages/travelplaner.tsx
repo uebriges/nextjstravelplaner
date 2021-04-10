@@ -87,7 +87,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   useEffect(() => {
     sessionStateSnapshot.setTripId(props.currentTripId);
-  }, [props.currentTripId, sessionStateSnapshot]);
+  }, [props.currentTripId]);
 
   useEffect(() => {
     sessionStateSnapshot.setUserId(props.currentUserId);
