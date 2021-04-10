@@ -91,7 +91,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   useEffect(() => {
     sessionStateSnapshot.setUserId(props.currentUserId);
-  }, [props.currentUserId, sessionStateSnapshot]);
+  }, [props.currentUserId]);
 
   const [viewport, setViewport] = useState({
     width: 100,
