@@ -6,7 +6,7 @@ exports.up = async (sql) => {
 		start_date date,
 		end_date date,
 		notes varchar(50),
-		session_id int,
+		session_id varchar(100),
 		PRIMARY KEY(id));`;
 };
 
