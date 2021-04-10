@@ -10,7 +10,7 @@ require('dotenv-safe').config();
 
 // declare global {
 //   interface Window {
-//     postgresSql: postgres.Sql<{}>;
+//     postgresSql: any;
 //   }
 // }
 
@@ -18,7 +18,7 @@ declare global {
   var postgresSql: any;
 }
 
-let sql: postgres.Sql<{}>;
+let sql: any;
 
 if (process.env.NODE_ENV === 'production') {
   // Heroku needs SSL connections but
@@ -31,13 +31,6 @@ if (process.env.NODE_ENV === 'production') {
   }
   sql = globalThis.postgresSql;
 }
-
-// const sql =
-//   process.env.NODE_ENV === 'production'
-//     ? postgres({ ssl: { rejectUnauthorized: false } })
-//     : postgres({
-//         idle_timeout: 5,
-//       });
 
 // ------------------------------------------------------ Session ---------------------------------------------------------------------
 
