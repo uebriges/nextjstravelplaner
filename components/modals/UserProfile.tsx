@@ -39,7 +39,7 @@ interface ColumnType {
   id: string;
   label: string;
   minWidth?: number;
-  align?: 'right';
+  align?: 'right' | 'center';
 }
 
 const columnHeaders: ColumnType[] = [
@@ -111,10 +111,6 @@ export default function UserProfile() {
       },
     });
 
-    console.log('user trips: ', userTrips);
-    console.log('user trips: ', userTrips[0].startDate);
-    console.log('user trips: ', typeof userTrips[0].startDate);
-
     setSuccessMessage('Switched to another trip');
     modalsStore.activateModal(MODALS.NONE);
   }
@@ -147,7 +143,6 @@ export default function UserProfile() {
     sessionStateSnapshot.setUserId(0);
   }
 
-  console.log('user trips: ', userTrips);
   return (
     <Dialog
       open={true}
@@ -177,12 +172,6 @@ export default function UserProfile() {
               {userTrips.data && userTrips.data.getUserTrips.length > 0
                 ? userTrips.data.getUserTrips.map(
                     (currentTrip: UserTripType) => {
-                      console.log('currentTrip: ', currentTrip);
-                      console.log('currentTrip: ', currentTrip.startDate);
-                      console.log(
-                        'currentTrip: ',
-                        typeof currentTrip.startDate,
-                      );
                       return (
                         <TableRow
                           data-cy={'trip' + currentTrip.id.toString()}
