@@ -40,6 +40,8 @@ export default function Login() {
 
   async function handleLogin(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
+
+    console.log('session user id: ', sessionStateSnapshot.userId);
     if (userName === '' || userPassword === '') {
       setError('User name or password missing.');
       return;
@@ -55,7 +57,10 @@ export default function Login() {
       },
     });
     // Update session token in sessionStore + update csrf
+    console.log('logged in: ', loggedIn);
+
     if (loggedIn.data.loginUser) {
+      console.log('handle save end: ');
       sessionStateSnapshot.setSession(
         SESSIONS.LOGGEDIN,
         loggedIn.data.loginUser.tokens.token,
@@ -75,6 +80,7 @@ export default function Login() {
     } else {
       setError('User name or password wrong');
     }
+    console.log('handle save end: ');
   }
 
   function handleRegister() {

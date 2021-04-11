@@ -2,13 +2,13 @@ import {
   ApolloServer,
   gql,
   IResolvers,
-  makeExecutableSchema,
+  makeExecutableSchema
 } from 'apollo-server-micro';
 import argon2 from 'argon2';
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
-  doesPasswordMatchPasswordHash,
+  doesPasswordMatchPasswordHash
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
@@ -26,7 +26,7 @@ import {
   switchToAnotherTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
-  userNameExists,
+  userNameExists
 } from '../../utils/database';
 
 const typeDefs = gql`
@@ -153,11 +153,9 @@ const resolvers: IResolvers = {
     async registerUser(root, args) {
       const userData = args.user;
 
-      console.log('graphql userData: ', userData);
       // User exists already
       const userExists = await userNameExists(userData.username);
 
-      console.log('graphql registerUser exists: ', userExists);
       if (userExists) {
         return { id: 0 };
       }
@@ -179,6 +177,7 @@ const resolvers: IResolvers = {
     async loginUser(root, args, context) {
       const { user } = args;
 
+      console.log('graphql args user: ', user);
       // Check CSRF token
       if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
         throw new Error('CSRF Token does not match');
@@ -186,6 +185,7 @@ const resolvers: IResolvers = {
 
       // Search for user in DB
       const userWithPasswordHash = await getUserByUserName(user.username);
+      console.log('graphql args userWithPasswordHash: ', userWithPasswordHash);
 
       // Error out if the username does not exist
       if (userWithPasswordHash[0].id === 0) {
@@ -198,6 +198,7 @@ const resolvers: IResolvers = {
         user.password,
         passwordHash,
       );
+      console.log('graphql args passwordMatches: ', passwordMatches);
 
       // Error out if the password does not match the hash
       if (!passwordMatches) {
@@ -207,6 +208,7 @@ const resolvers: IResolvers = {
       // At this point, we are  successfully authenticated
       const session = await createSessionTwentyFourHours(foundUser.id);
 
+      console.log('graphql args session: ', session);
       await updateSessionOfCorrespondingTrip(
         user.sessionToken, // current token
         '', // action which calls this function. Only needed for logout, not here.
@@ -217,10 +219,12 @@ const resolvers: IResolvers = {
         'session',
         session[0].token,
       );
+      console.log('graphql args sessionCookie: ', sessionCookie);
 
       context.res.setHeader('Set-Cookie', sessionCookie);
       const newCsrfToken = createCsrfToken(session[0].token);
 
+      console.log('graphql args newCsrfToken: ', newCsrfToken);
       return {
         user: foundUser,
         tokens: { token: session[0].token, csrf: newCsrfToken },

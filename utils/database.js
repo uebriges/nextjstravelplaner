@@ -325,7 +325,6 @@ export async function updateWaypoints(waypoints) {
 // -------------------------------------------------------------------- User related ----------------------------------------------------------------
 
 export async function registerUser(user) {
-  console.log('db register user: ', user);
   const newUser = await sql`
     INSERT INTO
       users (
@@ -341,10 +340,6 @@ export async function registerUser(user) {
     RETURNING *;
   `;
 
-  console.log(
-    'new User: ',
-    newUser.map((currentUser) => camelcaseKeys(currentUser)),
-  );
   return newUser.map((currentUser) => camelcaseKeys(currentUser));
 }
 
@@ -375,12 +370,16 @@ WHERE users_name = ${username};
 }
 
 export async function getUserTrips(userId) {
+  console.log('getUserTrips userId: ', userId);
   const tripsOfUser = await sql`
     SELECT DISTINCT id, title, start_date, end_date
-    FROM user_trip, trip
-    WHERE user_trip.user_id = ${userId}
+    FROM user_trip userTripTable
+		INNER JOIN trip tripTable ON userTripTable.trip_id = tripTable.id
+    WHERE userTripTable.user_id = ${userId}
     AND title IS NOT NULL;
   `;
+
+  console.log('getUserTrips tripsOfUser: ', tripsOfUser);
 
   return tripsOfUser.map((currentTrip) => camelcaseKeys(currentTrip));
 }

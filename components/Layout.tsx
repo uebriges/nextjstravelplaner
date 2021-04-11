@@ -61,6 +61,11 @@ export default function Layout(props: LayoutProps) {
     modalStateSnapshot.activateModal(MODALS.TRIPINSTRUCTIONS);
   }
 
+  console.log(
+    'layout sessionStateSnapshot.userId: ',
+    sessionStoreSnapshot.userId,
+  );
+
   return (
     <>
       <Head>

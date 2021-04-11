@@ -76,6 +76,11 @@ export default function UserProfile() {
     awaitRefetchQueries: true,
   });
 
+  console.log(
+    'profile sessionStateSnapshot.userId: ',
+    sessionStateSnapshot.userId,
+  );
+
   // Get the list of trips of a user
   const userTrips = useQuery(getUserTrips, {
     variables: {
