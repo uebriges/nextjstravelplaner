@@ -370,7 +370,6 @@ WHERE users_name = ${username};
 }
 
 export async function getUserTrips(userId) {
-  console.log('getUserTrips userId: ', userId);
   const tripsOfUser = await sql`
     SELECT DISTINCT id, title, start_date, end_date
     FROM user_trip userTripTable
@@ -380,8 +379,14 @@ export async function getUserTrips(userId) {
   `;
 
   console.log('getUserTrips tripsOfUser: ', tripsOfUser);
+  console.log(
+    'getUserTrips tripsOfUser typeof date: ',
+    typeof tripsOfUser[0].start_date,
+  );
 
-  return tripsOfUser.map((currentTrip) => camelcaseKeys(currentTrip));
+  return tripsOfUser.map((currentTrip) => {
+    return camelcaseKeys(currentTrip);
+  });
 }
 
 export async function saveUserTrip(userId, tripId, tripTitle) {
@@ -401,7 +406,6 @@ export async function saveUserTrip(userId, tripId, tripTitle) {
 
 export async function startNewTrip(token) {
   // get session id
-
   const sessionId = await sql`
     SELECT id
     FROM session
@@ -419,7 +423,7 @@ export async function startNewTrip(token) {
   const newTrip = await sql`
     INSERT INTO trip
     (session_id, start_date)
-    VALUES (${sessionId[0].id.toString()}, ${new Date().toLocaleDateString()})
+    VALUES (${sessionId[0].id.toString()}, ${Date.now().toLocaleDateString()})
     RETURNING id
   `;
 
