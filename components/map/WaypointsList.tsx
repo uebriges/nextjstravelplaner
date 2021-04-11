@@ -19,7 +19,6 @@ import {
   resetServerContext,
 } from 'react-beautiful-dnd';
 import { CoordinatesType } from '../../pages/travelplaner';
-import { routeListStyle } from '../../styles/styles';
 import {
   deleteWaypoint,
   getCurrentWaypoints,
@@ -109,7 +108,7 @@ export default function WaypointsList(props: WaypointsListType) {
         {/* provided is served by Droppable */}
         {(provided) => {
           return (
-            <div css={routeListStyle}>
+            <div>
               <List
                 dense={false}
                 {...provided.droppableProps}

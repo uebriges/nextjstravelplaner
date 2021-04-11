@@ -33,10 +33,6 @@ export default function TripInstructions() {
         <List>
           {tripStoreSnapshot.instructions.map(
             (instructions, indexInstructions, instructionsArray) => {
-              // let lastInstruction = '';
-              // if (instructionsArray.length === indexInstructions + 1) {
-              //   lastInstruction = instructions[-1];
-              // }
               const subInstructions = instructions.map(
                 (instruction, index, instructionArray) => {
                   if (
@@ -54,7 +50,7 @@ export default function TripInstructions() {
         </List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="primary">
+        <Button onClick={handleClose} className="modal-button-label">
           Close
         </Button>
       </DialogActions>

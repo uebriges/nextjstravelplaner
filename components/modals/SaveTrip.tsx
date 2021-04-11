@@ -5,14 +5,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
+  TextField,
 } from '@material-ui/core';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
   getSessionIdByToken,
   getUserTrips,
-  saveUserTrip
+  saveUserTrip,
 } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore from '../../utils/valtio/sessionstore';
@@ -79,10 +79,14 @@ export default function SaveTrip() {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="primary">
+        <Button onClick={handleCancel} className="modal-button-label">
           Cancel
         </Button>
-        <Button data-cy="SaveTripToDBBtn" onClick={handleSave} color="primary">
+        <Button
+          data-cy="SaveTripToDBBtn"
+          onClick={handleSave}
+          className="modal-button-label"
+        >
           Save
         </Button>
       </DialogActions>

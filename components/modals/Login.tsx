@@ -113,15 +113,19 @@ export default function Login() {
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={handleLogin} color="primary" data-cy="LoginBtn">
+        <Button
+          onClick={handleLogin}
+          className="modal-button-label"
+          data-cy="LoginBtn"
+        >
           Login
+        </Button>
+        <Button onClick={handleCancel} className="modal-button-label">
+          Cancel
         </Button>
         <Button
           onClick={handleRegister}
-          color="primary"
+          className="modal-button-label"
           data-cy="OpenRegisterBtn"
         >
           Register

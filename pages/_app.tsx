@@ -3,10 +3,13 @@ import {
   ApolloClient,
   ApolloProvider,
   DefaultOptions,
-  InMemoryCache,
+  InMemoryCache
 } from '@apollo/client';
+import { Global } from '@emotion/react';
+import { StylesProvider } from '@material-ui/styles';
 import { AppProps } from 'next/app';
-import '../styles/globals.css';
+// import '../styles/globals.css';
+import { globalStyles } from '../styles/styles';
 
 const defaultOptions: DefaultOptions = {
   watchQuery: {
@@ -40,9 +43,14 @@ if (process.env.NODE_ENV === 'production') {
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ApolloProvider client={client}>
-      <Component {...pageProps} />
-    </ApolloProvider>
+    <>
+      <Global styles={globalStyles} />
+      <StylesProvider injectFirst>
+        <ApolloProvider client={client}>
+          <Component {...pageProps} />
+        </ApolloProvider>
+      </StylesProvider>
+    </>
   );
 }
 

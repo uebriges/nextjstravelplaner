@@ -2,11 +2,10 @@
 import { useMutation } from '@apollo/client';
 import { BottomNavigation, BottomNavigationAction } from '@material-ui/core';
 import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
-import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import Head from 'next/head';
 import { useSnapshot } from 'valtio';
-import { footerStlye } from '../styles/styles';
+import { footerStyle, mapStyle } from '../styles/styles';
 import { updateSessionOfCorrespondingTrip } from '../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
@@ -72,7 +71,7 @@ export default function Layout(props: LayoutProps) {
           rel="stylesheet"
         />
       </Head>
-      <main>
+      <main css={mapStyle}>
         {modalStateSnapshot.activeModal === MODALS.LOGIN ? <Login /> : null}
         {modalStateSnapshot.activeModal === MODALS.REGISTER ? (
           <Register />
@@ -88,11 +87,11 @@ export default function Layout(props: LayoutProps) {
         ) : null}
         {props.children}
       </main>
-      <footer css={footerStlye}>
+      <footer css={footerStyle}>
         <BottomNavigation
           showLabels={false}
           style={{
-            background: 'rgba(229, 231, 235, 0.7)',
+            background: 'rgb(61 120 162)',
           }}
         >
           {/* <BottomNavigationAction icon={<LanguageIcon />} /> */}
@@ -105,7 +104,6 @@ export default function Layout(props: LayoutProps) {
             icon={<PermIdentityIcon />}
             onClick={handleUserFunctionality}
           />
-          <BottomNavigationAction icon={<MailOutlineIcon />} />
         </BottomNavigation>
       </footer>
     </>

@@ -10,7 +10,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -20,7 +20,7 @@ import {
   getCurrentWaypoints,
   getUserTrips,
   switchToAnotherTrip,
-  updateSessionOfCorrespondingTrip
+  updateSessionOfCorrespondingTrip,
 } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
@@ -226,10 +226,10 @@ export default function UserProfile() {
         </Paper>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleLogout} color="primary">
+        <Button onClick={handleLogout} className="modal-button-label">
           Logout
         </Button>
-        <Button onClick={handleCancel} color="primary">
+        <Button onClick={handleCancel} className="modal-button-label">
           Cancel
         </Button>
       </DialogActions>

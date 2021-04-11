@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
+import { Drawer } from '@material-ui/core';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
@@ -16,7 +17,13 @@ import MapOptions from '../components/map/MapOptions';
 import Route from '../components/map/Route';
 import WaypointMarkers from '../components/map/WaypointMarkers';
 import WaypointsList from '../components/map/WaypointsList';
-import { geocoderStyle, mapOptionsStyle, mapStyle } from '../styles/styles';
+import {
+  geocoderStyle,
+  mapStyle,
+  sideBarButton,
+  sideBarButtonInside,
+  UIDrawerStyle,
+} from '../styles/styles';
 import { getCurrentWaypoints, setNewWaypoint } from '../utils/graphqlQueries';
 import sessionStore, { SESSIONS } from '../utils/valtio/sessionstore';
 import tripStore from '../utils/valtio/tripstore';
@@ -64,6 +71,8 @@ export type RouteStepType = {
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const sessionStateSnapshot = useSnapshot(sessionStore);
   const tripStateSnapshot = useSnapshot(tripStore);
+  // Menu bar state that can be toggled to and from the left
+  const [sideBarState, setSideBarState] = useState(false);
 
   // set initial session state
   useEffect(() => {
@@ -226,7 +235,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             [maxLong, maxLat],
           ],
           {
-            padding: 30,
+            padding: 100,
             offset: [0, -100],
           },
         );
@@ -335,14 +344,31 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           ref={geoCoderContainerRef}
           style={{ position: 'absolute', top: 20, left: 20, zIndex: 2 }}
         />
-        <div css={mapOptionsStyle}>
+        <Drawer
+          css={UIDrawerStyle}
+          anchor="left"
+          open={sideBarState}
+          onClose={() => setSideBarState(false)}
+        >
+          {/* <div css={mapOptionsStyle}> */}
           <MapOptions />
           <hr />
           <WaypointsList
             generateTurnByTurnRoute={generateTurnByTurnRoute}
             sessionToken={sessionStateSnapshot.activeSessionToken}
           />
-        </div>
+          <button
+            css={sideBarButtonInside}
+            onClick={() => setSideBarState(false)}
+          >
+            <strong>{'<'}</strong>
+          </button>
+        </Drawer>
+
+        <button css={sideBarButton} onClick={() => setSideBarState(true)}>
+          <strong> {'>'}</strong>
+        </button>
+
         <Map
           mapboxToken={props.mapboxToken}
           viewport={viewport}

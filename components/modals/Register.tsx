@@ -118,10 +118,10 @@ export default function Register() {
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleRegister} color="primary" data-cy="RegisterBtn">
+        <Button onClick={handleRegister} className="modal-button-label" data-cy="RegisterBtn">
           Register
         </Button>
-        <Button onClick={handleCancel} color="primary">
+        <Button onClick={handleCancel} className="modal-button-label">
           Cancel
         </Button>
       </DialogActions>
