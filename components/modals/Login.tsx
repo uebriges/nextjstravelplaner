@@ -120,15 +120,15 @@ export default function Login() {
         >
           Login
         </Button>
-        <Button onClick={handleCancel} className="modal-button-label">
-          Cancel
-        </Button>
         <Button
           onClick={handleRegister}
           className="modal-button-label"
           data-cy="OpenRegisterBtn"
         >
           Register
+        </Button>
+        <Button onClick={handleCancel} className="modal-button-label">
+          Cancel
         </Button>
       </DialogActions>
     </Dialog>

@@ -28,7 +28,7 @@ export default function CustomPopup(props: CustomPopupPropsType) {
             color="primary"
             onClick={props.addCoordinatesToRoute}
           >
-            Add to route
+            Add to trip
           </Button>
         </div>
       </Popup>

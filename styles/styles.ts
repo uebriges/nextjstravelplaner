@@ -91,6 +91,12 @@ export const geocoderStyle = css`
 export const mapOptionButtonsStyles = css`
   display: flex;
   justify-content: space-around;
+
+  // If Save or Start new trip button is disabled
+
+  span.MuiButton-root.Mui-disabled {
+    color: rgb(242 253 80 / 26%);
+  }
 `;
 
 export const mapOptionsSpansStyles = css`

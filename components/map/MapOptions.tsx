@@ -93,6 +93,7 @@ export default function MapOptions() {
     <div>
       <div css={mapOptionButtonsStyles}>
         <Button
+        className="save-trip-button"
           data-cy="SaveTripBtn"
           onClick={handleSave}
           disabled={disabled}

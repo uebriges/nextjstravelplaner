@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
+  TextField,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -34,7 +34,7 @@ export default function Register() {
       }
 
       setErrorMessage(null);
-      setSuccessMessage('User created');
+      setSuccessMessage('Great... you are registered!');
       setTimeout(() => modalStoreSnapshot.activateModal(MODALS.NONE), 1500);
     },
   });
@@ -118,7 +118,11 @@ export default function Register() {
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleRegister} className="modal-button-label" data-cy="RegisterBtn">
+        <Button
+          onClick={handleRegister}
+          className="modal-button-label"
+          data-cy="RegisterBtn"
+        >
           Register
         </Button>
         <Button onClick={handleCancel} className="modal-button-label">

@@ -2,13 +2,13 @@ import {
   ApolloServer,
   gql,
   IResolvers,
-  makeExecutableSchema
+  makeExecutableSchema,
 } from 'apollo-server-micro';
 import argon2 from 'argon2';
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
-  doesPasswordMatchPasswordHash
+  doesPasswordMatchPasswordHash,
 } from '../../utils/auth';
 import { serializeSecureCookieServerSide } from '../../utils/cookies';
 import {
@@ -26,7 +26,7 @@ import {
   switchToAnotherTrip,
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
-  userNameExists
+  userNameExists,
 } from '../../utils/database';
 
 const typeDefs = gql`
@@ -153,9 +153,11 @@ const resolvers: IResolvers = {
     async registerUser(root, args) {
       const userData = args.user;
 
+      console.log('graphql userData: ', userData);
       // User exists already
       const userExists = await userNameExists(userData.username);
 
+      console.log('graphql registerUser exists: ', userExists);
       if (userExists) {
         return { id: 0 };
       }

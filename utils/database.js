@@ -325,6 +325,7 @@ export async function updateWaypoints(waypoints) {
 // -------------------------------------------------------------------- User related ----------------------------------------------------------------
 
 export async function registerUser(user) {
+  console.log('db register user: ', user);
   const newUser = await sql`
     INSERT INTO
       users (
@@ -340,6 +341,10 @@ export async function registerUser(user) {
     RETURNING *;
   `;
 
+  console.log(
+    'new User: ',
+    newUser.map((currentUser) => camelcaseKeys(currentUser)),
+  );
   return newUser.map((currentUser) => camelcaseKeys(currentUser));
 }
 

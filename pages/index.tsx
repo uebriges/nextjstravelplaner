@@ -25,7 +25,7 @@ export default function Home() {
     <main css={indexPageLinkStyle}>
       <p css={introTextStyle}>Wanna travel again?</p>
       <Link href="/travelplaner" passHref>
-        <Button variant="contained" color="default">
+        <Button variant="contained" color="primary">
           Start planning...
         </Button>
       </Link>
