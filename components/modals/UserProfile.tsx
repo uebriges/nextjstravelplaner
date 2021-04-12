@@ -169,9 +169,12 @@ export default function UserProfile() {
                   ))}
                 </TableRow>
               </TableHead>
-              {userTrips.data && userTrips.data.getUserTrips.length > 0
+              {userTrips.data &&
+              userTrips.data.getUserTrips &&
+              userTrips.data.getUserTrips.length > 0
                 ? userTrips.data.getUserTrips.map(
                     (currentTrip: UserTripType) => {
+                      console.log('currentTrip: ', currentTrip);
                       return (
                         <TableRow
                           data-cy={'trip' + currentTrip.id.toString()}

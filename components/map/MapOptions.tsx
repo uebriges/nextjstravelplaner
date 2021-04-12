@@ -7,16 +7,16 @@ import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
   mapOptionButtonsStyles,
-  mapOptionsSpansStyles
+  mapOptionsSpansStyles,
 } from '../../styles/styles';
 import {
   getCurrentWaypoints,
   getUserTrips,
-  startNewTrip
+  startNewTrip,
 } from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
-  MODALS
+  MODALS,
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 import tripStore from '../../utils/valtio/tripstore';
@@ -64,7 +64,15 @@ export default function MapOptions() {
         return currentTrip.id === sessionStateSnapshot.tripId;
       },
     );
-    waypoints.data && waypoints.data.waypoints.length > 0 && indexOfTrip < 0
+    console.log('waypoints.data: ', waypoints.data);
+    console.log(
+      'waypoints.data.waypoints.length: ',
+      waypoints.data.waypoints.length,
+    );
+    console.log('indexOfTrip: ', indexOfTrip);
+    waypoints.data &&
+    waypoints.data.waypoints.length > 0 &&
+    (indexOfTrip < 0 || typeof indexOfTrip === 'undefined')
       ? setDisabled(false)
       : setDisabled(true);
   }, [waypoints, userTrips]);
@@ -93,7 +101,7 @@ export default function MapOptions() {
     <div>
       <div css={mapOptionButtonsStyles}>
         <Button
-        className="save-trip-button"
+          className="save-trip-button"
           data-cy="SaveTripBtn"
           onClick={handleSave}
           disabled={disabled}
