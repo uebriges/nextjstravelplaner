@@ -1,4 +1,5 @@
 import { proxy } from 'valtio';
+import { ViewportType } from '../../pages/travelplaner';
 
 // IMPORTANT: Currently not used
 
@@ -15,8 +16,10 @@ type TripStoreType = {
   finalRoute: number[][] | null;
   distance: number;
   instructions: string[][];
+  viewport: ViewportType | null;
   addDistance: (distance: number) => void;
   addInstructions: (instructions: string[][]) => void;
+  setViewport: (viewport: ViewportType) => void;
 };
 
 const tripStore: TripStoreType = proxy({
@@ -24,11 +27,15 @@ const tripStore: TripStoreType = proxy({
   finalRoute: null,
   distance: 0,
   instructions: [],
+  viewport: null,
   addDistance: (distance) => {
     tripStore.distance = distance;
   },
   addInstructions: (instructions) => {
     tripStore.instructions = instructions;
+  },
+  setViewport: (viewport) => {
+    tripStore.viewport = viewport;
   },
 });
 

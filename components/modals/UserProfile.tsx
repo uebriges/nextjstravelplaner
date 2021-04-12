@@ -15,6 +15,7 @@ import {
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
+import { updateViewPort, ViewportType } from '../../pages/travelplaner';
 import {
   deleteSessionByToken,
   getCurrentWaypoints,
@@ -24,6 +25,7 @@ import {
 } from '../../utils/graphqlQueries';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
+import tripStore from '../../utils/valtio/tripstore';
 
 export type UserTripType = {
   id: number;
@@ -63,6 +65,7 @@ export default function UserProfile() {
   const [errorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const sessionStateSnapshot = useSnapshot(sessionStore);
+  const tripStateSnapshot = useSnapshot(tripStore);
 
   // GraphQL Queries
   // Get waypoints of specific trip
@@ -80,6 +83,13 @@ export default function UserProfile() {
   const userTrips = useQuery(getUserTrips, {
     variables: {
       userId: sessionStateSnapshot.userId,
+    },
+  });
+
+  // Get current waypoints
+  const waypoints = useQuery(getCurrentWaypoints, {
+    variables: {
+      token: sessionStateSnapshot.activeSessionToken,
     },
   });
 
@@ -110,7 +120,16 @@ export default function UserProfile() {
         newTripId: (event.target as HTMLTableDataCellElement).id,
       },
     });
-
+    console.log('waypoints before calling updateViewPort: ', waypoints);
+    const newViewPort = updateViewPort(waypoints.data.waypoints, {
+      width: 100,
+      height: 100,
+      latitude: 48.204845,
+      longitude: 16.368368,
+      zoom: 12,
+      transitionDuration: 1000,
+    });
+    tripStateSnapshot.setViewport(newViewPort as ViewportType);
     setSuccessMessage('Switched to another trip');
     modalsStore.activateModal(MODALS.NONE);
   }

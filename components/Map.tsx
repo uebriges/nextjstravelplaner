@@ -2,18 +2,20 @@
 import Image from 'next/image';
 import React, { useState } from 'react';
 import ReactMapGL, { MapEvent, Marker } from 'react-map-gl';
+import { useSnapshot } from 'valtio';
 import { ViewportType } from '../pages/travelplaner';
+import tripStore from '../utils/valtio/tripstore';
 import CustomPopup from './map/CustomPopup';
 
 type MapProps = {
   setMarkerSetByClick: (value: boolean) => void;
   setMarkerSetBySearchResult: (value: boolean) => void;
-  setViewport: (viewport: ViewportType) => void;
+  // setViewport: (viewport: ViewportType) => void;
   handleViewportChange: (newViewport: ViewportType) => void;
   addCoordinatesToRoute: () => void;
   setCurrentLatitude: (latitude: number) => void;
   setCurrentLongitude: (longitude: number) => void;
-  viewport: ViewportType;
+  // viewport: ViewportType;
   mapboxToken: string;
   mapRef: any;
   markerSetByClick: boolean;
@@ -22,10 +24,13 @@ type MapProps = {
 };
 
 export default function Map(props: MapProps) {
-  const [currentMarkerPosition, setCurrentMarkerPosition] = useState([
-    props.viewport.longitude,
-    props.viewport.latitude,
-  ]);
+  const tripStateSnapshot = useSnapshot(tripStore);
+  console.log('tripStateSnapshot: ', tripStateSnapshot);
+  const [currentMarkerPosition, setCurrentMarkerPosition] = useState();
+  //   [
+  //   tripStateSnapshot.viewport.longitude,
+  //   tripStateSnapshot.viewport.latitude,
+  // ]
   const [marker, setMarker] = useState(false);
 
   const childrenWithProps = React.Children.map(props.children, (child) => {
@@ -56,7 +61,7 @@ export default function Map(props: MapProps) {
 
   return (
     <ReactMapGL
-      {...props.viewport}
+      {...tripStateSnapshot.viewport}
       ref={props.mapRef}
       width="100%"
       height="100%"

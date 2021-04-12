@@ -68,6 +68,60 @@ export type RouteStepType = {
   };
 };
 
+export function updateViewPort(
+  waypoints: CoordinatesType[],
+  viewport: ViewportType,
+) {
+  // Update viewport to show all markers on the map (most of the time it will be zooming out)
+  console.log('waypoints: ', waypoints);
+  console.log('viewport: ', viewport);
+  if (waypoints && waypoints.length > 1) {
+    const allLongitudes = waypoints.map(
+      (waypoint: CoordinatesType) => waypoint.longitude,
+    );
+    const allLatitudes = waypoints.map(
+      (waypoint: CoordinatesType) => waypoint.latitude,
+    );
+
+    const maxLong = Math.max(...allLongitudes);
+    const maxLat = Math.max(...allLatitudes);
+    const minLong = Math.min(...allLongitudes);
+    const minLat = Math.min(...allLatitudes);
+
+    console.log('maxLong: ', typeof maxLong);
+    console.log('maxLat: ', maxLat);
+    console.log('minLong: ', minLong);
+    console.log('minLat: ', minLat);
+    console.log('viewport: ', viewport);
+
+    const { longitude, latitude, zoom } = new WebMercatorViewport(
+      viewport,
+    ).fitBounds(
+      [
+        [minLong, minLat],
+        [maxLong, maxLat],
+      ],
+      {
+        padding: 30,
+        // offset: [20, -80],
+      },
+    );
+
+    console.log('longitude: ', longitude);
+    console.log('latitude: ', latitude);
+    console.log('zoom: ', zoom);
+    return {
+      ...viewport,
+      longitude,
+      latitude,
+      zoom: 6,
+      transitionDuration: 1000,
+      // transitionInterpolator: new FlyToInterpolator(),
+      // transitionEasing: d3.easeCubic,
+    };
+  }
+}
+
 const TravelPlaner = (props: TravelPlanerPropsType) => {
   const sessionStateSnapshot = useSnapshot(sessionStore);
   const tripStateSnapshot = useSnapshot(tripStore);
@@ -97,20 +151,31 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
     sessionStateSnapshot.setUserId(props.currentUserId);
   }, [props.currentUserId]);
 
-  const [viewport, setViewport] = useState({
-    width: 100,
-    height: 100,
-    latitude: 48.204845,
-    longitude: 16.368368,
-    zoom: 12,
-    transitionDuration: 1000,
-  });
+  // const [currentViewport, setCurrentViewport] = useState({
+  //   width: 100,
+  //   height: 100,
+  //   latitude: 48.204845,
+  //   longitude: 16.368368,
+  //   zoom: 12,
+  //   transitionDuration: 1000,
+  // });
+
+  useEffect(() => {
+    tripStateSnapshot.setViewport({
+      width: 100,
+      height: 100,
+      latitude: 48.204845,
+      longitude: 16.368368,
+      zoom: 12,
+      transitionDuration: 1000,
+    });
+  }, []);
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
-  const handleViewportChange = useCallback(
-    (newViewport) => setViewport(newViewport),
-    [],
-  );
+  const handleViewportChange = useCallback((newViewport) => {
+    // setCurrentViewport(newViewport);
+    tripStateSnapshot.setViewport(newViewport);
+  }, []);
 
   // GraphQL queries
   // Get current waypoints
@@ -210,45 +275,15 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
       const newListOfWaypoints = await refetchWaypoints();
 
-      // Update viewport to show all markers on the map (most of the time it will be zooming out)
-      if (
-        newListOfWaypoints.data.waypoints &&
-        newListOfWaypoints.data.waypoints.length > 1
-      ) {
-        const allLongitudes = newListOfWaypoints.data.waypoints.map(
-          (waypoint: CoordinatesType) => waypoint.longitude,
-        );
-        const allLatitudes = newListOfWaypoints.data.waypoints.map(
-          (waypoint: CoordinatesType) => waypoint.latitude,
-        );
+      // Update Viewport after adding a new waypoint
+      const newViewport = updateViewPort(
+        newListOfWaypoints.data.waypoints,
+        tripStateSnapshot.viewport as ViewportType,
+      );
 
-        const maxLong = Math.max(...allLongitudes);
-        const maxLat = Math.max(...allLatitudes);
-        const minLong = Math.min(...allLongitudes);
-        const minLat = Math.min(...allLatitudes);
-
-        const { longitude, latitude, zoom } = new WebMercatorViewport(
-          viewport,
-        ).fitBounds(
-          [
-            [minLong, minLat],
-            [maxLong, maxLat],
-          ],
-          {
-            padding: 100,
-            offset: [0, -100],
-          },
-        );
-        setViewport({
-          ...viewport,
-          longitude,
-          latitude,
-          zoom,
-          transitionDuration: 1000,
-          // transitionInterpolator: new FlyToInterpolator(),
-          // transitionEasing: d3.easeCubic,
-        });
-      }
+      console.log('new viewport: ', newViewport);
+      // setCurrentViewport(newViewport);
+      tripStateSnapshot.setViewport(newViewport as ViewportType);
     }
   }
 
@@ -371,8 +406,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
         <Map
           mapboxToken={props.mapboxToken}
-          viewport={viewport}
-          setViewport={setViewport}
+          // viewport={currentViewport}
+          // setViewport={setCurrentViewport}
           handleViewportChange={handleViewportChange}
           mapRef={mapRef}
           addCoordinatesToRoute={addCoordinatesToRoute}
