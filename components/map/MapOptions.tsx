@@ -13,6 +13,7 @@ import {
   getCurrentWaypoints,
   getUserTrips,
   startNewTrip,
+  updateSessionOfCorrespondingTrip,
 } from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
@@ -57,6 +58,10 @@ export default function MapOptions() {
     },
   });
 
+  const [updateSessionOfCorrespondingTripFunction] = useMutation(
+    updateSessionOfCorrespondingTrip,
+  );
+
   // Save button is active if at least one waypoint is selected
   useEffect(() => {
     const indexOfTrip = userTrips.data?.getUserTrips?.findIndex(
@@ -64,12 +69,7 @@ export default function MapOptions() {
         return currentTrip.id === sessionStateSnapshot.tripId;
       },
     );
-    console.log('waypoints.data: ', waypoints.data);
-    console.log(
-      'waypoints.data.waypoints.length: ',
-      waypoints.data.waypoints.length,
-    );
-    console.log('indexOfTrip: ', indexOfTrip);
+
     waypoints.data &&
     waypoints.data.waypoints.length > 0 &&
     (indexOfTrip < 0 || typeof indexOfTrip === 'undefined')
@@ -78,10 +78,27 @@ export default function MapOptions() {
   }, [waypoints, userTrips]);
 
   // Save trip
-  function handleSave() {
+  async function handleSave() {
     if (sessionStateSnapshot.activeSessionType !== SESSIONS.LOGGEDIN) {
       modalStateSnapshot.setInitialAction(INITIALACTION.SAVETRIP);
       modalStateSnapshot.activateModal(MODALS.LOGIN);
+
+      // Change session id of trip to 5 mins session token
+      const newTokenAndCSRF = await updateSessionOfCorrespondingTripFunction({
+        variables: {
+          sessions: { currentToken: sessionStateSnapshot.activeSessionToken },
+        },
+      });
+
+      // Store fallback + update session token in sessionStore + update csrf
+      sessionStateSnapshot.setFallbackSession();
+      sessionStateSnapshot.setSession(
+        SESSIONS.DURINGLOGINORREGISTER,
+        newTokenAndCSRF.data.updateSessionOfCorrespondingTrip[0],
+      );
+      sessionStateSnapshot.setCSRFToken(
+        newTokenAndCSRF.data.updateSessionOfCorrespondingTrip[1],
+      );
     } else {
       modalStateSnapshot.activateModal(MODALS.SAVETRIP);
     }

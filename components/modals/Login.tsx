@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField
+  TextField,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import { useSnapshot } from 'valtio';
 import { loginUser } from '../../utils/graphqlQueries';
 import modalsStore, {
   INITIALACTION,
-  MODALS
+  MODALS,
 } from '../../utils/valtio/modalsstore';
 import sessionStore, { SESSIONS } from '../../utils/valtio/sessionstore';
 
@@ -26,13 +26,31 @@ export default function Login() {
   const modalStateSnapshot = useSnapshot(modalsStore);
 
   const [loginUserDB] = useMutation(loginUser, {
-    onCompleted({ loggedIn }) {
-      return loggedIn;
+    onCompleted(data) {
+      // Update session token in sessionStore + update csrf
+      console.log('loggedIn.data.loginUser: ', data);
+      if (data.loginUser) {
+        sessionStateSnapshot.setSession(
+          SESSIONS.LOGGEDIN,
+          data.loginUser.tokens.token,
+        );
+        sessionStateSnapshot.setCSRFToken(data.loginUser.tokens.csrf);
+        sessionStateSnapshot.setUserId(data.loginUser.user.id);
+
+        setSuccessMessage('Log in succeeded');
+        // setTimeout(() => {
+        if (modalStateSnapshot.initialAction === INITIALACTION.SAVETRIP) {
+          // modalStateSnapshot.activateModal(MODALS.NONE);
+          modalStateSnapshot.activateModal(MODALS.SAVETRIP);
+        } else {
+          modalStateSnapshot.activateModal(MODALS.NONE);
+        }
+        // }, 1000);
+      } else {
+        setError('User name or password wrong');
+      }
     },
   });
-
-  // if (loading) return 'Loading …';
-  // if (error) return 'Something went wrong!';
 
   function handleCancel() {
     modalsStore.activateModal(MODALS.NONE);
@@ -45,7 +63,12 @@ export default function Login() {
       setError('User name or password missing.');
       return;
     }
-    const loggedIn = await loginUserDB({
+    console.log('userName', userName);
+    console.log('userPassword', userPassword);
+    console.log('activeSessionToken', sessionStateSnapshot.activeSessionToken);
+    console.log('csrfToken', sessionStateSnapshot.csrfToken);
+
+    await loginUserDB({
       variables: {
         user: {
           username: userName,
@@ -55,28 +78,6 @@ export default function Login() {
         },
       },
     });
-    // Update session token in sessionStore + update csrf
-
-    if (loggedIn.data.loginUser) {
-      sessionStateSnapshot.setSession(
-        SESSIONS.LOGGEDIN,
-        loggedIn.data.loginUser.tokens.token,
-      );
-      sessionStateSnapshot.setCSRFToken(loggedIn.data.loginUser.tokens.csrf);
-      sessionStateSnapshot.setUserId(loggedIn.data.loginUser.user.id);
-
-      setSuccessMessage('Log in succeeded');
-      // setTimeout(() => {
-      if (modalStateSnapshot.initialAction === INITIALACTION.SAVETRIP) {
-        // modalStateSnapshot.activateModal(MODALS.NONE);
-        modalStateSnapshot.activateModal(MODALS.SAVETRIP);
-      } else {
-        modalStateSnapshot.activateModal(MODALS.NONE);
-      }
-      // }, 1000);
-    } else {
-      setError('User name or password wrong');
-    }
   }
 
   function handleRegister() {
