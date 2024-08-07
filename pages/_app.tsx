@@ -12,29 +12,13 @@ import { AppProps } from 'next/app';
 import { globalStyles } from '../styles/styles';
 
 import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
-// import { makeStyles } from '@mui/styles'
-
 
 declare module '@mui/styles' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme { }
 }
 
-
-
-// declare module '@mui/styles/defaultTheme' {
-//   // eslint-disable-next-line @typescript-eslint/no-empty-interface
-//   interface DefaultTheme extends Theme { }
-// }
-
-
 const theme = createTheme();
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     // some CSS that accesses the theme
-//   }
-// }));
-
 
 const defaultOptions: DefaultOptions = {
   watchQuery: {
