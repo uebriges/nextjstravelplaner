@@ -12,7 +12,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import Alert from '@mui/lab/Alert';
+import Alert from '@mui/material/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {

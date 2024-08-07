@@ -421,8 +421,6 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             mapRef={mapRef}
             onViewportChange={handleGeocoderViewportChange}
             mapboxApiAccessToken={props.mapboxToken}
-            // position="top-left"
-            // collapsed={true}
             marker={false}
             containerRef={geoCoderContainerRef}
             onResult={onSearchResult}

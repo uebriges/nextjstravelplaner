@@ -25,7 +25,6 @@ export default function CustomPopup(props: CustomPopupPropsType) {
           <Button
             data-cy="AddWaypointBtn"
             variant="contained"
-            color="primary"
             onClick={props.addCoordinatesToRoute}
           >
             Add to trip
