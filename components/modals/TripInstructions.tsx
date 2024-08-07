@@ -23,7 +23,6 @@ export default function TripInstructions() {
   return (
     <Dialog
       open={true}
-      // onClose={handleClose}
       aria-labelledby="form dialog for registration"
     >
       <DialogTitle id="form dialog title for registration">

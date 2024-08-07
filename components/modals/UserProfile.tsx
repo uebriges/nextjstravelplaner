@@ -146,7 +146,6 @@ export default function UserProfile() {
   return (
     <Dialog
       open={true}
-      // onClose={handleClose}
       aria-labelledby="form dialog for registration"
       maxWidth="xl"
     >

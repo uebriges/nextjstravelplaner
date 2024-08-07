@@ -84,18 +84,17 @@ export default function Login() {
     modalsStore.activateModal(MODALS.REGISTER);
   }
 
-  function handleClose() { }
 
   return (
     <Dialog
       open={true}
-      onClose={handleClose}
       aria-labelledby="form dialog for login"
     >
       <DialogTitle id="form dialog title for login">Login</DialogTitle>
       <DialogContent>
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="userName"
           label="User name"
@@ -104,6 +103,7 @@ export default function Login() {
           onChange={(e) => setUserName(e.target.value)} />
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="password"
           label="Password"

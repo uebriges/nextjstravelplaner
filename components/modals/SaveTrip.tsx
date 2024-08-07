@@ -62,7 +62,6 @@ export default function SaveTrip() {
   return (
     <Dialog
       open={true}
-      // onClose={handleClose}
       aria-labelledby="form dialog for saving a trip"
     >
       <DialogTitle id="form dialog title for saving a trip">
@@ -71,6 +70,7 @@ export default function SaveTrip() {
       <DialogContent>
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="tripName"
           label="Trip title"

@@ -60,7 +60,6 @@ export default function Register() {
   return (
     <Dialog
       open={true}
-      // onClose={handleClose}
       aria-labelledby="form dialog for registration"
     >
       <DialogTitle id="form dialog title for registration">
@@ -70,6 +69,7 @@ export default function Register() {
         <TextField
           variant="standard"
           data-cy="RegistrationTextInputUserName"
+          size="small"
           margin="dense"
           id="userName"
           label="User name"
@@ -78,6 +78,7 @@ export default function Register() {
           onChange={(e) => setUserName(e.target.value)} />
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="firstName"
           label="First name"
@@ -87,6 +88,7 @@ export default function Register() {
           data-cy="RegistrationTextInputUserFirstName" />
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="lastName"
           label="Last name"
@@ -96,6 +98,7 @@ export default function Register() {
           data-cy="RegistrationTextInputUserLastName" />
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="email"
           label="E-Mail"
@@ -105,6 +108,7 @@ export default function Register() {
           data-cy="RegistrationTextInputUserEmail" />
         <TextField
           variant="standard"
+          size="small"
           margin="dense"
           id="password"
           label="Password"
