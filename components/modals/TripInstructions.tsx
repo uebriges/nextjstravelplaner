@@ -7,7 +7,7 @@ import {
   Divider,
   List,
   ListItem,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useSnapshot } from 'valtio';
 import modalsStore, { MODALS } from '../../utils/valtio/modalsstore';
 import tripStore from '../../utils/valtio/tripstore';

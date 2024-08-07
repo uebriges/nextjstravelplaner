@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation } from '@apollo/client';
-import { BottomNavigation, BottomNavigationAction } from '@material-ui/core';
-import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
-import PermIdentityIcon from '@material-ui/icons/PermIdentity';
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import Head from 'next/head';
 import { useSnapshot } from 'valtio';
 import { footerStyle, mapStyle } from '../styles/styles';

@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {

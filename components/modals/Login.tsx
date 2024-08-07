@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+} from '@mui/material';
+import Alert from '@mui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { loginUser } from '../../utils/graphqlQueries';
@@ -84,7 +84,7 @@ export default function Login() {
     modalsStore.activateModal(MODALS.REGISTER);
   }
 
-  function handleClose() {}
+  function handleClose() { }
 
   return (
     <Dialog

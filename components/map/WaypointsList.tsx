@@ -7,9 +7,9 @@ import {
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import MenuIcon from '@material-ui/icons/Menu';
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useEffect, useState } from 'react';
 import {
   DragDropContext,
@@ -116,75 +116,75 @@ export default function WaypointsList(props: WaypointsListType) {
               >
                 {waypoints
                   ? waypoints.map(
-                      (waypoint: CoordinatesType, index: number) => {
-                        return (
-                          <Draggable
-                            key={
-                              'Draggable' +
-                              waypoint.latitude +
-                              waypoint.longitude +
-                              waypoint.id
-                            }
-                            draggableId={
-                              'Id' + waypoint.latitude + waypoint.longitude
-                            }
-                            index={index}
-                          >
-                            {(providedDraggable) => {
-                              return (
-                                <ListItem
-                                  key={
-                                    waypoint.longitude
-                                      ? waypoints.longitude
-                                      : 0 +
-                                        (waypoint.latitude
-                                          ? waypoint.latitude
-                                          : 0)
-                                  }
-                                  {...providedDraggable.draggableProps}
-                                  {...providedDraggable.dragHandleProps}
-                                  ref={providedDraggable.innerRef}
-                                >
-                                  <ListItemIcon>
-                                    <MenuIcon />
-                                  </ListItemIcon>
-                                  <ListItemText
-                                    primary={waypoint.waypointName}
-                                  />
-                                  <ListItemSecondaryAction>
-                                    <IconButton
-                                      key={
-                                        'IconButton' +
-                                        waypoint.longitude +
-                                        waypoint.latitude
-                                      }
-                                      edge="end"
-                                      aria-label="delete"
-                                      onClick={async () => {
-                                        const route = Array.from(
-                                          waypointsFromDB.data.waypoints,
-                                        );
-                                        route.splice(index, 1);
-                                        await deleteWaypointFunction({
-                                          variables: {
-                                            waypointId: waypoint.id,
-                                          },
-                                        });
-                                        setWaypoints(route);
-                                        props.generateTurnByTurnRoute();
-                                        waypointsFromDB.refetch();
-                                      }}
-                                    >
-                                      <CloseIcon />
-                                    </IconButton>
-                                  </ListItemSecondaryAction>
-                                </ListItem>
-                              );
-                            }}
-                          </Draggable>
-                        );
-                      },
-                    )
+                    (waypoint: CoordinatesType, index: number) => {
+                      return (
+                        <Draggable
+                          key={
+                            'Draggable' +
+                            waypoint.latitude +
+                            waypoint.longitude +
+                            waypoint.id
+                          }
+                          draggableId={
+                            'Id' + waypoint.latitude + waypoint.longitude
+                          }
+                          index={index}
+                        >
+                          {(providedDraggable) => {
+                            return (
+                              <ListItem
+                                key={
+                                  waypoint.longitude
+                                    ? waypoints.longitude
+                                    : 0 +
+                                    (waypoint.latitude
+                                      ? waypoint.latitude
+                                      : 0)
+                                }
+                                {...providedDraggable.draggableProps}
+                                {...providedDraggable.dragHandleProps}
+                                ref={providedDraggable.innerRef}
+                              >
+                                <ListItemIcon>
+                                  <MenuIcon />
+                                </ListItemIcon>
+                                <ListItemText
+                                  primary={waypoint.waypointName}
+                                />
+                                <ListItemSecondaryAction>
+                                  <IconButton
+                                    key={
+                                      'IconButton' +
+                                      waypoint.longitude +
+                                      waypoint.latitude
+                                    }
+                                    edge="end"
+                                    aria-label="delete"
+                                    onClick={async () => {
+                                      const route = Array.from(
+                                        waypointsFromDB.data.waypoints,
+                                      );
+                                      route.splice(index, 1);
+                                      await deleteWaypointFunction({
+                                        variables: {
+                                          waypointId: waypoint.id,
+                                        },
+                                      });
+                                      setWaypoints(route);
+                                      props.generateTurnByTurnRoute();
+                                      waypointsFromDB.refetch();
+                                    }}
+                                  >
+                                    <CloseIcon />
+                                  </IconButton>
+                                </ListItemSecondaryAction>
+                              </ListItem>
+                            );
+                          }}
+                        </Draggable>
+                      );
+                    },
+                  )
                   : null}
               </List>
             </div>

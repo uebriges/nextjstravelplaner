@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+} from '@mui/material';
+import Alert from '@mui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { registerUser } from '../../utils/graphqlQueries';

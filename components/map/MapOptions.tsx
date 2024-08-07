@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
-import { Button } from '@material-ui/core';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import SaveIcon from '@material-ui/icons/Save';
+import { Button } from '@mui/material';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import SaveIcon from '@mui/icons-material/Save';
 import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
@@ -71,8 +71,8 @@ export default function MapOptions() {
     );
 
     waypoints.data &&
-    waypoints.data.waypoints.length > 0 &&
-    (indexOfTrip < 0 || typeof indexOfTrip === 'undefined')
+      waypoints.data.waypoints.length > 0 &&
+      (indexOfTrip < 0 || typeof indexOfTrip === 'undefined')
       ? setDisabled(false)
       : setDisabled(true);
   }, [waypoints, userTrips]);

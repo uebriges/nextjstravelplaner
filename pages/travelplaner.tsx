@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useMutation, useQuery } from '@apollo/client';
-import { Drawer } from '@material-ui/core';
+import { Drawer } from '@mui/material';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
@@ -426,7 +426,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             marker={false}
             containerRef={geoCoderContainerRef}
             onResult={onSearchResult}
-            // render -> Renders HTML into result -> use for add and mark as favorite
+          // render -> Renders HTML into result -> use for add and mark as favorite
           />
         </Map>
       </div>

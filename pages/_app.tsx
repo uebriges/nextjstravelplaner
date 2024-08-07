@@ -6,10 +6,21 @@ import {
   InMemoryCache
 } from '@apollo/client';
 import { Global } from '@emotion/react';
-import { StylesProvider } from '@material-ui/styles';
+import { StylesProvider } from '@mui/styles';
 import { AppProps } from 'next/app';
 // import '../styles/globals.css';
 import { globalStyles } from '../styles/styles';
+
+import { ThemeProvider, createMuiTheme, makeStyles } from '@mui/material/styles';
+
+const theme = createMuiTheme();
+
+// const useStyles = makeStyles((theme) => {
+//   root: {
+//     // some CSS that accesses the theme
+//   }
+// });
+
 
 const defaultOptions: DefaultOptions = {
   watchQuery: {
@@ -42,14 +53,17 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 function MyApp({ Component, pageProps }: AppProps) {
+  // const classes = useStyles();
   return (
     <>
       <Global styles={globalStyles} />
-      <StylesProvider injectFirst>
-        <ApolloProvider client={client}>
-          <Component {...pageProps} />
-        </ApolloProvider>
-      </StylesProvider>
+      <ThemeProvider theme={theme}>
+        <StylesProvider injectFirst>
+          <ApolloProvider client={client}>
+            <Component {...pageProps} />
+          </ApolloProvider>
+        </StylesProvider>
+      </ThemeProvider>;
     </>
   );
 }

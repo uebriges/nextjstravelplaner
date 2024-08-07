@@ -11,8 +11,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+} from '@mui/material';
+import Alert from '@mui/lab/Alert';
 import { useState } from 'react';
 import { useSnapshot } from 'valtio';
 import {
@@ -170,59 +170,59 @@ export default function UserProfile() {
                 </TableRow>
               </TableHead>
               {userTrips.data &&
-              userTrips.data.getUserTrips &&
-              userTrips.data.getUserTrips.length > 0
+                userTrips.data.getUserTrips &&
+                userTrips.data.getUserTrips.length > 0
                 ? userTrips.data.getUserTrips.map(
-                    (currentTrip: UserTripType) => {
-                      console.log('currentTrip: ', currentTrip);
-                      return (
-                        <TableRow
-                          data-cy={'trip' + currentTrip.id.toString()}
-                          hover
-                          role="checkbox"
-                          tabIndex={-1}
-                          key={currentTrip.id.toString()}
+                  (currentTrip: UserTripType) => {
+                    console.log('currentTrip: ', currentTrip);
+                    return (
+                      <TableRow
+                        data-cy={'trip' + currentTrip.id.toString()}
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        key={currentTrip.id.toString()}
+                      >
+                        <TableCell
+                          align="center"
+                          onClick={handleTableRowClick}
+                          id={currentTrip.id.toString()}
                         >
-                          <TableCell
-                            align="center"
-                            onClick={handleTableRowClick}
-                            id={currentTrip.id.toString()}
-                          >
-                            {currentTrip.id}
-                          </TableCell>
-                          <TableCell
-                            align="left"
-                            onClick={handleTableRowClick}
-                            id={currentTrip.id.toString()}
-                          >
-                            {currentTrip.title}
-                          </TableCell>
-                          <TableCell
-                            align="center"
-                            onClick={handleTableRowClick}
-                            id={currentTrip.id.toString()}
-                          >
-                            {currentTrip.startDate
-                              ? new Date(
-                                  Number(currentTrip.startDate),
-                                ).toLocaleDateString()
-                              : null}
-                          </TableCell>
-                          <TableCell
-                            align="center"
-                            onClick={handleTableRowClick}
-                            id={currentTrip.id.toString()}
-                          >
-                            {currentTrip.endDate
-                              ? new Date(
-                                  Number(currentTrip.endDate),
-                                ).toLocaleDateString()
-                              : null}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )
+                          {currentTrip.id}
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          onClick={handleTableRowClick}
+                          id={currentTrip.id.toString()}
+                        >
+                          {currentTrip.title}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          onClick={handleTableRowClick}
+                          id={currentTrip.id.toString()}
+                        >
+                          {currentTrip.startDate
+                            ? new Date(
+                              Number(currentTrip.startDate),
+                            ).toLocaleDateString()
+                            : null}
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          onClick={handleTableRowClick}
+                          id={currentTrip.id.toString()}
+                        >
+                          {currentTrip.endDate
+                            ? new Date(
+                              Number(currentTrip.endDate),
+                            ).toLocaleDateString()
+                            : null}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  },
+                )
                 : null}
               {errorMessage ? (
                 <Alert severity="error">{errorMessage}</Alert>

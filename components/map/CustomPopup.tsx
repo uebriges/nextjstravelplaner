@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { Popup } from 'react-map-gl';
 import { customPopupStyle } from '../../styles/styles';
 
