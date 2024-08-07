@@ -95,21 +95,21 @@ export default function Login() {
       <DialogTitle id="form dialog title for login">Login</DialogTitle>
       <DialogContent>
         <TextField
+          variant="standard"
           margin="dense"
           id="userName"
           label="User name"
           type="text"
           fullWidth
-          onChange={(e) => setUserName(e.target.value)}
-        />
+          onChange={(e) => setUserName(e.target.value)} />
         <TextField
+          variant="standard"
           margin="dense"
           id="password"
           label="Password"
           type="password"
           fullWidth
-          onChange={(e) => setUserPassword(e.target.value)}
-        />
+          onChange={(e) => setUserPassword(e.target.value)} />
         {error ? <Alert severity="error">{error}</Alert> : null}
         {successMessage ? (
           <Alert severity="success">{successMessage}</Alert>

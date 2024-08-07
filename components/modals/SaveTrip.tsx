@@ -70,13 +70,13 @@ export default function SaveTrip() {
       </DialogTitle>
       <DialogContent>
         <TextField
+          variant="standard"
           margin="dense"
           id="tripName"
           label="Trip title"
           type="text"
           fullWidth
-          onChange={(e) => setTripTitle(e.target.value)}
-        />
+          onChange={(e) => setTripTitle(e.target.value)} />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} className="modal-button-label">

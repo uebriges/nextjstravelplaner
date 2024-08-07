@@ -68,50 +68,50 @@ export default function Register() {
       </DialogTitle>
       <DialogContent>
         <TextField
+          variant="standard"
           data-cy="RegistrationTextInputUserName"
           margin="dense"
           id="userName"
           label="User name"
           type="text"
           fullWidth
-          onChange={(e) => setUserName(e.target.value)}
-        />
+          onChange={(e) => setUserName(e.target.value)} />
         <TextField
+          variant="standard"
           margin="dense"
           id="firstName"
           label="First name"
           type="text"
           fullWidth
           onChange={(e) => setUserFirstName(e.target.value)}
-          data-cy="RegistrationTextInputUserFirstName"
-        />
+          data-cy="RegistrationTextInputUserFirstName" />
         <TextField
+          variant="standard"
           margin="dense"
           id="lastName"
           label="Last name"
           type="text"
           fullWidth
           onChange={(e) => setUserLastName(e.target.value)}
-          data-cy="RegistrationTextInputUserLastName"
-        />
+          data-cy="RegistrationTextInputUserLastName" />
         <TextField
+          variant="standard"
           margin="dense"
           id="email"
           label="E-Mail"
           type="text"
           fullWidth
           onChange={(e) => setUserEmail(e.target.value)}
-          data-cy="RegistrationTextInputUserEmail"
-        />
+          data-cy="RegistrationTextInputUserEmail" />
         <TextField
+          variant="standard"
           margin="dense"
           id="password"
           label="Password"
           type="password"
           fullWidth
           onChange={(e) => setUserPassword(e.target.value)}
-          data-cy="RegistrationTextInputUserPassword"
-        />
+          data-cy="RegistrationTextInputUserPassword" />
         {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
         {successMessage ? (
           <Alert severity="success">{successMessage}</Alert>

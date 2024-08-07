@@ -174,7 +174,7 @@ export default function WaypointsList(props: WaypointsListType) {
                                       props.generateTurnByTurnRoute();
                                       waypointsFromDB.refetch();
                                     }}
-                                  >
+                                    size="large">
                                     <CloseIcon />
                                   </IconButton>
                                 </ListItemSecondaryAction>

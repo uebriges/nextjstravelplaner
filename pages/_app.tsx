@@ -11,15 +11,29 @@ import { AppProps } from 'next/app';
 // import '../styles/globals.css';
 import { globalStyles } from '../styles/styles';
 
-import { ThemeProvider, createMuiTheme, makeStyles } from '@mui/material/styles';
+import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
+// import { makeStyles } from '@mui/styles'
 
-const theme = createMuiTheme();
 
-// const useStyles = makeStyles((theme) => {
+declare module '@mui/styles' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme { }
+}
+
+
+
+// declare module '@mui/styles/defaultTheme' {
+//   // eslint-disable-next-line @typescript-eslint/no-empty-interface
+//   interface DefaultTheme extends Theme { }
+// }
+
+
+const theme = createTheme();
+// const useStyles = makeStyles((theme) => ({
 //   root: {
 //     // some CSS that accesses the theme
 //   }
-// });
+// }));
 
 
 const defaultOptions: DefaultOptions = {
@@ -54,18 +68,18 @@ if (process.env.NODE_ENV === 'production') {
 
 function MyApp({ Component, pageProps }: AppProps) {
   // const classes = useStyles();
-  return (
-    <>
-      <Global styles={globalStyles} />
+  return <>
+    <Global styles={globalStyles} />
+    <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <StylesProvider injectFirst>
           <ApolloProvider client={client}>
             <Component {...pageProps} />
           </ApolloProvider>
         </StylesProvider>
-      </ThemeProvider>;
-    </>
-  );
+      </ThemeProvider>
+    </StyledEngineProvider>;
+  </>;
 }
 
 export default MyApp;
