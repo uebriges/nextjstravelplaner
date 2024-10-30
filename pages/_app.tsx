@@ -18,6 +18,10 @@ declare module '@mui/styles' {
   interface DefaultTheme extends Theme { }
 }
 
+declare module '@mui/styles/defaultTheme' {
+  interface DefaultTheme extends Theme { }
+}
+
 const theme = createTheme();
 
 const defaultOptions: DefaultOptions = {
