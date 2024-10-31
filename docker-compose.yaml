@@ -32,7 +32,7 @@ services:
   frontend:
     depends_on:
       pgdb:
-        condition: service_healthy
+        condition: service_healthy # waits for healthcheck being done
     container_name: nextjs-app
     restart: unless-stopped
     build:
