@@ -1,0 +1,28 @@
+# Dockerfile.dev
+
+FROM node:18-alpine
+
+# Install Python and other build dependencies
+RUN apk add --no-cache python3 py3-pip make g++ libc6-compat
+
+# Set Python3 as the default Python version
+RUN ln -sf python3 /usr/bin/python
+
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
+  COPY . .
+  
+CMD \
+  if [ -f yarn.lock ]; then yarn dev; \
+  elif [ -f package-lock.json ]; then npm run dev; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm migrate up & pnpm run dev; \
+  fi

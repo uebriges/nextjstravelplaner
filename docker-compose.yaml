@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  pgdb:
+    restart: always
+    image: postgres
+    shm_size: 128mb
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+      PGDATABASE: postgres
+      PGUSERNAME: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d postgres", #&& echo 'SELECT 1' | psql -U postgres -d postgres
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # adminer
+  pgadmin:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  frontend:
+    depends_on:
+      pgdb:
+        condition: service_healthy
+    container_name: nextjs-app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/.next
+      - /app/node_modules
+    ports:
+      - 3000:3000
+    env_file:
+      - ./.env
+    environment:
+      - PGHOST=pgdb
+      - PGPASSWORD=example
+
+volumes:
+  pgdata:
