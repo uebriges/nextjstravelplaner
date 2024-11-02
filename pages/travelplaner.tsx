@@ -108,7 +108,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   const [currentLatitude, setCurrentLatitude] = useState(38.899826);
   const [currentLongitude, setCurrentLongitude] = useState(-77.023041);
   const handleViewportChange = useCallback(
-    (newViewport) => setViewport(newViewport),
+    (newViewport: any) => setViewport(newViewport),
     [],
   );
 
@@ -148,7 +148,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
 
   // Handle Geocorder viewport change
   const handleGeocoderViewportChange = useCallback(
-    (newViewport) => {
+    (newViewport: any) => {
       setCurrentLatitude(Number(newViewport.latitude));
       setCurrentLongitude(Number(newViewport.longitude));
 
@@ -336,7 +336,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
   }, []);
 
   return (
-    <Layout>
+    (<Layout>
       <Head>
         <title>Find your way</title>
         <link rel="icon" href="/favicon.ico" />
@@ -416,7 +416,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
             </>
           ) : (
             // eslint-disable-next-line react/jsx-no-useless-fragment
-            <></>
+            (<></>)
           )}
           <Geocoder
             css={geocoderStyle}
@@ -430,7 +430,7 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
           />
         </Map>
       </div>
-    </Layout>
+    </Layout>)
   );
 };
 
