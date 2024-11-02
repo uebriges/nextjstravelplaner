@@ -195,6 +195,8 @@ const TravelPlaner = (props: TravelPlanerPropsType) => {
         latitude: currentLatitude,
         waypointName: '',
       });
+
+
       const newWaypointData = await setNewWaypointFunction({
         variables: {
           token: sessionStateSnapshot.activeSessionToken,

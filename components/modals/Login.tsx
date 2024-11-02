@@ -28,7 +28,6 @@ export default function Login() {
   const [loginUserDB] = useMutation(loginUser, {
     onCompleted(data) {
       // Update session token in sessionStore + update csrf
-      console.log('loggedIn.data.loginUser: ', data);
       if (data.loginUser) {
         sessionStateSnapshot.setSession(
           SESSIONS.LOGGEDIN,
@@ -63,10 +62,6 @@ export default function Login() {
       setError('User name or password missing.');
       return;
     }
-    console.log('userName', userName);
-    console.log('userPassword', userPassword);
-    console.log('activeSessionToken', sessionStateSnapshot.activeSessionToken);
-    console.log('csrfToken', sessionStateSnapshot.csrfToken);
 
     await loginUserDB({
       variables: {

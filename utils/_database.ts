@@ -1,12 +1,12 @@
-import camelcaseKeys from 'camelcase-keys';
-import postgres from 'postgres';
-import { UserTripType } from '../components/modals/UserProfile';
-import generateSession from './session';
-import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
+import camelcaseKeys from "camelcase-keys";
+import postgres from "postgres";
+import { UserTripType } from "../components/modals/UserProfile";
+import generateSession from "./session";
+import setPostgresDefaultsOnHeroku from "./setPostgresDefaultsOnHeroku";
 
 setPostgresDefaultsOnHeroku();
 
-require('dotenv-safe').config();
+require("dotenv-safe").config();
 
 // declare global {
 //   interface Window {
@@ -20,7 +20,7 @@ declare global {
 
 let sql: any;
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   // Heroku needs SSL connections but
   // has an "unauthorized" certificate
   // https://devcenter.heroku.com/changelog-items/852
@@ -138,7 +138,7 @@ export async function getSessionIdByToken(token: String) {
 export async function updateSessionOfCorrespondingTrip(
   currentToken: string,
   action?: string,
-  newToken?: string,
+  newToken?: string
 ) {
   let newTokenObject;
   let newTokenId;
@@ -146,7 +146,7 @@ export async function updateSessionOfCorrespondingTrip(
   if (!newToken) {
     // Logout: New token -> 2 hours valid
     // Any other action: 5 mins (e.g. start login process)
-    if (action === 'logout') {
+    if (action === "logout") {
       newTokenObject = await createSessionTwoHours();
       newToken = newTokenObject.token as string;
       newTokenId = newTokenObject.id;
@@ -241,7 +241,7 @@ export async function setNewWaypoint(
   token: String,
   longitude: String,
   latitude: String,
-  waypointName: String,
+  waypointName: String
 ) {
   // Get the session id of the current session
   const sessionId = await getSessionIdByToken(token);
@@ -326,27 +326,27 @@ export async function deleteWaypoint(waypointId: number) {
 export async function updateWaypoints(waypoints: WaypointDBType[]) {
   // 1. Update coordinates and waypoint name of moved waypoint
   let sqlQuery =
-    'UPDATE waypoint as w SET longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name FROM (values  ';
+    "UPDATE waypoint as w SET longitude = w2.longitude, latitude = w2.latitude, waypoint_name = w2.waypoint_name FROM (values  ";
   waypoints.map((waypoint, index, array) => {
     sqlQuery += ` (${waypoint.id}, ${waypoint.longitude}, ${waypoint.latitude}, '${waypoint.waypointName}')`;
-    sqlQuery += index === array.length - 1 ? '' : ',';
+    sqlQuery += index === array.length - 1 ? "" : ",";
     return waypoint;
   });
   sqlQuery +=
-    ' ) AS w2(id, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;';
+    " ) AS w2(id, longitude, latitude, waypoint_name) WHERE w2.id = w.id RETURNING *;";
 
   const updatedWayointPosition = await sql.unsafe(sqlQuery);
 
   // 2. Update order number of waypoints in the list
   sqlQuery =
-    'UPDATE trip_waypoint as tw SET order_number = tw2.order_number FROM (values  ';
+    "UPDATE trip_waypoint as tw SET order_number = tw2.order_number FROM (values  ";
   waypoints.map((waypoint, index, array) => {
     sqlQuery += ` (${waypoint.id}, ${waypoint.orderNumber})`;
-    sqlQuery += index === array.length - 1 ? '' : ',';
+    sqlQuery += index === array.length - 1 ? "" : ",";
     return waypoint;
   });
   sqlQuery +=
-    ' ) AS tw2(id, order_number) WHERE tw2.id = tw.waypoint_id RETURNING *;';
+    " ) AS tw2(id, order_number) WHERE tw2.id = tw.waypoint_id RETURNING *;";
 
   await sql.unsafe(sqlQuery);
 
@@ -439,14 +439,14 @@ export async function getUserTrips(userId: number) {
   `;
 
   return tripsOfUser.map((currentTrip: UserTripType) =>
-    camelcaseKeys(currentTrip),
+    camelcaseKeys(currentTrip)
   );
 }
 
 export async function saveUserTrip(
   userId: number,
   tripId: number,
-  tripTitle: string,
+  tripTitle: string
 ) {
   await sql`
     INSERT INTO user_trip
@@ -459,7 +459,7 @@ export async function saveUserTrip(
   WHERE id = ${tripId};
 `;
 
-  return 'Saved trip';
+  return "Saved trip";
 }
 
 export async function startNewTrip(token: string) {
@@ -490,7 +490,7 @@ export async function startNewTrip(token: string) {
 
 export async function switchToAnotherTrip(
   currentSessionToken: string,
-  newTripId: string,
+  newTripId: string
 ) {
   // get session id
   const sessionId = await sql`
@@ -511,7 +511,7 @@ export async function switchToAnotherTrip(
     SET session_id = ${sessionId[0].id.toString()}
     WHERE id = ${newTripId};`;
 
-  return 'switched to tripId: ' + newTripId;
+  return "switched to tripId: " + newTripId;
 }
 
 export async function getCurrentTripIdByToken(token: string) {
@@ -541,7 +541,7 @@ export async function isCurrentTokenLoggedIn(token: string) {
   `;
 
   const result = userId.map((currentUserId: UserIdType) =>
-    camelcaseKeys(currentUserId),
+    camelcaseKeys(currentUserId)
   );
   const isLoggedIn = result.length < 1 || !result[0].userId ? false : true;
 

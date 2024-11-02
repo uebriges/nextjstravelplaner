@@ -35,7 +35,7 @@ const defaultOptions: DefaultOptions = {
   },
   mutate: {
     errorPolicy: 'all',
-  },
+  }
 };
 
 let client: any;

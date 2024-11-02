@@ -3,14 +3,14 @@ import {
   gql,
   IResolvers,
   makeExecutableSchema,
-} from 'apollo-server-micro';
-import argon2 from 'argon2';
+} from "apollo-server-micro";
+import argon2 from "argon2";
 import {
   createCsrfToken,
   doesCsrfTokenMatchSessionToken,
   doesPasswordMatchPasswordHash,
-} from '../../utils/auth';
-import { serializeSecureCookieServerSide } from '../../utils/cookies';
+} from "../../utils/auth";
+import { serializeSecureCookieServerSide } from "../../utils/cookies";
 import {
   createSessionTwentyFourHours,
   deleteSessionByToken,
@@ -27,7 +27,7 @@ import {
   updateSessionOfCorrespondingTrip,
   updateWaypoints,
   userNameExists,
-} from '../../utils/database';
+} from "../../utils/database";
 
 const typeDefs = gql`
   type Query {
@@ -168,7 +168,7 @@ const resolvers: IResolvers = {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        homeCoordinates: '',
+        homeCoordinates: "",
         currentlyTraveling: false,
         password: passwordHash,
       });
@@ -179,7 +179,7 @@ const resolvers: IResolvers = {
 
       // Check CSRF token
       if (!doesCsrfTokenMatchSessionToken(user.csrfToken, user.sessionToken)) {
-        throw new Error('CSRF Token does not match');
+        throw new Error("CSRF Token does not match");
       }
 
       // Search for user in DB
@@ -187,19 +187,19 @@ const resolvers: IResolvers = {
 
       // Error out if the username does not exist
       if (userWithPasswordHash[0].id === 0) {
-        throw new Error('Username or password does not match');
+        throw new Error("Username or password does not match");
       }
 
       // Check if password is correct
       const { passwordHash, ...foundUser } = userWithPasswordHash[0];
       const passwordMatches = await doesPasswordMatchPasswordHash(
         user.password,
-        passwordHash,
+        passwordHash
       );
 
       // Error out if the password does not match the hash
       if (!passwordMatches) {
-        throw new Error('Username or password does not match');
+        throw new Error("Username or password does not match");
       }
 
       // At this point, we are  successfully authenticated
@@ -207,16 +207,16 @@ const resolvers: IResolvers = {
 
       await updateSessionOfCorrespondingTrip(
         user.sessionToken, // current token
-        '', // action which calls this function. Only needed for logout, not here.
-        session[0].token, // new token
+        "", // action which calls this function. Only needed for logout, not here.
+        session[0].token // new token
       );
 
       const sessionCookie = serializeSecureCookieServerSide(
-        'session',
-        session[0].token,
+        "session",
+        session[0].token
       );
 
-      context.res.setHeader('Set-Cookie', sessionCookie);
+      context.res.setHeader("Set-Cookie", sessionCookie);
       const newCsrfToken = createCsrfToken(session[0].token);
 
       return {
@@ -229,7 +229,7 @@ const resolvers: IResolvers = {
         args.token,
         args.longitude,
         args.latitude,
-        args.waypointName,
+        args.waypointName
       );
       return newWaypoint;
     },
@@ -243,18 +243,18 @@ const resolvers: IResolvers = {
       const newSessionToken = await updateSessionOfCorrespondingTrip(
         args.sessions.currentToken,
         args.sessions.action,
-        args.sessions.newToken,
+        args.sessions.newToken
       );
 
       const newSessionCookie = serializeSecureCookieServerSide(
-        'session',
-        newSessionToken,
+        "session",
+        newSessionToken
       );
 
       // New session cookie needs also a new csrf token
       const newCsrfToken = createCsrfToken(newSessionToken);
 
-      context.res.setHeader('Set-Cookie', newSessionCookie);
+      context.res.setHeader("Set-Cookie", newSessionCookie);
       return [newSessionToken, newCsrfToken];
     },
     async deleteSessionByToken(root, args) {
@@ -265,7 +265,7 @@ const resolvers: IResolvers = {
       const savedTrip = await saveUserTrip(
         args.userId,
         args.tripId,
-        args.tripTitle,
+        args.tripTitle
       );
       return savedTrip;
     },
@@ -295,5 +295,5 @@ export default new ApolloServer({
     };
   },
 }).createHandler({
-  path: '/api/graphql',
+  path: "/api/graphql",
 });
