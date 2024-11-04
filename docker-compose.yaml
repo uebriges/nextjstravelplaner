@@ -49,6 +49,6 @@ services:
     environment:
       - PGHOST=pgdb
       - PGPASSWORD=example
-
+  
 volumes:
   pgdata:
